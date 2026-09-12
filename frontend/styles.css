@@ -1,0 +1,736 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --primary-light: #eff6ff;
+  --accent: #d97706;
+  --success: #059669;
+  --danger: #dc2626;
+  --bg-main: #f8fafc;
+  --card-bg: #ffffff;
+  --text-main: #020617; /* High-contrast deep black */
+  --text-body: #0f172a; /* Solid crisp text */
+  --text-muted: #334155; /* Visible dark slate */
+  --border-color: #cbd5e1;
+}
+
+body {
+  font-family: 'Noto Sans Telugu', 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-body);
+  font-weight: 500;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Glassmorphism & Cards */
+.card-shadow {
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-shadow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -4px rgba(37, 99, 235, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+}
+
+/* Article Card Base */
+.article-card {
+  border: 1.5px solid #cbd5e1 !important;
+  background: #ffffff;
+  border-radius: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Category Left Border Color Highlights */
+.border-cat-national { border-left: 6px solid #2563eb !important; }
+.border-cat-regional { border-left: 6px solid #d97706 !important; }
+.border-cat-economy { border-left: 6px solid #059669 !important; }
+.border-cat-science_tech { border-left: 6px solid #9333ea !important; }
+.border-cat-sports_awards { border-left: 6px solid #ea580c !important; }
+.border-cat-appointments { border-left: 6px solid #475569 !important; }
+
+/* Category Badges with Vivid High-Contrast Colors */
+.badge-national { 
+  background: #eff6ff !important; 
+  color: #1e40af !important; 
+  border: 1.5px solid #93c5fd !important; 
+  font-weight: 800 !important;
+  box-shadow: 0 1px 2px rgba(30, 64, 175, 0.08);
+}
+.badge-regional { 
+  background: #fffbeb !important; 
+  color: #b45309 !important; 
+  border: 1.5px solid #fcd34d !important; 
+  font-weight: 800 !important;
+  box-shadow: 0 1px 2px rgba(180, 83, 9, 0.08);
+}
+.badge-economy { 
+  background: #f0fdf4 !important; 
+  color: #15803d !important; 
+  border: 1.5px solid #86efac !important; 
+  font-weight: 800 !important;
+  box-shadow: 0 1px 2px rgba(21, 128, 61, 0.08);
+}
+.badge-science_tech { 
+  background: #faf5ff !important; 
+  color: #7e22ce !important; 
+  border: 1.5px solid #d8b4fe !important; 
+  font-weight: 800 !important;
+  box-shadow: 0 1px 2px rgba(126, 34, 206, 0.08);
+}
+.badge-sports_awards { 
+  background: #fff7ed !important; 
+  color: #c2410c !important; 
+  border: 1.5px solid #fdba74 !important; 
+  font-weight: 800 !important;
+  box-shadow: 0 1px 2px rgba(194, 65, 12, 0.08);
+}
+.badge-appointments { 
+  background: #f8fafc !important; 
+  color: #1e293b !important; 
+  border: 1.5px solid #cbd5e1 !important; 
+  font-weight: 800 !important;
+  box-shadow: 0 1px 2px rgba(30, 41, 59, 0.08);
+}
+
+/* Exam Relevance & Source Badges */
+.exam-tag-badge {
+  background: #fdf2f8 !important;
+  color: #be185d !important;
+  border: 1.5px solid #fbcfe8 !important;
+  font-weight: 700 !important;
+}
+.source-tag-badge {
+  background: #fffbeb !important;
+  color: #92400e !important;
+  border: 1.5px solid #fde68a !important;
+  font-weight: 700 !important;
+}
+
+/* Article Card & Takeaways Box Styles (Light Mode) */
+.article-title {
+  color: #020617 !important;
+}
+.article-summary {
+  color: #0f172a !important;
+}
+.article-details {
+  background: #f0f7ff !important;
+  background-image: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%) !important;
+  border: 1.5px solid #93c5fd !important;
+}
+.article-details-header {
+  color: #1e3a8a !important;
+}
+.article-details-header i,
+.article-details-header svg {
+  color: #2563eb !important;
+}
+.article-details-text {
+  color: #020617 !important; /* Pure deep jet black in light mode */
+}
+.btn-audio-listen {
+  color: #4338ca;
+}
+.btn-audio-listen:hover {
+  color: #312e81;
+}
+.btn-bookmark {
+  color: #b45309;
+}
+.btn-bookmark:hover {
+  color: #78350f;
+}
+.btn-copy {
+  color: #1d4ed8;
+}
+.btn-copy:hover {
+  color: #1e40af;
+}
+
+/* Quick Revision Hint */
+.quick-revision-hint {
+  background: linear-gradient(to right, #eff6ff, #eef2ff);
+  border: 1.5px solid #bfdbfe;
+  color: #1e293b;
+}
+
+/* Quiz styling */
+.quiz-option {
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1.5px solid #cbd5e1;
+  font-weight: 600;
+  color: #0f172a;
+}
+.quiz-option:hover {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+}
+.quiz-option.correct {
+  background-color: #ecfdf5 !important;
+  border-color: #059669 !important;
+  color: #064e3b !important;
+  font-weight: 700;
+}
+.quiz-option.wrong {
+  background-color: #fef2f2 !important;
+  border-color: #dc2626 !important;
+  color: #7f1d1d !important;
+  font-weight: 700;
+}
+
+/* Pulse badge animation */
+@keyframes softPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.03); }
+}
+.animate-pulse-soft {
+  animation: softPulse 2s infinite ease-in-out;
+}
+
+/* ================= PRINT / PDF EXPORT STYLES ================= */
+@media print {
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+  }
+
+  .no-print, header, nav, .filter-bar, button, #quizSection, #syncBanner, #telegramModal, #bookmarksModal, #analyticsModal, #bookletsModal, #articleDetailModal {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+    border-bottom: 4px solid #1d4ed8 !important;
+    padding-bottom: 16px !important;
+    margin-bottom: 24px !important;
+    background: #f0f7ff !important;
+    padding: 20px !important;
+    border-radius: 12px !important;
+    border: 1.5px solid #bfdbfe !important;
+  }
+
+  .print-only h1 {
+    color: #1e3a8a !important;
+    font-size: 20pt !important;
+    font-weight: 900 !important;
+    margin-bottom: 4px !important;
+  }
+
+  .print-only p {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+  }
+
+  .print-only #printDate {
+    color: #1d4ed8 !important;
+    font-size: 14pt !important;
+    font-weight: 900 !important;
+  }
+
+  .article-card {
+    page-break-inside: avoid !important;
+    box-shadow: none !important;
+    border: 2px solid #94a3b8 !important;
+    border-radius: 12px !important;
+    margin-bottom: 24px !important;
+    padding: 20px !important;
+    background: #ffffff !important;
+  }
+
+  .article-card h3 {
+    color: #000000 !important;
+    font-size: 14pt !important;
+    font-weight: 900 !important;
+    line-height: 1.4 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .article-card p {
+    color: #0f172a !important;
+    font-size: 10.5pt !important;
+    font-weight: 600 !important;
+    line-height: 1.6 !important;
+  }
+
+  .article-details {
+    display: block !important;
+    background: #eff6ff !important;
+    border: 2px solid #60a5fa !important;
+    border-radius: 10px !important;
+    padding: 14px !important;
+    margin-top: 12px !important;
+  }
+
+  .article-details p {
+    color: #1e3a8a !important;
+    font-weight: 900 !important;
+    font-size: 11pt !important;
+    margin-bottom: 6px !important;
+  }
+
+  .article-details div {
+    color: #020617 !important;
+    font-weight: 700 !important;
+    font-size: 10.5pt !important;
+    line-height: 1.6 !important;
+  }
+
+  .badge-national, .badge-regional, .badge-economy, .badge-science_tech, .badge-sports_awards, .badge-appointments {
+    font-size: 9.5pt !important;
+    font-weight: 800 !important;
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    border-width: 1.5px !important;
+  }
+
+  .exam-tag-badge, .source-tag-badge {
+    font-size: 9pt !important;
+    font-weight: 700 !important;
+    padding: 3px 8px !important;
+    border-radius: 6px !important;
+  }
+}
+
+/* ================= DARK MODE STYLES ================= */
+body.dark {
+  background-color: #0b1120 !important;
+  color: #f8fafc !important;
+}
+body.dark header {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+}
+body.dark footer {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+}
+body.dark .bg-white {
+  background-color: #131d33 !important;
+  border-color: #1e293b !important;
+}
+body.dark .bg-slate-50 {
+  background-color: #0f172a !important;
+}
+body.dark .bg-slate-100 {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+body.dark .border-slate-200, body.dark .border-slate-100 {
+  border-color: #1e293b !important;
+}
+body.dark .text-slate-900, body.dark .text-slate-950 {
+  color: #f8fafc !important;
+}
+body.dark .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+body.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+body.dark .text-slate-600, body.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+body.dark .card-shadow {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
+}
+body.dark .quiz-option {
+  background-color: #182238 !important;
+  border-color: #273552 !important;
+  color: #e2e8f0 !important;
+}
+body.dark .quiz-option:hover {
+  background-color: #22304d !important;
+  border-color: #3b82f6 !important;
+}
+/* Dark Mode Article Card Overrides */
+body.dark .article-card {
+  background-color: #131d33 !important;
+  border-color: #1e293b !important;
+}
+body.dark .article-title {
+  color: #ffffff !important;
+}
+body.dark .article-summary {
+  color: #f1f5f9 !important;
+}
+body.dark .article-footer {
+  border-color: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+/* CRITICAL FIX: Article Notes Box in Dark Mode (High Contrast & Visible) */
+body.dark .article-details {
+  background: #090e1a !important;
+  background-image: none !important; /* Kills any lingering gradient */
+  border: 1.5px solid #3b82f6 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+}
+body.dark .article-details-header {
+  color: #60a5fa !important; /* Vibrant high-contrast blue */
+}
+body.dark .article-details-header i,
+body.dark .article-details-header svg {
+  color: #38bdf8 !important;
+}
+body.dark .article-details-text {
+  color: #f8fafc !important; /* Pure high-contrast white on dark #090e1a */
+}
+body.dark .article-details * {
+  color: #f8fafc;
+}
+body.dark .article-details-header,
+body.dark .article-details-header * {
+  color: #60a5fa !important;
+}
+
+/* Card Action Buttons in Dark Mode */
+body.dark .btn-audio-listen {
+  color: #a5b4fc !important;
+}
+body.dark .btn-audio-listen:hover {
+  color: #c7d2fe !important;
+}
+body.dark .btn-bookmark {
+  color: #fcd34d !important;
+}
+body.dark .btn-bookmark:hover {
+  color: #fef08a !important;
+}
+body.dark .btn-copy {
+  color: #38bdf8 !important;
+}
+body.dark .btn-copy:hover {
+  color: #7dd3fc !important;
+}
+
+/* Quick Revision Hint in Dark Mode */
+body.dark .quick-revision-hint {
+  background: #0f172a !important;
+  background-image: none !important;
+  border: 1.5px solid #2563eb !important;
+  color: #f1f5f9 !important;
+}
+body.dark .quick-revision-hint * {
+  color: #f1f5f9 !important;
+}
+body.dark .quick-revision-hint b,
+body.dark .quick-revision-hint span {
+  color: #93c5fd !important;
+}
+
+/* Target Exam Bar in Dark Mode */
+body.dark #targetExamBar {
+  background-color: #131d33 !important;
+  border-color: #1e293b !important;
+}
+body.dark #targetExamBar .exam-btn.active {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+body.dark #targetExamBar .exam-btn:not(.active) {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+/* Study Calendar in Dark Mode */
+body.dark #studyCalendarModal .bg-white {
+  background-color: #131d33 !important;
+  border-color: #1e293b !important;
+}
+body.dark #calendarMonthTitle {
+  color: #f8fafc !important;
+}
+body.dark #calendarDaysGrid button {
+  color: #e2e8f0 !important;
+}
+body.dark #calendarDaysGrid button.bg-emerald-50 {
+  background-color: #064e3b !important;
+  border-color: #059669 !important;
+  color: #a7f3d0 !important;
+}
+body.dark #calendarDaysGrid button:hover {
+  background-color: #1e293b !important;
+}
+body.dark input, body.dark select {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+/* Audio Waveform Animation */
+.audio-wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+}
+.audio-wave span {
+  width: 2.5px;
+  background-color: #38bdf8;
+  border-radius: 2px;
+  animation: waveAnim 1s ease-in-out infinite alternate;
+}
+.audio-wave span:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+.audio-wave span:nth-child(2) { height: 14px; animation-delay: 0.3s; }
+.audio-wave span:nth-child(3) { height: 9px; animation-delay: 0.2s; }
+.audio-wave span:nth-child(4) { height: 12px; animation-delay: 0.4s; }
+
+@keyframes waveAnim {
+  0% { transform: scaleY(0.4); }
+  100% { transform: scaleY(1); }
+}
+
+/* 3D Flashcard Flip Effect */
+.flashcard-scene {
+  perspective: 1200px;
+}
+.flashcard-inner {
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.flashcard-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+.flashcard-front, .flashcard-back {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.flashcard-back {
+  transform: rotateY(180deg);
+}
+
+/* ================= 1. CBT EXAM STYLES ================= */
+.cbt-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+@media (min-width: 640px) {
+  .cbt-palette-grid {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+}
+.palette-btn {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+}
+.palette-btn.current {
+  outline: 2.5px solid #2563eb;
+  border-color: #1d4ed8 !important;
+  font-size: 0.85rem;
+}
+.palette-btn.answered {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  border-color: #047857 !important;
+}
+.palette-btn.unanswered {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #fca5a5 !important;
+}
+.palette-btn.marked {
+  background-color: #7c3aed !important;
+  color: #ffffff !important;
+  border-color: #6d28d9 !important;
+}
+.cbt-option {
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+}
+.cbt-option:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+.cbt-option.selected {
+  border-color: #2563eb !important;
+  background-color: #eff6ff !important;
+  box-shadow: 0 0 0 1.5px #2563eb;
+}
+
+body.dark .palette-btn {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-color: #334155;
+}
+body.dark .cbt-option {
+  background-color: #182238;
+  border-color: #273552;
+  color: #f1f5f9;
+}
+body.dark .cbt-option:hover {
+  background-color: #1e2d4a;
+  border-color: #3b82f6;
+}
+body.dark .cbt-option.selected {
+  background-color: #1e3a8a !important;
+  border-color: #60a5fa !important;
+}
+
+/* ================= 2. PERSISTENT AUDIO PODCAST PLAYER ================= */
+#podcastPlayerBar {
+  box-shadow: 0 -8px 24px -4px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#podcastPlayerBar.hidden-bar {
+  transform: translateY(120%);
+}
+
+/* ================= 3. AI STUDY MENTOR WIDGET ================= */
+#aiMentorWidget {
+  animation: softFloat 3s ease-in-out infinite;
+}
+@keyframes softFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.chat-bubble-user {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  border-radius: 1rem 1rem 0.2rem 1rem;
+}
+.chat-bubble-ai {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-radius: 1rem 1rem 1rem 0.2rem;
+  border: 1px solid #e2e8f0;
+}
+body.dark .chat-bubble-ai {
+  background: #1e293b;
+  color: #f1f5f9;
+  border-color: #334155;
+}
+
+/* ================= 4. SYLLABUS TRACKER ================= */
+.syllabus-item:hover {
+  background-color: #f8fafc;
+}
+body.dark .syllabus-item:hover {
+  background-color: #1e293b;
+}
+
+/* Voice Search Mic Pulse */
+@keyframes voicePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+.voice-recording {
+  animation: voicePulse 1.4s infinite;
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* Mindmaps Tree Styling */
+.mindmap-node {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.mindmap-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+.mindmap-root {
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  color: #ffffff;
+  font-weight: 800;
+}
+.mindmap-branch {
+  border-left: 3px solid #60a5fa;
+  padding-left: 1rem;
+  margin-left: 0.75rem;
+}
+body.dark .mindmap-branch {
+  border-left-color: #3b82f6;
+}
+
+/* Weakness Heatmap & Analytics */
+.heatmap-strong {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+body.dark .heatmap-strong {
+  background-color: rgba(6, 78, 59, 0.3);
+  color: #6ee7b7;
+  border-color: #059669;
+}
+.heatmap-moderate {
+  background-color: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+body.dark .heatmap-moderate {
+  background-color: rgba(120, 53, 15, 0.3);
+  color: #fcd34d;
+  border-color: #d97706;
+}
+.heatmap-weak {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+body.dark .heatmap-weak {
+  background-color: rgba(127, 29, 29, 0.3);
+  color: #fca5a5;
+  border-color: #dc2626;
+}
+
+/* Notes Cards */
+.note-item-card {
+  transition: all 0.2s ease;
+}
+.note-item-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+

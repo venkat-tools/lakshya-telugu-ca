@@ -1,0 +1,8 @@
+﻿.tools/
+cloudflared.exe
+__pycache__/
+*.pyc
+backend/__pycache__/
+backend/pdf_cache/
+backend/audio_cache/
+*.log

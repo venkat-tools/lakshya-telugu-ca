@@ -1,0 +1,2289 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>డైలీ కరెంట్ అఫైర్స్ | పోటీ పరీక్షల ప్రత్యేక డ్యాష్‌బోర్డ్ (Daily Current Affairs Telugu)</title>
+  <!-- PWA Meta & Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1e40af">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css?v=13">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased flex flex-col">
+
+  <!-- Printable Header (Visible only when printing) -->
+  <div class="hidden print-only p-6 border-b-4 border-blue-600 mb-6 bg-blue-50/70 rounded-2xl">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-black text-blue-950 tracking-tight">లక్ష్య CA • పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ నోట్స్</h1>
+        <p class="text-sm font-bold text-slate-900 mt-1">APPSC, TSPSC, UPSC, SSC, Banking మరియు పోలీస్ పరీక్షల సమగ్ర స్టడీ మెటీరియల్</p>
+      </div>
+      <div class="text-right">
+        <p class="font-black text-xl text-blue-800" id="printDate">తేదీ: 2026-09-11</p>
+        <p class="text-xs font-bold text-slate-700">సిద్ధం చేసినది: లక్ష్య స్మార్ట్ డైలీ డైజెస్ట్</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Announcement / Ticker Bar -->
+  <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white text-xs md:text-sm py-2 px-4 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-400 text-slate-950">
+          🔥 తాజా అప్‌డేట్
+        </span>
+        <span id="tickerText" class="truncate max-w-xs md:max-w-xl text-slate-200">
+          పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ & ప్రాక్టీస్ క్విజ్ లోడ్ అవుతోంది...
+        </span>
+      </div>
+      <div class="flex items-center space-x-2 text-xs">
+        <!-- Voice Reader Audio Button -->
+        <button id="voiceAudioBtn" class="bg-indigo-700 hover:bg-indigo-600 text-white px-2.5 py-1 rounded-md flex items-center space-x-1.5 transition font-medium">
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+          <span id="voiceAudioText">వార్తలు వినండి (Audio)</span>
+        </button>
+        <button id="syncBtn" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded-md flex items-center space-x-1 transition font-medium">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>సింక్ చేయి</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation & Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+      
+      <!-- Brand Logo & Title -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
+          <i data-lucide="award" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-lg md:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            లక్ష్య CA <span class="text-xs bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded-full">తెలుగు</span>
+          </h1>
+          <p class="text-xs text-slate-500 font-medium">పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ & ప్రాక్టీస్ క్విజ్</p>
+        </div>
+      </div>
+
+      <!-- Controls: Date Picker & Search & PDF -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        
+        <!-- Date Selector Dropdown -->
+        <div class="flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200">
+          <i data-lucide="calendar" class="w-4 h-4 text-slate-500 ml-2"></i>
+          <select id="dateSelect" class="bg-transparent text-xs sm:text-sm font-semibold text-slate-800 px-2 py-1 outline-none cursor-pointer">
+            <!-- Populated via JavaScript -->
+          </select>
+        </div>
+
+        <!-- Search Input with Voice Search -->
+        <div class="relative flex items-center">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="కీవర్డ్ సెర్చ్ (ఉదా: ఇస్రో, బడ్జెట్)..." 
+            class="pl-8 pr-8 py-1.5 text-xs sm:text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 w-40 sm:w-64 transition text-slate-800 dark:text-slate-100"
+          />
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5"></i>
+          <button 
+            id="voiceSearchBtn" 
+            title="తెలుగులో మాట్లాడి సెర్చ్ చేయండి (Voice Search)" 
+            class="absolute right-2 top-1.5 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 p-1 rounded-full transition flex items-center justify-center">
+            <i data-lucide="mic" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Print / PDF Download Button -->
+        <button id="printBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium flex items-center space-x-1.5 transition shadow-sm">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>నోట్స్ PDF</span>
+        </button>
+
+        <!-- Monthly & Weekly Booklets Button -->
+        <button id="openBookletsModalBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium flex items-center space-x-1.5 transition shadow-sm">
+          <i data-lucide="book-marked" class="w-4 h-4"></i>
+          <span>బుక్‌లెట్స్ (PDF)</span>
+        </button>
+
+        <!-- Telugu E-Papers & PDF Hub Button -->
+        <button id="openEpaperModalBtn" class="bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition shadow-sm">
+          <i data-lucide="newspaper" class="w-4 h-4"></i>
+          <span>📰 తెలుగు ఈ-పేపర్స్ (PDF)</span>
+        </button>
+
+        <!-- APPSC Group 2 Full Syllabus Mock & PYQs Button -->
+        <button id="openAppscGroup2Btn" class="bg-gradient-to-r from-amber-500 via-orange-600 to-rose-600 hover:from-amber-400 hover:via-orange-500 hover:to-rose-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold flex items-center space-x-1.5 transition shadow-md">
+          <i data-lucide="award" class="w-4 h-4 text-yellow-200"></i>
+          <span>🎯 APPSC గ్రూప్-2 గ్రాండ్ టెస్ట్ (150 Qs) & PYQs</span>
+        </button>
+
+        <!-- Map Pointing Explorer & Atlas Hub Button -->
+        <button id="openMapPointingBtn" class="bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-500 hover:to-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold flex items-center space-x-1.5 transition shadow-md">
+          <i data-lucide="map-pin" class="w-4 h-4 text-emerald-200"></i>
+          <span>🗺️ మ్యాప్ పాయింటింగ్ (Map Hub)</span>
+        </button>
+
+        <!-- AP History & Multi-Exam Hub Button -->
+        <button id="openApHistoryBtn" class="bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-700 hover:from-indigo-600 hover:to-pink-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold flex items-center space-x-1.5 transition shadow-md">
+          <i data-lucide="landmark" class="w-4 h-4 text-pink-200"></i>
+          <span>🏛️ AP చరిత్ర & గ్రూప్స్ 1, 2, 3</span>
+        </button>
+
+        <!-- Welfare Schemes & Budget 2026 Hub Button -->
+        <button id="openSchemesBtn" class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 hover:from-emerald-500 hover:to-cyan-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold flex items-center space-x-1.5 transition shadow-md">
+          <i data-lucide="gift" class="w-4 h-4 text-cyan-200"></i>
+          <span>🌾 సంక్షేమ పథకాలు 2026 (Super Six)</span>
+        </button>
+
+        <!-- Mains Model Answers Hub Button -->
+        <button id="openMainsBtn" class="bg-gradient-to-r from-violet-700 to-fuchsia-700 hover:from-violet-600 hover:to-fuchsia-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold flex items-center space-x-1.5 transition shadow-md">
+          <i data-lucide="pen-tool" class="w-4 h-4 text-fuchsia-200"></i>
+          <span>✍️ మెయిన్స్ మోడల్ ఆన్సర్స్</span>
+        </button>
+
+        <!-- Live CBT Exam Button (Feature 1) -->
+        <button id="openCbtExamBtn" class="bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition shadow-sm">
+          <i data-lucide="timer" class="w-4 h-4"></i>
+          <span>లైవ్ CBT ఎగ్జామ్ (50 Qs)</span>
+        </button>
+
+        <!-- Grand Mock Test with OMR Sheet (Feature 4) -->
+        <a href="/omr_test" target="_blank" class="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition shadow-sm">
+          <i data-lucide="file-check-2" class="w-4 h-4"></i>
+          <span>OMR టెస్ట్ పేపర్</span>
+        </a>
+
+        <!-- Syllabus Tracker Button (Feature 5) -->
+        <button id="openSyllabusBtn" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1 transition shadow-2xs">
+          <i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i>
+          <span>సిలబస్ ట్రాకర్</span>
+        </button>
+
+        <!-- Performance Analytics Button -->
+        <button id="openAnalyticsBtn" class="bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1 transition shadow-2xs" title="మీ CBT స్కోర్లు మరియు బలహీనతల విశ్లేషణ">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 text-blue-600"></i>
+          <span>📊 పెర్ఫార్మెన్స్ అనలిటిక్స్</span>
+        </button>
+
+        <!-- Mindmaps Button -->
+        <button id="openMindmapsBtn" class="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1 transition shadow-2xs" title="కాన్సెప్ట్ మైండ్‌మ్యాప్స్ విజువలైజర్">
+          <i data-lucide="git-fork" class="w-4 h-4 text-amber-600"></i>
+          <span>🧠 మైండ్‌మ్యాప్స్</span>
+        </button>
+
+        <!-- Notes & Bookmarks Button -->
+        <button id="openBookmarksBtn" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1 transition shadow-2xs" title="నా సేవ్ చేసిన ఆర్టికల్స్ మరియు సొంత నోట్స్">
+          <i data-lucide="bookmark" class="w-4 h-4 text-indigo-600"></i>
+          <span>📝 నోట్స్ & బుక్‌మార్క్స్</span>
+          <span id="bookmarkBadgeCount" class="ml-1 px-1.5 py-0.2 text-[10px] rounded-full bg-indigo-200 text-indigo-900 font-black">0</span>
+        </button>
+
+        <!-- Study Calendar Button (Feature 3) -->
+        <button id="openCalendarBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1 transition shadow-2xs">
+          <i data-lucide="calendar-days" class="w-4 h-4 text-slate-600"></i>
+          <span>క్యాలెండర్</span>
+        </button>
+
+        <!-- Install PWA App Button (Feature 2) -->
+        <button id="installAppBtn" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1 transition shadow-sm" title="మొబైల్ లేదా పీసీలో యాప్‌లా ఇన్‌స్టాల్ చేసుకోండి">
+          <i data-lucide="smartphone" class="w-4 h-4 text-emerald-400"></i>
+          <span>యాప్ ఇన్‌స్టాల్</span>
+        </button>
+
+        <!-- Telegram Bot Button -->
+        <button id="openTelegramModalBtn" class="bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium flex items-center space-x-1.5 transition shadow-sm">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>టెలిగ్రామ్ బోట్</span>
+        </button>
+
+        <!-- Notification Alerts Button -->
+        <button id="notificationToggleBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium flex items-center space-x-1 transition border border-slate-200" title="డైలీ మార్నింగ్ అలర్ట్స్ ఆన్ చేయండి">
+          <i data-lucide="bell" id="bellIcon" class="w-4 h-4 text-indigo-600"></i>
+          <span id="notifBtnText">నోటిఫికేషన్లు</span>
+        </button>
+
+        <!-- Dark Mode Toggle (Feature 2) -->
+        <button id="darkModeToggle" class="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-lg transition border border-slate-200" title="నైట్ మోడ్ / డే మోడ్ మార్చుకోండి">
+          <i data-lucide="moon" id="themeIcon" class="w-4 h-4"></i>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Navigation Tabs (Articles, Quiz, One-Liners) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex border-t border-slate-100 overflow-x-auto">
+      <button class="nav-tab active px-4 py-2.5 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 flex items-center space-x-2 whitespace-nowrap" data-tab="articles">
+        <i data-lucide="book-open" class="w-4 h-4"></i>
+        <span>డైలీ కరెంట్ అఫైర్స్</span>
+        <span id="tabCountArticles" class="ml-1 px-1.5 py-0.2 text-xs rounded-full bg-blue-100 text-blue-700">0</span>
+      </button>
+      <button class="nav-tab px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap" data-tab="quiz">
+        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+        <span>ప్రాక్టీస్ క్విజ్ (MCQs)</span>
+        <span id="tabCountQuiz" class="ml-1 px-1.5 py-0.2 text-xs rounded-full bg-slate-100 text-slate-700">0</span>
+      </button>
+      <button class="nav-tab px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap" data-tab="oneliners">
+        <i data-lucide="zap" class="w-4 h-4"></i>
+        <span>ఒక వరుస ముఖ్యాంశాలు (Quick Revision)</span>
+        <span id="tabCountOneliners" class="ml-1 px-1.5 py-0.2 text-xs rounded-full bg-slate-100 text-slate-700">0</span>
+      </button>
+      <button class="nav-tab px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap" data-tab="mocktests">
+        <i data-lucide="target" class="w-4 h-4 text-purple-600"></i>
+        <span>సబ్జెక్ట్ మాక్ టెస్ట్స్</span>
+        <span class="ml-1 px-1.5 py-0.2 text-xs rounded-full bg-purple-100 text-purple-700 font-bold">EXAM</span>
+      </button>
+      <button class="nav-tab px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap" data-tab="flashcards">
+        <i data-lucide="layers" class="w-4 h-4 text-amber-500"></i>
+        <span>3D రివిజన్ ఫ్లాష్‌కార్డ్స్</span>
+        <span id="tabCountFlashcards" class="ml-1 px-1.5 py-0.2 text-xs rounded-full bg-amber-100 text-amber-800 font-bold">3D</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- Overview Stats Banner -->
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3.5 mb-6 no-print">
+      <div class="bg-white p-4 rounded-xl border border-slate-200 card-shadow flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+          <i data-lucide="newspaper" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 font-medium">నేటి ఆర్టికల్స్</p>
+          <h3 class="text-xl font-bold text-slate-900" id="statArticles">0</h3>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-200 card-shadow flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <i data-lucide="help-circle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 font-medium">క్విజ్ ప్రశ్నలు</p>
+          <h3 class="text-xl font-bold text-slate-900" id="statQuiz">0</h3>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-200 card-shadow flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+          <i data-lucide="zap" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 font-medium">వన్-లైనర్స్</p>
+          <h3 class="text-xl font-bold text-slate-900" id="statOneliners">0</h3>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-200 card-shadow flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+          <i data-lucide="trophy" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 font-medium">క్విజ్ స్కోరు</p>
+          <h3 class="text-xl font-bold text-slate-900" id="statScore">0 / 0</h3>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-200 card-shadow flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
+          <i data-lucide="flame" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 font-medium">డైలీ స్ట్రీక్</p>
+          <h3 class="text-xl font-bold text-orange-600" id="statStreak">1 రోజు 🔥</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Target Exam Personalization Bar (Feature 2) -->
+    <div id="targetExamBar" class="mb-5 bg-white border border-slate-200 rounded-xl p-3 sm:p-4 card-shadow no-print flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+      <div class="flex items-center space-x-2.5 shrink-0">
+        <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center font-bold text-base">
+          🎯
+        </div>
+        <div>
+          <span class="text-xs sm:text-sm font-bold text-slate-900">మీ లక్ష్య పరీక్ష (Target Exam):</span>
+          <span class="text-[11px] text-slate-500 block font-medium">మీ పరీక్షా సిలబస్‌కు సరిపోయే కరెంట్ అఫైర్స్ మాత్రమే ఫిల్టర్ అవుతాయి</span>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-1.5" id="examFilterButtons">
+        <button onclick="setTargetExam('all')" class="exam-btn active text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-900 text-white transition shadow-2xs" data-exam="all">
+          🌟 మొత్తం పరీక్షలు
+        </button>
+        <button onclick="setTargetExam('appsc')" class="exam-btn text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition" data-exam="appsc">
+          🏛️ APPSC (Grp 1, 2)
+        </button>
+        <button onclick="setTargetExam('tspsc')" class="exam-btn text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition" data-exam="tspsc">
+          🏛️ TSPSC (Grp 1, 2, 3)
+        </button>
+        <button onclick="setTargetExam('police')" class="exam-btn text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition" data-exam="police">
+          👮 పోలీస్ SI / PC
+        </button>
+        <button onclick="setTargetExam('banking')" class="exam-btn text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition" data-exam="banking">
+          🏦 బ్యాంకింగ్ / SSC
+        </button>
+        <button onclick="setTargetExam('upsc')" class="exam-btn text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition" data-exam="upsc">
+          🇮🇳 UPSC సివిల్స్
+        </button>
+      </div>
+    </div>
+
+    <!-- Category Filter Pills (Visible when in Articles Tab) -->
+    <div id="categoryFilterBar" class="mb-6 flex flex-wrap gap-2 items-center no-print">
+      <span class="text-xs font-semibold text-slate-500 mr-1">విభాగాలు:</span>
+      <button class="cat-pill active px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white" data-category="all">
+        మొత్తం
+      </button>
+      <button class="cat-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50" data-category="national">
+        🏛️ జాతీయం
+      </button>
+      <button class="cat-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50" data-category="regional">
+        🌾 AP & తెలంగాణ
+      </button>
+      <button class="cat-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50" data-category="economy">
+        📈 ఆర్థికం & బ్యాంకింగ్
+      </button>
+      <button class="cat-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50" data-category="science_tech">
+        🚀 సైన్స్ & టెక్నాలజీ
+      </button>
+      <button class="cat-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50" data-category="sports_awards">
+        🏆 క్రీడలు & అవార్డులు
+      </button>
+      <button class="cat-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50" data-category="appointments">
+        👤 నియామకాలు
+      </button>
+    </div>
+
+    <!-- ================= TAB 1: ARTICLES VIEW ================= -->
+    <section id="articlesSection" class="tab-content">
+      <div id="articlesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Articles populated via JS -->
+      </div>
+      <div id="noArticlesMessage" class="hidden text-center py-12 bg-white rounded-xl border border-slate-200">
+        <i data-lucide="inbox" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+        <h4 class="text-base font-semibold text-slate-700">ఈ విభాగంలో లేదా ఈ తేదీకి వార్తలు కనబడలేదు</h4>
+        <p class="text-xs text-slate-500 mt-1">వేరే కేటగిరీ లేదా తేదీని ఎంచుకోండి లేదా పైనున్న 'వార్తలు సింక్ చేయి' క్లిక్ చేయండి.</p>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: QUIZ VIEW ================= -->
+    <section id="quizSection" class="tab-content hidden">
+      <div class="bg-white rounded-xl border border-slate-200 p-5 mb-6 card-shadow">
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-5 h-5 text-blue-600"></i>
+              డైలీ ప్రాక్టీస్ క్విజ్ (MCQs with Explanations)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              సరైన సమాధానాన్ని ఎంచుకోగానే తక్షణ ఫలితం మరియు పరీక్షల దృక్కోణంలో సమగ్ర వివరణ కనిపిస్తుంది.
+            </p>
+          </div>
+          <button id="resetQuizBtn" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            క్విజ్ రీసెట్ చేయి
+          </button>
+        </div>
+      </div>
+
+      <div id="quizContainer" class="space-y-4">
+        <!-- Quiz questions populated via JS -->
+      </div>
+
+      <div id="noQuizMessage" class="hidden text-center py-12 bg-white rounded-xl border border-slate-200">
+        <i data-lucide="clipboard-x" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+        <h4 class="text-base font-semibold text-slate-700">ఈ తేదీకి క్విజ్ ప్రశ్నలు అందుబాటులో లేవు</h4>
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: ONE-LINERS VIEW ================= -->
+    <section id="onelinersSection" class="tab-content hidden">
+      <div class="bg-white rounded-xl border border-slate-200 p-6 card-shadow">
+        <div class="flex items-center space-x-3 mb-4 pb-4 border-b border-slate-100">
+          <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">ఒక వరుస ముఖ్యాంశాలు (Quick Revision One-Liners)</h3>
+            <p class="text-xs text-slate-500">పరీక్షల ముందు క్విక్ రివిజన్ చేసుకోవడానికి రోజువారీ అత్యంత ముఖ్యమైన పాయింట్లు</p>
+          </div>
+        </div>
+
+        <!-- Quick Revision Category Filter & Interactive Hint -->
+        <div class="quick-revision-hint mb-5 rounded-xl p-3.5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+          <div class="flex items-center gap-2 text-xs sm:text-sm">
+            <span class="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">💡</span>
+            <span><b>సూచన:</b> క్రింది పాయింట్‌పై లేదా కేటగిరీ (ఉదా: <b>🚀 సైన్స్ & టెక్నాలజీ</b>) పై క్లిక్ చేసి సమగ్ర ఆర్టికల్, పరీక్షల నోట్స్ & తెలుగు ఆడియోను చూడవచ్చు!</span>
+          </div>
+          <div class="flex items-center gap-1.5 flex-wrap shrink-0">
+            <button onclick="filterOneLinersByCategory('all')" class="oneliner-filter-pill active text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-2xs transition">అన్నీ</button>
+            <button onclick="filterOneLinersByCategory('science_tech')" class="oneliner-filter-pill text-xs font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition">🚀 సైన్స్ & టెక్</button>
+            <button onclick="filterOneLinersByCategory('national')" class="oneliner-filter-pill text-xs font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition">🏛️ జాతీయం</button>
+            <button onclick="filterOneLinersByCategory('regional')" class="oneliner-filter-pill text-xs font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition">🌾 AP & TS</button>
+            <button onclick="filterOneLinersByCategory('economy')" class="oneliner-filter-pill text-xs font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition">📈 ఆర్థికం</button>
+          </div>
+        </div>
+
+        <ul id="onelinersContainer" class="space-y-3">
+          <!-- One-liners populated via JS -->
+        </ul>
+
+        <div id="noOnelinersMessage" class="hidden text-center py-12">
+          <i data-lucide="file-text" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+          <p class="text-sm text-slate-500">ఈ తేదీకి వన్-లైనర్స్ అందుబాటులో లేవు.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: SUBJECT MOCK TESTS (Feature 4) ================= -->
+    <section id="mocktestsSection" class="tab-content hidden">
+      <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6 card-shadow">
+        <div class="flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="award" class="w-5 h-5 text-purple-600"></i>
+              సబ్జెక్ట్ వారీగా స్పెషల్ మాక్ టెస్టులు (Subject Test Series)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              APPSC, TSPSC & UPSC సిలబస్ ప్రకారం రూపొందించిన ప్రామాణిక టెస్టులు - తక్షణ స్కోరు & వివరణలతో
+            </p>
+          </div>
+          <div id="mockScoreBadge" class="hidden text-xs bg-purple-50 text-purple-800 border border-purple-200 px-3 py-1.5 rounded-lg font-bold">
+            టెస్ట్ స్కోరు: <span id="mockScoreText">0 / 0</span>
+          </div>
+        </div>
+
+        <!-- Subject Selectors Grid -->
+        <div id="mockSubjectsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-5">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Active Mock Test Question Container -->
+      <div id="mockQuestionsContainer" class="space-y-4">
+        <!-- Questions populated via JS -->
+      </div>
+    </section>
+
+    <!-- ================= TAB 5: 3D REVISION FLASHCARDS (Feature 1) ================= -->
+    <section id="flashcardsSection" class="tab-content hidden">
+      <!-- Controls & Progress Banner -->
+      <div class="bg-white rounded-xl border border-slate-200 p-5 mb-6 card-shadow">
+        <div class="flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="layers" class="w-5 h-5 text-amber-500"></i>
+              3D ఇంటరాక్టివ్ రివిజన్ ఫ్లాష్‌కార్డ్స్ (Active Recall & Revision)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              కార్డ్ పై క్లిక్ చేసి 3Dలో తిప్పండి (Flip). యాక్టివ్ రీకాల్ ద్వారా పరీక్షా అంశాలను వేగంగా గుర్తుంచుకోండి.
+            </p>
+          </div>
+          <!-- Progress Badges -->
+          <div class="flex items-center gap-2 text-xs font-bold">
+            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg">
+              ✅ గుర్తుంది: <span id="fcMasteredCount">0</span>
+            </span>
+            <span class="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg">
+              ❌ మళ్ళీ చూడాలి: <span id="fcReviewCount">0</span>
+            </span>
+            <span class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-lg">
+              కార్డ్: <span id="fcCurrentIndex">1</span> / <span id="fcTotalCards">0</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Flashcards Category Filter -->
+        <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-slate-100">
+          <span class="text-xs font-bold text-slate-500 mr-1">విభాగం ఫిల్టర్:</span>
+          <button onclick="filterFlashcards('all')" class="fc-filter-pill active text-xs font-bold px-3 py-1 rounded-full bg-amber-500 text-white shadow-2xs transition">అన్నీ</button>
+          <button onclick="filterFlashcards('national')" class="fc-filter-pill text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition">🏛️ జాతీయం</button>
+          <button onclick="filterFlashcards('regional')" class="fc-filter-pill text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition">🌾 AP & TS</button>
+          <button onclick="filterFlashcards('economy')" class="fc-filter-pill text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition">📈 ఆర్థికం</button>
+          <button onclick="filterFlashcards('science_tech')" class="fc-filter-pill text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition">🚀 సైన్స్ & టెక్</button>
+          <button onclick="filterFlashcards('sports_awards')" class="fc-filter-pill text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition">🏆 క్రీడలు & అవార్డులు</button>
+        </div>
+      </div>
+
+      <!-- 3D Flashcard Container -->
+      <div class="max-w-2xl mx-auto mb-6">
+        <!-- 3D Flip Scene -->
+        <div class="flashcard-scene w-full h-[380px] sm:h-[420px] cursor-pointer select-none" onclick="flipCurrentFlashcard()">
+          <div id="flashcardInner" class="flashcard-inner relative w-full h-full">
+            
+            <!-- FRONT OF CARD -->
+            <div class="flashcard-front absolute inset-0 bg-white rounded-2xl border-2 border-amber-300 shadow-xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden">
+              <div class="flex justify-between items-center">
+                <span id="fcFrontCategory" class="text-xs font-black px-2.5 py-1 rounded-md bg-amber-100 text-amber-900 border border-amber-200 uppercase tracking-wide">
+                  🏛️ జాతీయం
+                </span>
+                <span id="fcFrontExamTag" class="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                  🎯 APPSC / TSPSC
+                </span>
+              </div>
+              
+              <div class="my-auto text-center py-4">
+                <span class="text-3xl sm:text-4xl block mb-3">❓</span>
+                <p class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">ప్రశ్న / ముఖ్యాంశం (Active Recall)</p>
+                <h3 id="fcFrontTitle" class="text-lg sm:text-2xl font-black text-slate-900 leading-snug">
+                  ఫ్లాష్‌కార్డ్ లోడ్ అవుతోంది...
+                </h3>
+              </div>
+
+              <div class="pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400 font-semibold">
+                <span id="fcFrontDate">📅 2026-09-11</span>
+                <span class="flex items-center gap-1 text-amber-600 font-bold">
+                  <span>సమాధానం చూడటానికి కార్డ్ క్లిక్ చేయండి 🔄</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- BACK OF CARD -->
+            <div class="flashcard-back absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-950 text-white rounded-2xl border-2 border-indigo-500 shadow-2xl p-6 sm:p-8 flex flex-col justify-between overflow-y-auto">
+              <div class="flex justify-between items-center pb-2 border-b border-white/10">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  💡 సమగ్ర సమాధానం & విశ్లేషణ
+                </span>
+                <button onclick="event.stopPropagation(); playFlashcardAudio();" class="text-xs bg-white/10 hover:bg-white/20 text-white px-2.5 py-1 rounded-lg flex items-center gap-1 font-semibold transition">
+                  <i data-lucide="volume-2" class="w-3.5 h-3.5 text-sky-400"></i>
+                  <span>వినండి</span>
+                </button>
+              </div>
+
+              <div class="my-auto py-3 space-y-3">
+                <div>
+                  <h4 class="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">ప్రధాన సారాంశం:</h4>
+                  <p id="fcBackSummary" class="text-sm sm:text-base font-bold text-slate-100 leading-relaxed">
+                    సారాంశం లోడ్ అవుతోంది...
+                  </p>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-3 rounded-xl">
+                  <h5 class="text-xs font-bold text-amber-300 uppercase tracking-wider mb-1">పరీక్షల కీలక పాయింట్:</h5>
+                  <p id="fcBackDetails" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    వివరాలు...
+                  </p>
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-white/10 flex justify-between items-center text-xs text-slate-400">
+                <span id="fcBackSource">మూలం: తెలుగు దినపత్రిక</span>
+                <span class="text-indigo-300 font-medium">తిరిగి చూడటానికి క్లిక్ చేయండి 🔄</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mt-5">
+          <div class="flex items-center gap-2">
+            <button onclick="prevFlashcard()" class="bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1 transition shadow-2xs">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              <span>మునుపటిది</span>
+            </button>
+            <button onclick="nextFlashcard()" class="bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1 transition shadow-2xs">
+              <span>తదుపరిది</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <button onclick="flipCurrentFlashcard()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition shadow-sm">
+            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+            <span>కార్డ్ తిప్పు (Flip)</span>
+          </button>
+
+          <div class="flex items-center gap-2">
+            <button onclick="markFlashcardReview()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1 transition">
+              <i data-lucide="x" class="w-4 h-4"></i>
+              <span>మళ్ళీ చూడాలి</span>
+            </button>
+            <button onclick="markFlashcardMastered()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1 transition shadow-sm">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>గుర్తుంది ✅</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Telegram Configuration Modal -->
+  <div id="telegramModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-sky-500 text-white flex items-center justify-center">
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">టెలిగ్రామ్ బోట్ కాన్ఫిగరేషన్</h3>
+        </div>
+        <button id="closeTelegramModalBtn" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Quick Steps -->
+      <div class="bg-sky-50 border border-sky-200 rounded-xl p-3.5 mb-4 text-xs text-sky-900 space-y-1">
+        <p class="font-bold flex items-center gap-1 text-sky-800">
+          <i data-lucide="info" class="w-3.5 h-3.5"></i> బోట్ టోకెన్ & చాట్ ఐడీ ఎలా పొందాలి?
+        </p>
+        <ol class="list-decimal pl-4 space-y-0.5 text-sky-950 font-normal">
+          <li>టెలిగ్రామ్‌లో <b>@BotFather</b> కు వెళ్లి <code>/newbot</code> అని మెసేజ్ చేసి బోట్ టోకెన్ పొందండి.</li>
+          <li>మీ బోట్‌కు ఒక 'హలో' మెసేజ్ పంపండి.</li>
+          <li>మీ Chat ID కోసం <b>@userinfobot</b> ను సంప్రదించండి లేదా గ్రూప్/ఛానెల్ యూజర్‌నేమ్ (ఉదా: <code>@mychannel</code>) ఇవ్వండి.</li>
+        </ol>
+      </div>
+
+      <!-- Inputs -->
+      <div class="space-y-3 mb-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Telegram Bot Token (API టోకెన్):</label>
+          <input 
+            type="password" 
+            id="tgBotToken" 
+            placeholder="ఉదా: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ" 
+            class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Chat ID లేదా Channel Username:</label>
+          <input 
+            type="text" 
+            id="tgChatId" 
+            placeholder="ఉదా: 987654321 లేదా @telugucurrentaffairs" 
+            class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+          />
+        </div>
+        <div id="tgStatusText" class="text-xs text-slate-500 font-medium"></div>
+      </div>
+
+      <!-- Scheduler Section (Feature 1) -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-4 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-600"></i>
+            రోజూ ఉదయం ఆటోమేటిక్ షెడ్యూల్ (Auto Schedule):
+          </span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="schedulerToggle" checked class="sr-only peer">
+            <div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+        <div class="flex items-center justify-between text-xs text-slate-600">
+          <span>షెడ్యూల్ సమయం (24H ఫార్మాట్):</span>
+          <input 
+            type="time" 
+            id="schedulerTime" 
+            value="07:00" 
+            class="border border-slate-300 rounded px-2 py-0.5 text-xs font-semibold text-slate-800 bg-white"
+          />
+        </div>
+        <div class="flex justify-between items-center pt-1 border-t border-slate-200 text-xs">
+          <span class="text-slate-500" id="schedulerStatus">స్థితి: ఉదయం 07:00 AM కు రన్ అవుతుంది</span>
+          <button id="triggerNowBtn" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
+            <i data-lucide="play" class="w-3 h-3"></i>
+            ఇప్పుడే రన్ చేయి
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap gap-2 justify-end pt-3 border-t border-slate-100">
+        <button id="tgTestBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition">
+          <i data-lucide="bell" class="w-3.5 h-3.5"></i>
+          <span>టెస్ట్ మెసేజ్ పంపు</span>
+        </button>
+        <button id="tgSaveBtn" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <span>సేవ్ చేయి</span>
+        </button>
+        <button id="tgSendDigestBtn" class="bg-sky-500 hover:bg-sky-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition shadow-sm">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>నేటి డైజెస్ట్ + క్విజ్ పంపు</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Telugu E-Papers & PDF Hub Modal -->
+  <div id="epaperModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200">
+      
+      <!-- Header -->
+      <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800 mb-4">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-red-600 to-rose-500 text-white flex items-center justify-center shadow-md">
+            <i data-lucide="newspaper" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100">తెలుగు ఈ-పేపర్స్ & డైలీ PDF హబ్</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">ఈనాడు, సాక్షి, ఆంధ్రజ్యోతి, నమస్తే తెలంగాణ & లక్ష్య డైలీ ఎడిషన్</p>
+          </div>
+        </div>
+        <button id="closeEpaperModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="overflow-y-auto space-y-4 pr-1">
+
+        <!-- 1. Lakshya Compiled Daily E-Paper Card -->
+        <div class="bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-950 text-white p-4 sm:p-5 rounded-2xl shadow-lg border border-blue-800">
+          <div class="flex justify-between items-start mb-2">
+            <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              డైలీ స్పెషల్ PDF
+            </span>
+            <span class="text-xs text-blue-200 font-bold" id="epaperModalDate">తేదీ: 2026-09-12</span>
+          </div>
+          <h4 class="text-lg sm:text-xl font-black mb-1">లక్ష్య డైలీ తెలుగు ఈ-పేపర్ (Daily Exam Edition)</h4>
+          <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+            ఈనాడు, సాక్షి, నమస్తే తెలంగాణ నుండి సేకరించిన 56 ప్రధాన ఆర్టికల్స్, ఒక వరుస ముఖ్యాంశాలు మరియు 5 డైలీ ప్రాక్టీస్ ప్రశ్నలతో కూడిన సమగ్ర PDF డాక్యుమెంట్.
+          </p>
+          
+          <div class="flex flex-wrap gap-2.5">
+            <a id="epaperDownloadLink" href="/api/epaper/pdf" download class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>డైరెక్ట్ PDF డౌన్‌లోడ్</span>
+            </a>
+            <button id="epaperSendTelegramBtn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>టెలిగ్రామ్‌కు PDF పంపండి</span>
+            </button>
+            <a id="epaperViewWebLink" href="/epaper" target="_blank" class="bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+              <i data-lucide="external-link" class="w-4 h-4"></i>
+              <span>బ్రౌజర్‌లో చదవండి</span>
+            </a>
+          </div>
+          <div id="epaperTgStatus" class="mt-2 text-xs font-semibold text-amber-300 hidden"></div>
+        </div>
+
+        <!-- 2. Official Telugu E-Papers Portals Directory -->
+        <div>
+          <h4 class="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+            <i data-lucide="globe" class="w-4 h-4 text-blue-600"></i>
+            ప్రముఖ తెలుగు దినపత్రికల అధికారిక ఈ-పేపర్ పోర్టల్స్ (1-Click Read / Download):
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            
+            <a href="https://epaper.eenadu.net" target="_blank" class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 rounded-xl transition group">
+              <div>
+                <div class="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 group-hover:text-blue-600 flex items-center gap-1.5">
+                  <span>📰 ఈనాడు ఈ-పేపర్ (Eenadu)</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">AP & TS అన్ని జిల్లాల పూర్తి PDF ఎడిషన్లు</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition"></i>
+            </a>
+
+            <a href="https://epaper.sakshi.com" target="_blank" class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 rounded-xl transition group">
+              <div>
+                <div class="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 group-hover:text-blue-600 flex items-center gap-1.5">
+                  <span>📰 సాక్షి ఈ-పేపర్ (Sakshi)</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">మెయిన్ ఎడిషన్ & డిస్ట్రిక్ట్ టాబ్లాయిడ్స్</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition"></i>
+            </a>
+
+            <a href="https://epaper.andhrajyothy.com" target="_blank" class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 rounded-xl transition group">
+              <div>
+                <div class="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 group-hover:text-blue-600 flex items-center gap-1.5">
+                  <span>📰 ఆంధ్రజ్యోతి ఈ-పేపర్ (Andhra Jyothy)</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">సమగ్ర వార్తలు మరియు సంపాదకీయం</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition"></i>
+            </a>
+
+            <a href="https://epaper.ntnews.com" target="_blank" class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 rounded-xl transition group">
+              <div>
+                <div class="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 group-hover:text-blue-600 flex items-center gap-1.5">
+                  <span>📰 నమస్తే తెలంగాణ (NT News)</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">తెలంగాణ ప్రాంతీయ ప్రత్యేక ఎడిషన్</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition"></i>
+            </a>
+
+            <a href="https://epaper.prajasakti.com" target="_blank" class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 rounded-xl transition group">
+              <div>
+                <div class="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 group-hover:text-blue-600 flex items-center gap-1.5">
+                  <span>📰 ప్రజాశక్తి ఈ-పేపర్ (Prajasakti)</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">సామాజిక & ఆర్థిక రంగ విశ్లేషణలు</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition"></i>
+            </a>
+
+            <a href="https://epaper.vaartha.com" target="_blank" class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 rounded-xl transition group">
+              <div>
+                <div class="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 group-hover:text-blue-600 flex items-center gap-1.5">
+                  <span>📰 వార్త ఈ-పేపర్ (Vaartha)</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">జాతీయ మరియు తెలుగు రాష్ట్రాల వార్తలు</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition"></i>
+            </a>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Notes & Bookmarks Studio Modal -->
+  <div id="bookmarksModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] flex flex-col">
+      <!-- Header -->
+      <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800 mb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
+            <i data-lucide="book-open-check" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 dark:text-slate-100">నా స్టడీ నోట్స్ & బుక్‌మార్క్స్ డైరీ</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">పరీక్షల రివిజన్ కోసం ఆర్టికల్స్ మరియు సొంత నోట్స్</p>
+          </div>
+        </div>
+        <button id="closeBookmarksBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Studio Navigation Tabs -->
+      <div class="flex border-b border-slate-200 dark:border-slate-800 mb-3 gap-2 text-xs font-bold">
+        <button id="tabBookmarksBtn" onclick="switchNotesStudioTab('bookmarks')" class="px-3 py-2 border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+          <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
+          <span>🔖 సేవ్డ్ ఆర్టికల్స్ (<span id="tabBookmarksCount">0</span>)</span>
+        </button>
+        <button id="tabMyNotesBtn" onclick="switchNotesStudioTab('notes')" class="px-3 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 flex items-center gap-1.5">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+          <span>✍️ మై ఓన్ నోట్స్ (<span id="tabMyNotesCount">0</span>)</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: Saved Bookmarks List -->
+      <div id="notesStudioBookmarksTab" class="flex-1 overflow-y-auto space-y-3 pr-1">
+        <div id="bookmarksListContainer" class="space-y-2.5">
+          <!-- Populated via JS -->
+        </div>
+        <div id="noBookmarksMsg" class="hidden text-center py-10">
+          <i data-lucide="bookmark-minus" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+          <p class="text-xs text-slate-500 dark:text-slate-400">ఇంకా ఏ ఆర్టికల్స్ బుక్‌మార్క్ చేయలేదు. ఆర్టికల్ కార్డ్స్‌లోని 'సేవ్' క్లిక్ చేయండి.</p>
+        </div>
+      </div>
+
+      <!-- TAB 2: My Personal Notes Creator & List -->
+      <div id="notesStudioMyNotesTab" class="hidden flex-1 overflow-y-auto space-y-3.5 pr-1">
+        <!-- New Note Form Box -->
+        <div class="bg-indigo-50/70 dark:bg-slate-800/80 p-3.5 rounded-xl border border-indigo-100 dark:border-slate-700 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-extrabold text-indigo-900 dark:text-indigo-300">కొత్త స్టడీ నోట్ రాయండి:</span>
+            <span class="text-[11px] text-slate-500">ఆటో-సేవ్ అవుతుంది</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input type="text" id="newNoteTitle" placeholder="టాపిక్ లేదా అంశం (ఉదా: 106వ రాజ్యాంగ సవరణ)..." class="sm:col-span-2 text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-indigo-500 font-bold" />
+            <select id="newNoteCategory" class="text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none font-semibold">
+              <option value="జాతీయం">🏛️ జాతీయం</option>
+              <option value="ప్రాంతీయం">🏛️ ప్రాంతీయం (AP/TS)</option>
+              <option value="సైన్స్ & టెక్">🔬 సైన్స్ & టెక్</option>
+              <option value="ఆర్థికం">💰 ఆర్థికం</option>
+              <option value="పాలిటీ">⚖️ పాలిటీ</option>
+              <option value="జనరల్">📚 జనరల్ స్టడీస్</option>
+            </select>
+          </div>
+          <textarea id="newNoteContent" rows="3" placeholder="మీ సొంత పరీక్షా పాయింట్లు, షార్ట్‌కట్ ట్రిక్స్, లేదా ముఖ్యమైన వివరాలు ఇక్కడ నోట్ చేసుకోండి..." class="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:ring-1 focus:ring-indigo-500 leading-relaxed font-medium"></textarea>
+          <div class="flex justify-end gap-2">
+            <button onclick="savePersonalNote()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition">
+              <i data-lucide="save" class="w-3.5 h-3.5"></i>
+              <span>నోట్ సేవ్ చేయి</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Saved Personal Notes List -->
+        <div id="personalNotesListContainer" class="space-y-2.5">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="flex justify-between items-center pt-3 border-t border-slate-200 dark:border-slate-800 mt-3 text-xs">
+        <button id="clearBookmarksBtn" class="text-red-600 hover:text-red-700 dark:text-red-400 font-bold flex items-center gap-1">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          అన్నీ క్లియర్ చేయి
+        </button>
+        <div class="flex items-center space-x-2">
+          <button onclick="exportNotesAsTxt()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            డౌన్‌లోడ్ (.txt)
+          </button>
+          <button onclick="window.print()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-3.5 py-1.5 rounded-lg font-bold flex items-center gap-1 shadow-sm">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            ప్రింట్ నోట్స్
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Analytics & Weakness Heatmap Modal -->
+  <div id="analyticsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800 mb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+            <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 dark:text-slate-100">స్టడీ పెర్ఫార్మెన్స్ & వీక్‌నెస్ విశ్లేషణ</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">CBT మాక్ టెస్టుల ప్రోగ్రెస్ మరియు సబ్జెక్టుల వారీగా పట్టు</p>
+          </div>
+        </div>
+        <button id="closeAnalyticsBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable Analytics Content -->
+      <div class="flex-1 overflow-y-auto space-y-4 pr-1 text-xs sm:text-sm">
+        <!-- Aspirant Level Badge -->
+        <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white p-4 rounded-xl flex justify-between items-center shadow-sm">
+          <div>
+            <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">కరెంట్ లెవెల్</span>
+            <h4 class="text-base sm:text-lg font-black mt-1" id="analyticsLevelTitle">గ్రూప్-1 సూపర్ ఆస్పిరెంట్ ⭐</h4>
+            <p class="text-xs text-blue-100 mt-0.5" id="analyticsLevelSub">స్థిరమైన అభ్యాసం మరియు నెగెటివ్ మార్కింగ్ నియంత్రణ బాగుంది!</p>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-black text-amber-300" id="analyticsStreakDays">1 రోజు</div>
+            <div class="text-xs text-blue-200 font-bold">కంటిన్యూస్ స్ట్రీక్ 🔥</div>
+          </div>
+        </div>
+
+        <!-- 4 KPI Metrics Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+          <div class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3 rounded-xl">
+            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">రాసిన CBT టెస్ట్‌లు</p>
+            <h4 class="text-lg font-black text-slate-900 dark:text-slate-100 mt-1" id="analyticsTotalTests">0</h4>
+          </div>
+          <div class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3 rounded-xl">
+            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">సగటు స్కోరు</p>
+            <h4 class="text-lg font-black text-blue-600 dark:text-blue-400 mt-1" id="analyticsAvgScore">0 / 50</h4>
+          </div>
+          <div class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3 rounded-xl">
+            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">ఖచ్చితత్వం (Accuracy)</p>
+            <h4 class="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-1" id="analyticsAccuracy">0%</h4>
+          </div>
+          <div class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3 rounded-xl">
+            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">అత్యధిక మార్కులు</p>
+            <h4 class="text-lg font-black text-purple-600 dark:text-purple-400 mt-1" id="analyticsTopScore">0</h4>
+          </div>
+        </div>
+
+        <!-- Score Trend Chart (Visual SVG) -->
+        <div class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-4 rounded-xl">
+          <div class="flex justify-between items-center mb-2">
+            <h5 class="text-xs font-black text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
+              <span>CBT మార్కుల పురోగతి (Score Progress Trend):</span>
+            </h5>
+            <span class="text-[11px] text-slate-500 font-semibold">గత 5 టెస్టులు</span>
+          </div>
+          <div id="analyticsTrendChartContainer" class="w-full h-24 flex items-center justify-center bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-2">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Subject Mastery Breakdown -->
+        <div class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-4 rounded-xl space-y-2.5">
+          <h5 class="text-xs font-black text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+            <i data-lucide="target" class="w-4 h-4 text-emerald-600"></i>
+            <span>సబ్జెక్టుల వారీగా పట్టు (Subject Mastery Rate):</span>
+          </h5>
+          <div id="analyticsSubjectBars" class="space-y-2 text-xs font-semibold">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Weakness Heatmap & Action Plan -->
+        <div class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-4 rounded-xl space-y-2">
+          <h5 class="text-xs font-black text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i>
+            <span>వీక్‌నెస్ హీట్‌మ్యాప్ & స్టడీ సూచనలు (Weakness Heatmap & Recommendations):</span>
+          </h5>
+          <div id="analyticsHeatmapContainer" class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Button -->
+      <div class="pt-3 border-t border-slate-200 dark:border-slate-800 mt-3 flex justify-end">
+        <button onclick="document.getElementById('analyticsModal').classList.add('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg text-xs">
+          పూర్తయింది
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Concept Mindmaps Modal -->
+  <div id="mindmapsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-4xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[92vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800 mb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center">
+            <i data-lucide="git-fork" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 dark:text-slate-100">ఇంటరాక్టివ్ కాన్సెప్ట్ మైండ్‌మ్యాప్స్ (Visual Mindmaps)</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">సంక్లిష్టమైన సిలబస్ అంశాలను ఒకే చూపులో గుర్తుంచుకోండి (నోడ్ క్లిక్ చేయండి)</p>
+          </div>
+        </div>
+        <button onclick="document.getElementById('mindmapsModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Mindmap Topic Tabs -->
+      <div class="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto gap-2 pb-2 mb-3 text-xs font-bold">
+        <button onclick="switchMindmapTopic('schemes')" class="mindmap-tab px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-slate-800 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700 whitespace-nowrap" data-mtopic="schemes">
+          🌾 సంక్షేమ పథకాలు
+        </button>
+        <button onclick="switchMindmapTopic('isro')" class="mindmap-tab px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 whitespace-nowrap" data-mtopic="isro">
+          🚀 ఇస్రో స్పేస్ మిషన్లు
+        </button>
+        <button onclick="switchMindmapTopic('budget')" class="mindmap-tab px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 whitespace-nowrap" data-mtopic="budget">
+          💰 బడ్జెట్ 2026 & ఎకానమీ
+        </button>
+        <button onclick="switchMindmapTopic('polity')" class="mindmap-tab px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 whitespace-nowrap" data-mtopic="polity">
+          ⚖️ పాలిటీ & సవరణలు
+        </button>
+      </div>
+
+      <!-- Mindmap Visual Layout (Split View: Tree & Details) -->
+      <div class="flex-1 overflow-y-auto grid grid-cols-1 lg:grid-cols-3 gap-4 pr-1">
+        <!-- Tree View Container (2 cols) -->
+        <div class="lg:col-span-2 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
+          <div id="mindmapTreeContainer" class="space-y-3">
+            <!-- Rendered dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Selected Node Details & Exam Takeaways (1 col) -->
+        <div class="bg-indigo-50/70 dark:bg-slate-800/80 p-4 rounded-xl border border-indigo-200 dark:border-slate-700 flex flex-col">
+          <h4 class="text-xs font-black text-indigo-950 dark:text-indigo-300 flex items-center gap-1.5 mb-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
+            <span>పరీక్షా ముఖ్యాంశాలు (Exam Focus):</span>
+          </h4>
+          <div id="mindmapDetailsContent" class="text-xs text-slate-800 dark:text-slate-200 space-y-2 flex-1">
+            <p class="text-slate-500 dark:text-slate-400 italic">ఎడమవైపు మైండ్‌మ్యాప్‌లోని ఏదైనా నోడ్ పై క్లిక్ చేస్తే పరీక్షల్లో అడిగే కీలక అంశాలు ఇక్కడ కనిపిస్తాయి.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Close -->
+      <div class="pt-3 border-t border-slate-200 dark:border-slate-800 mt-3 flex justify-between items-center text-xs">
+        <span class="text-slate-500 dark:text-slate-400">💡 చిట్కా: నోడ్స్‌ని క్లిక్ చేసి ఉప-అంశాలను తెరవండి/మూసివేయండి.</span>
+        <button onclick="document.getElementById('mindmapsModal').classList.add('hidden')" class="bg-slate-800 dark:bg-slate-700 text-white font-bold px-4 py-1.5 rounded-lg">
+          పూర్తయింది
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booklets & Magazine Download Modal (Weekly & Monthly) -->
+  <div id="bookletsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center">
+            <i data-lucide="book-marked" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">కరెంట్ అఫైర్స్ బుక్‌లెట్స్ & మ్యాగజైన్ (PDF)</h3>
+            <p class="text-xs text-slate-500">వీక్లీ & మంత్లీ పూర్తి మెటీరియల్ ఒకే క్లిక్‌తో డౌన్‌లోడ్ చేసుకోండి</p>
+          </div>
+        </div>
+        <button id="closeBookletsBtn" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 my-2">
+        <!-- 1. Weekly Booklet Card -->
+        <div class="p-4 rounded-xl border-2 border-emerald-500/40 bg-emerald-50/50 hover:bg-emerald-50 transition flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-600 text-white">📅 వారం వారీ బుక్‌లెట్</span>
+              <span class="text-xs font-semibold text-emerald-800">గత 7 రోజుల సంకలనం</span>
+            </div>
+            <h4 class="text-base font-bold text-slate-900 mt-1">వీక్లీ కరెంట్ అఫైర్స్ క్యాప్సూల్ (Weekly PDF)</h4>
+            <p class="text-xs text-slate-600 mt-1">
+              గత 7 రోజులలో వచ్చిన అన్ని తెలుగు దినపత్రికల ముఖ్యాంశాలు, వన్-లైనర్స్ మరియు వీక్లీ ప్రాక్టీస్ MCQs బ్యాంక్.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-emerald-200/60 flex justify-between items-center">
+            <span class="text-xs text-slate-500">ఫార్మాట్: క్లీన్ ప్రింటబుల్ PDF</span>
+            <a href="/magazine?type=weekly" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1 shadow-sm">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>వీక్లీ బుక్‌లెట్ ఓపెన్ చేయి</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 2. Monthly Magazine Card -->
+        <div class="p-4 rounded-xl border-2 border-purple-500/40 bg-purple-50/50 hover:bg-purple-50 transition flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-600 text-white">📚 నెలవారీ మాస పత్రిక</span>
+              <span class="text-xs font-semibold text-purple-800">సెప్టెంబర్ 2026 ఎడిషన్</span>
+            </div>
+            <h4 class="text-base font-bold text-slate-900 mt-1">లక్ష్య కరెంట్ అఫైర్స్ మాస పత్రిక (Monthly Magazine)</h4>
+            <p class="text-xs text-slate-600 mt-1">
+              మొత్తం నెల కరెంట్ అఫైర్స్, విభాగాల వారీగా సమగ్ర నోట్స్, కవర్ పేజీ మరియు 100+ ప్రశ్నలతో కూడిన పూర్తి బుక్‌లెట్.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-purple-200/60 flex justify-between items-center">
+            <span class="text-xs text-slate-500">ఫార్మాట్: 40+ పేజీల ప్రచురణ PDF</span>
+            <a href="/magazine?type=monthly" target="_blank" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1 shadow-sm">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>మాస పత్రిక ఓపెన్ చేయి</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Article Detail Modal (Triggered from Quick Revision) -->
+  <div id="articleDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3">
+        <div class="flex items-center space-x-2">
+          <span id="modalCategoryBadge" class="text-xs font-bold px-2.5 py-1 rounded-md badge-national">
+            జాతీయం
+          </span>
+          <span id="modalSourceBadge" class="text-xs font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
+            📰 దినపత్రిక
+          </span>
+        </div>
+        <button id="closeArticleDetailBtn" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 pr-1 space-y-4">
+        <div>
+          <span class="text-xs text-slate-500 font-semibold" id="modalArticleDate">📅 2026-09-11</span>
+          <h2 class="text-lg sm:text-xl font-bold text-slate-900 mt-1 leading-snug" id="modalArticleTitle">
+            ఆర్టికల్ శీర్షిక
+          </h2>
+          <span class="inline-block mt-2 text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200" id="modalExamTag">
+            🎯 APPSC / TSPSC / UPSC
+          </span>
+        </div>
+
+        <div class="article-summary-box text-xs sm:text-sm leading-relaxed p-3.5 rounded-xl border border-slate-200" id="modalArticleSummary">
+          ఆర్టికల్ సారాంశం...
+        </div>
+
+        <div class="article-details rounded-xl p-4 text-xs sm:text-sm space-y-2">
+          <h4 class="article-details-header font-bold flex items-center gap-1.5">
+            <i data-lucide="bookmark" class="w-4 h-4 text-blue-600"></i>
+            <span>పరీక్షల కీలక అంశాలు & సమగ్ర నోట్స్ (Key Exam Takeaways):</span>
+          </h4>
+          <div class="article-details-text whitespace-pre-line leading-relaxed font-bold" id="modalArticleDetailedNotes">
+            నోట్స్ వివరాలు...
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer Controls -->
+      <div class="flex flex-wrap justify-between items-center gap-2 pt-3 border-t border-slate-100 mt-3 text-xs">
+        <button id="modalAudioBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition">
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+          <span>తెలుగు ఆడియో వినండి</span>
+        </button>
+        <div class="flex gap-2">
+          <button id="modalBookmarkBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition">
+            <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
+            <span>సేవ్ చేయి</span>
+          </button>
+          <button id="modalGoToArticlesBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition">
+            <span>ఆర్టికల్స్ విభాగంలో చూడు &rarr;</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Study Calendar Modal (Feature 3) -->
+  <div id="studyCalendarModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200 flex flex-col">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">మంత్లీ స్టడీ క్యాలెండర్ & డైలీ స్ట్రీక్</h3>
+            <p class="text-xs text-slate-500">రోజువారీ అధ్యయనం & కరెంట్ అఫైర్స్ హిస్టరీ</p>
+          </div>
+        </div>
+        <button id="closeCalendarBtn" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Month Navigation Header -->
+      <div class="flex justify-between items-center mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+        <button onclick="changeCalendarMonth(-1)" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-700 transition">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        </button>
+        <h4 id="calendarMonthTitle" class="text-sm font-bold text-slate-900">సెప్టెంబర్ 2026</h4>
+        <button onclick="changeCalendarMonth(1)" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-700 transition">
+          <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Calendar Weekday Header (7 columns) -->
+      <div class="grid grid-cols-7 gap-1 text-center font-black text-xs text-slate-500 mb-2">
+        <span class="text-rose-500">ఆది</span>
+        <span>సోమ</span>
+        <span>మంగళ</span>
+        <span>బుధ</span>
+        <span>గురు</span>
+        <span>శుక్ర</span>
+        <span class="text-blue-600">శని</span>
+      </div>
+
+      <!-- Calendar Days Grid -->
+      <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1.5 text-center text-xs">
+        <!-- Dynamically rendered via JS -->
+      </div>
+
+      <!-- Streak & Stats Footer -->
+      <div class="mt-5 pt-3 border-t border-slate-100 flex flex-wrap justify-between items-center text-xs text-slate-600 gap-2">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center gap-1 font-medium">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> వార్తలున్న రోజు
+          </span>
+          <span class="flex items-center gap-1 font-medium">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> ఎంచుకున్న రోజు
+          </span>
+        </div>
+        <div class="font-bold text-slate-800">
+          కంటిన్యూస్ స్ట్రీక్: <span class="text-orange-600" id="calendarStreakText">1 రోజు 🔥</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= APPSC GROUP-2 EXAM HUB MODAL ================= -->
+  <div id="appscGroup2Modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full p-5 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[92vh] flex flex-col animate-in fade-in zoom-in duration-200">
+      
+      <!-- Modal Header -->
+      <div class="flex justify-between items-start pb-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-rose-600 text-white flex items-center justify-center font-black text-2xl shadow-md">
+            🎯
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                APPSC గ్రూప్-2 గ్రాండ్ మాక్ టెస్ట్ & PYQs హబ్
+              </h2>
+              <span class="bg-rose-100 text-rose-800 text-[10px] font-black px-2 py-0.5 rounded-full border border-rose-200">
+                మొత్తం సిలబస్
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              5 విభాగాలు కలిపి 150 ప్రశ్నల పూర్తి గ్రాండ్ టెస్ట్ & గత పరీక్షల అసలైన PYQs (2024 & 2019)
+            </p>
+          </div>
+        </div>
+        <button id="closeAppscGroup2Btn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-xl transition">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
+
+        <!-- 5-Syllabus Sections Weightage Banner -->
+        <div class="bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 text-white p-4 rounded-2xl shadow-md">
+          <div class="flex justify-between items-center mb-2.5">
+            <span class="text-xs font-black uppercase tracking-wider text-amber-300">
+              📌 APPSC గ్రూప్-2 ప్రిలిమ్స్ సిలబస్ స్వరూపం (150 ప్రశ్నలు - 150 మార్కులు):
+            </span>
+            <span class="text-[11px] bg-white/20 px-2.5 py-0.5 rounded-full font-bold">నెగటివ్: 1/3 (-0.33)</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs font-bold">
+            <div class="p-2 bg-white/10 rounded-xl border border-white/10">
+              <span class="block text-amber-300 text-base">🏛️</span>
+              <span class="text-white block mt-0.5">భారతీయ చరిత్ర</span>
+              <span class="text-[11px] text-blue-200">30 ప్రశ్నలు</span>
+            </div>
+            <div class="p-2 bg-white/10 rounded-xl border border-white/10">
+              <span class="block text-amber-300 text-base">🌍</span>
+              <span class="text-white block mt-0.5">భూగోళశాస్త్రం</span>
+              <span class="text-[11px] text-blue-200">30 ప్రశ్నలు</span>
+            </div>
+            <div class="p-2 bg-white/10 rounded-xl border border-white/10">
+              <span class="block text-amber-300 text-base">👥</span>
+              <span class="text-white block mt-0.5">భారతీయ సమాజం</span>
+              <span class="text-[11px] text-blue-200">30 ప్రశ్నలు</span>
+            </div>
+            <div class="p-2 bg-white/10 rounded-xl border border-white/10">
+              <span class="block text-amber-300 text-base">📰</span>
+              <span class="text-white block mt-0.5">కరెంట్ అఫైర్స్</span>
+              <span class="text-[11px] text-blue-200">30 ప్రశ్నలు</span>
+            </div>
+            <div class="p-2 bg-white/10 rounded-xl border border-white/10 col-span-2 sm:col-span-1">
+              <span class="block text-amber-300 text-base">🧠</span>
+              <span class="text-white block mt-0.5">రీజనింగ్</span>
+              <span class="text-[11px] text-blue-200">30 ప్రశ్నలు</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Main Test Options -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          
+          <!-- Option 1: Full 150 Qs Grand Test -->
+          <div class="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border-2 border-amber-300 dark:border-amber-700/60 flex flex-col justify-between hover:shadow-lg transition">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded bg-amber-200 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200">
+                  సిఫారసు చేసినది ⭐
+                </span>
+                <span class="text-xs font-black text-amber-800 dark:text-amber-400">150 నిమిషాలు</span>
+              </div>
+              <h3 class="font-black text-base text-slate-900 dark:text-white mb-1">
+                గ్రాండ్ మాక్ టెస్ట్ (150 Qs)
+              </h3>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
+                అన్ని 5 విభాగాలు కలిపి (చరిత్ర, జాగ్రఫీ, సమాజం, CA, రీజనింగ్). రియల్ APPSC ఎగ్జామ్ అనుభవం.
+              </p>
+            </div>
+            <button id="startAppscFullMockBtn" class="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black text-xs py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5">
+              <span>గ్రాండ్ టెస్ట్ రాయండి (150 Qs)</span>
+              <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <!-- Option 2: Authentic PYQs Test -->
+          <div class="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/20 border-2 border-indigo-300 dark:border-indigo-700/60 flex flex-col justify-between hover:shadow-lg transition">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded bg-indigo-200 dark:bg-indigo-900/60 text-indigo-900 dark:text-indigo-200">
+                  అసలైన పరీక్ష ప్రశ్నలు 📜
+                </span>
+                <span class="text-xs font-black text-indigo-800 dark:text-indigo-400">91 Qs</span>
+              </div>
+              <h3 class="font-black text-base text-slate-900 dark:text-white mb-1">
+                గత పరీక్షల ప్రశ్నలు (PYQs)
+              </h3>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
+                2024 ఫిబ్రవరి 25 ప్రిలిమ్స్ మరియు 2019 స్క్రీనింగ్ టెస్ట్ అధికారిక ప్రశ్నలు & సమగ్ర తెలుగు వివరణలు.
+              </p>
+            </div>
+            <button id="startAppscPyqsBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5">
+              <span>PYQs టెస్ట్ రాయండి (91 Qs)</span>
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <!-- Option 3: Quick 50 Qs Mini Grand Test -->
+          <div class="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/20 border-2 border-emerald-300 dark:border-emerald-700/60 flex flex-col justify-between hover:shadow-lg transition">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded bg-emerald-200 dark:bg-emerald-900/60 text-emerald-900 dark:text-emerald-200">
+                  త్వరిత ప్రాక్టీస్ ⚡
+                </span>
+                <span class="text-xs font-black text-emerald-800 dark:text-emerald-400">50 నిమిషాలు</span>
+              </div>
+              <h3 class="font-black text-base text-slate-900 dark:text-white mb-1">
+                మినీ గ్రాండ్ టెస్ట్ (50 Qs)
+              </h3>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
+                5 విభాగాలు కలిపి ప్రతి విభాగం నుండి 10 ముఖ్యమైన మోడల్ ప్రశ్నలతో కూడిన స్పీడ్ టెస్ట్.
+              </p>
+            </div>
+            <button id="startAppscQuickBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5">
+              <span>మినీ టెస్ట్ ప్రారంభించు (50 Qs)</span>
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Section-wise Practice Filter Buttons -->
+        <div class="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <h4 class="font-extrabold text-xs text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+            <span>📑 విభాగాల వారీగా ప్రాక్టీస్ చేయండి (30 ప్రశ్నలు చొప్పున):</span>
+            <span class="text-[11px] text-slate-500">వ్యవధి: 30 నిమిషాలు</span>
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <button class="appsc-sec-btn p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-500 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 text-center transition flex flex-col items-center gap-1" data-sec="history">
+              <span>🏛️ చరిత్ర</span>
+              <span class="text-[10px] text-blue-600 font-extrabold">30 Qs &rarr;</span>
+            </button>
+            <button class="appsc-sec-btn p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-500 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 text-center transition flex flex-col items-center gap-1" data-sec="geography">
+              <span>🌍 జాగ్రఫీ</span>
+              <span class="text-[10px] text-blue-600 font-extrabold">30 Qs &rarr;</span>
+            </button>
+            <button class="appsc-sec-btn p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-500 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 text-center transition flex flex-col items-center gap-1" data-sec="society">
+              <span>👥 సమాజం</span>
+              <span class="text-[10px] text-blue-600 font-extrabold">30 Qs &rarr;</span>
+            </button>
+            <button class="appsc-sec-btn p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-500 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 text-center transition flex flex-col items-center gap-1" data-sec="current_affairs">
+              <span>📰 కరెంట్ అఫైర్స్</span>
+              <span class="text-[10px] text-blue-600 font-extrabold">30 Qs &rarr;</span>
+            </button>
+            <button class="appsc-sec-btn p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-500 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 text-center transition flex flex-col items-center gap-1 col-span-2 sm:col-span-1" data-sec="mental_ability">
+              <span>🧠 రీజనింగ్</span>
+              <span class="text-[10px] text-blue-600 font-extrabold">30 Qs &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Printable OMR Sheet Banner -->
+        <div class="flex flex-wrap justify-between items-center gap-3 p-4 bg-rose-50 dark:bg-rose-950/20 rounded-2xl border border-rose-200 dark:border-rose-800">
+          <div class="flex items-center space-x-3">
+            <span class="text-2xl">🖨️</span>
+            <div>
+              <h4 class="font-extrabold text-xs sm:text-sm text-rose-950 dark:text-rose-200">
+                ఆఫ్‌లైన్ OMR ప్రాక్టీస్ పేపర్ కావాలా?
+              </h4>
+              <p class="text-[11px] text-rose-700 dark:text-rose-300">
+                150 ప్రశ్నల పూర్తి పేపర్, OMR బబుల్ షీట్ మరియు ఆన్సర్ కీని PDF గా డౌన్‌లోడ్ లేదా ప్రింట్ చేసుకోండి.
+              </p>
+            </div>
+          </div>
+          <a href="/omr_group2" target="_blank" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>150 Qs OMR పేపర్ ఓపెన్ ↗</span>
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MAP POINTING & ATLAS HUB MODAL ================= -->
+  <div id="mapPointingModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-5xl w-full p-4 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[94vh] flex flex-col animate-in fade-in zoom-in duration-200">
+      
+      <!-- Modal Header -->
+      <div class="flex justify-between items-start pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center font-black text-2xl shadow-md">
+            🗺️
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                మ్యాప్ పాయింటింగ్ ఎక్స్‌ప్లోరర్ & స్టడీ అట్లాస్ (Map Hub)
+              </h2>
+              <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-200">
+                APPSC & UPSC స్పెషల్
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              ఆంధ్రప్రదేశ్, భారతదేశం మరియు ప్రపంచ వ్యూహాత్మక ప్రాంతాలు, పోర్టులు, కనుమలు, జలసంధుల సమగ్ర మ్యాప్ విశ్లేషణ
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/map_pointing_atlas" target="_blank" class="hidden sm:inline-flex items-center gap-1 text-xs font-bold bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 px-3 py-1.5 rounded-xl transition">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+            <span>ప్రింటబుల్ అట్లాస్ ↗</span>
+          </a>
+          <button id="closeMapPointingBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-xl transition">
+            <i data-lucide="x" class="w-6 h-6"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Domain Switcher Tabs -->
+      <div class="flex items-center gap-2 pt-3 pb-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0">
+        <button class="map-tab-btn active px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 bg-teal-600 text-white shadow-sm" data-domain="ap">
+          <span>🚩 ఆంధ్రప్రదేశ్ మ్యాప్</span>
+          <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full" id="mapTabApCount">13</span>
+        </button>
+        <button class="map-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200" data-domain="india">
+          <span>🇮🇳 భారతదేశం మ్యాప్</span>
+          <span class="bg-slate-200 dark:bg-slate-700 text-[10px] px-1.5 py-0.2 rounded-full" id="mapTabIndiaCount">8</span>
+        </button>
+        <button class="map-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200" data-domain="world">
+          <span>🌐 ప్రపంచ వ్యూహాత్మక జలసంధులు</span>
+          <span class="bg-slate-200 dark:bg-slate-700 text-[10px] px-1.5 py-0.2 rounded-full" id="mapTabWorldCount">7</span>
+        </button>
+        <button class="map-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 hover:bg-amber-200" data-domain="quiz">
+          <span>📝 మ్యాప్ క్విజ్ ప్రాక్టీస్</span>
+          <span class="bg-amber-500 text-slate-950 text-[10px] font-black px-1.5 py-0.2 rounded-full">28 Qs</span>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="flex-1 overflow-y-auto py-3 pr-1 space-y-4">
+        
+        <!-- Interactive Explorer View (Map + List + Detail Card) -->
+        <div id="mapExplorerContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          
+          <!-- Left: Interactive Visual Map & Locations List (7 cols) -->
+          <div class="lg:col-span-7 space-y-3">
+            
+            <!-- Map Canvas Box with Markers -->
+            <div class="relative bg-slate-950 rounded-2xl border border-slate-800 p-3 overflow-hidden shadow-inner flex flex-col justify-between" style="min-height: 290px; max-height: 350px;">
+              <!-- Map Background Graphic / Watermark -->
+              <div class="absolute inset-0 opacity-15 pointer-events-none flex items-center justify-center text-5xl sm:text-6xl font-black text-slate-400 select-none text-center">
+                <span id="mapWatermarkText">ANDHRA PRADESH</span>
+              </div>
+
+              <!-- Map Interactive Pins Layer -->
+              <div id="mapPinsLayer" class="relative w-full h-64 sm:h-72">
+                <!-- Pins injected dynamically by JavaScript -->
+              </div>
+
+              <!-- Map Bottom Helper -->
+              <div class="relative z-10 flex justify-between items-center text-[11px] text-slate-400 bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-xl border border-slate-800">
+                <span id="mapDomainNote">📍 లొకేషన్ పాయింట్ పై క్లిక్ చేసి సమగ్ర పరీక్షా విశ్లేషణ చూడండి</span>
+                <span class="text-teal-400 font-bold" id="activePointCounter">13 కేంద్రాలు</span>
+              </div>
+            </div>
+
+            <!-- Locations Quick Filter List -->
+            <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">📌 ప్రముఖ కేంద్రాల జాబితా (Quick Select):</span>
+                <input type="text" id="mapSearchInput" placeholder="వెతకండి..." class="text-xs px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 w-36 outline-none" />
+              </div>
+              <div id="mapPointsQuickList" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right: Location Detail Inspector Card (5 cols) -->
+          <div class="lg:col-span-5 flex flex-col">
+            <div id="mapDetailCard" class="bg-white dark:bg-slate-800 rounded-2xl border border-teal-200 dark:border-teal-800 p-4 shadow-md flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex justify-between items-start gap-2 mb-1">
+                  <span id="detailBadgeCat" class="bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 text-[11px] font-black px-2.5 py-0.5 rounded-md">
+                    ఓడరేవులు & తీరప్రాంతం
+                  </span>
+                  <span id="detailBadgeLoc" class="bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 text-[11px] font-bold px-2 py-0.5 rounded-md">
+                    విశాఖపట్నం
+                  </span>
+                </div>
+                <h3 id="detailTitle" class="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-snug">
+                  విశాఖపట్నం పోర్టు & గంగవరం
+                </h3>
+                <p id="detailEngName" class="text-[11px] text-slate-500 font-bold mb-3">Visakhapatnam Port</p>
+
+                <div class="space-y-2 text-xs">
+                  <div class="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-700/60">
+                    <span class="text-slate-900 dark:text-slate-200 font-bold block mb-1">📌 భౌగోళిక & పరీక్షల కీలక వాస్తవాలు:</span>
+                    <div id="detailKeyFacts" class="text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
+                      • భారతదేశ తూర్పు తీరంలో ఉన్న ఏకైక సహజ నౌకాశ్రయం.
+                    </div>
+                  </div>
+
+                  <div class="bg-amber-50 dark:bg-amber-950/30 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800/60 text-amber-950 dark:text-amber-200">
+                    <span class="font-bold block mb-0.5">🎯 పోటీ పరీక్షల ప్రాధాన్యత:</span>
+                    <div id="detailSignificance">APPSC Group 2 & గ్రూప్ 1 లో సహజ నౌకాశ్రయం అంశంలో రెగ్యులర్ ప్రశ్న.</div>
+                  </div>
+
+                  <div id="detailPyqBox" class="bg-rose-50 dark:bg-rose-950/30 p-2.5 rounded-xl border border-rose-200 dark:border-rose-800/60 text-rose-950 dark:text-rose-200">
+                    <span class="font-bold block mb-0.5">🏆 గత పరీక్షల ప్రశ్న (PYQ):</span>
+                    <div id="detailPyqText">APPSC Group 2 (2019): తూర్పు తీరంలో 'డాల్ఫిన్స్ నోస్' ఏ పోర్టుకు సహజ రక్షణ కల్పిస్తుంది? -> విశాఖపట్నం</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                <button id="testPointInQuizBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1">
+                  <span>ఈ కేంద్రంపై MCQ ప్రాక్టీస్</span>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </button>
+                <a href="/map_pointing_atlas" target="_blank" class="text-xs text-teal-700 dark:text-teal-400 font-bold hover:underline">
+                  పూర్తి అట్లాస్ &rarr;
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Quiz Container View (Hidden by default, shown when quiz tab is active) -->
+        <div id="mapQuizContainer" class="hidden space-y-4">
+          <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white p-4 rounded-2xl flex justify-between items-center shadow-md">
+            <div>
+              <h3 class="text-base sm:text-lg font-black">📝 మ్యాప్ పాయింటింగ్ క్విజ్ & సెల్ఫ్ ఎవాల్యుయేషన్</h3>
+              <p class="text-xs text-amber-100">ఆంధ్రప్రదేశ్, భారతదేశం & ప్రపంచ భౌగోళిక అంశాలపై 28 MCQs</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-bold block">స్కోర్:</span>
+              <span id="mapQuizScoreText" class="text-xl font-black text-white">0 / 28</span>
+            </div>
+          </div>
+
+          <div id="mapQuizQuestionsList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= AP HISTORY & APPSC EXAMS HUB MODAL ================= -->
+  <div id="apHistoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-5xl w-full p-4 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[94vh] flex flex-col animate-in fade-in zoom-in duration-200">
+      <div class="flex justify-between items-start pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white flex items-center justify-center font-black text-2xl shadow-md">
+            🏛️
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                ఆంధ్రప్రదేశ్ సమగ్ర చరిత్ర & APPSC గ్రూప్స్ 1, 2, 3 హబ్
+              </h2>
+              <span class="bg-pink-100 text-pink-800 text-[10px] font-black px-2 py-0.5 rounded-full border border-pink-200">
+                పూర్తి సిలబస్ & PYQs
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              శాతవాహనుల యుగం నుండి 2014 AP విభజన చట్టం వరకు సమగ్ర చారిత్రక పరిణామాలు & గ్రాండ్ టెస్టులు
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/omr_appsc_all" target="_blank" class="hidden sm:inline-flex items-center gap-1 text-xs font-bold bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 px-3 py-1.5 rounded-xl transition">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>OMR పేపర్స్ (1, 2, 3) ↗</span>
+          </a>
+          <button id="closeApHistoryBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-xl transition">
+            <i data-lucide="x" class="w-6 h-6"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Exam Launcher Banner -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 py-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <button id="startGroup1ExamBtn" class="p-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white text-left hover:scale-[1.02] transition shadow-xs flex justify-between items-center">
+          <div>
+            <span class="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded uppercase">గ్రూప్-1 ప్రిలిమ్స్</span>
+            <h4 class="font-black text-xs sm:text-sm mt-1">120 Qs గ్రాండ్ టెస్ట్</h4>
+            <p class="text-[10px] text-amber-100">GS & మెంటల్ ఎబిలిటీ</p>
+          </div>
+          <i data-lucide="play-circle" class="w-6 h-6"></i>
+        </button>
+        <button id="startGroup2FromHistoryBtn" class="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 text-white text-left hover:scale-[1.02] transition shadow-xs flex justify-between items-center">
+          <div>
+            <span class="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded uppercase">గ్రూప్-2 స్క్రీనింగ్</span>
+            <h4 class="font-black text-xs sm:text-sm mt-1">150 Qs ఫుల్ మాక్</h4>
+            <p class="text-[10px] text-blue-100">5 సెక్షన్లు (30 Qs చొప్పున)</p>
+          </div>
+          <i data-lucide="play-circle" class="w-6 h-6"></i>
+        </button>
+        <button id="startGroup3ExamBtn" class="p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white text-left hover:scale-[1.02] transition shadow-xs flex justify-between items-center">
+          <div>
+            <span class="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded uppercase">గ్రూప్-3 పంచాయతీ</span>
+            <h4 class="font-black text-xs sm:text-sm mt-1">150 Qs పంచాయతీరాజ్</h4>
+            <p class="text-[10px] text-emerald-100">గ్రామీణాభివృద్ధి & 73వ సవరణ</p>
+          </div>
+          <i data-lucide="play-circle" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable Topics & Practice View -->
+      <div class="flex-1 overflow-y-auto py-3 space-y-4 pr-1">
+        <div class="flex justify-between items-center">
+          <h3 class="font-black text-xs sm:text-sm text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+            📜 ఆంధ్రప్రదేశ్ చారిత్రక యుగాలు & ముఖ్య పరిణామాలు (Syllabus Units):
+          </h3>
+          <span class="text-xs text-purple-600 font-bold">8 ప్రామాణిక విభాగాలు</span>
+        </div>
+        <div id="apTopicsContainer" class="space-y-3">
+          <!-- Injected via JS -->
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+          <h3 class="font-black text-xs sm:text-sm text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+            📝 AP చరిత్ర అసలైన PYQ మోడల్ ప్రశ్నలు:
+          </h3>
+          <div id="apHistoryQuestionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= WELFARE SCHEMES & BUDGET 2026 MODAL ================= -->
+  <div id="schemesModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-5xl w-full p-4 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[94vh] flex flex-col animate-in fade-in zoom-in duration-200">
+      <div class="flex justify-between items-start pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-black text-2xl shadow-md">
+            🌾
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                ప్రభుత్వ సంక్షేమ పథకాలు & బడ్జెట్ 2026 హబ్
+              </h2>
+              <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-200">
+                15-20 మార్కుల వెయిటేజీ
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              AP కూటమి ప్రభుత్వం 'సూపర్ సిక్స్', తెలంగాణ 'ఆరు గ్యారెంటీలు' & కేంద్ర పథకాల సమగ్ర విశ్లేషణ
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/schemes_handbook" target="_blank" class="hidden sm:inline-flex items-center gap-1 text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-xl transition">
+            <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
+            <span>స్కీమ్స్ హ్యాండ్‌బుక్ ↗</span>
+          </a>
+          <button id="closeSchemesBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-xl transition">
+            <i data-lucide="x" class="w-6 h-6"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Schemes Filter Tabs -->
+      <div class="flex items-center gap-2 pt-3 pb-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0">
+        <button class="scheme-tab-btn active px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 bg-emerald-600 text-white shadow-sm" data-cat="ap">
+          <span>🚩 AP సూపర్ సిక్స్ (Super Six)</span>
+        </button>
+        <button class="scheme-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200" data-cat="telangana">
+          <span>🌾 తెలంగాణ ఆరు గ్యారెంటీలు</span>
+        </button>
+        <button class="scheme-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200" data-cat="central">
+          <span>🇮🇳 కేంద్ర ఫ్లాగ్‌షిప్ పథకాలు</span>
+        </button>
+        <button class="scheme-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 hover:bg-amber-200" data-cat="quiz">
+          <span>📝 స్కీమ్స్ క్విజ్ & MCQs</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="flex-1 overflow-y-auto py-3 space-y-4 pr-1">
+        <div id="schemesCardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <!-- Injected via JS -->
+        </div>
+        <div id="schemesQuizContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAINS MODEL ANSWERS MODAL ================= -->
+  <div id="mainsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[94vh] flex flex-col animate-in fade-in zoom-in duration-200">
+      <div class="flex justify-between items-start pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center font-black text-2xl shadow-md">
+            ✍️
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                గ్రూప్-1 & గ్రూప్-2 మెయిన్స్ మోడల్ సమాధానాలు (Mains Bank)
+              </h2>
+              <span class="bg-violet-100 text-violet-800 text-[10px] font-black px-2 py-0.5 rounded-full border border-violet-200">
+                డిస్క్రిప్టివ్ రైటింగ్
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              పరిచయం, ముఖ్య విశ్లేషణ, ప్రభుత్వ చర్యలు, ముగింపుతో కూడిన అధికారిక ప్రామాణిక సమాధానాలు
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/mains_answer_bank" target="_blank" class="hidden sm:inline-flex items-center gap-1 text-xs font-bold bg-violet-50 hover:bg-violet-100 text-violet-800 border border-violet-200 px-3 py-1.5 rounded-xl transition">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span>మెయిన్స్ బ్యాంక్ PDF ↗</span>
+          </a>
+          <button id="closeMainsBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-xl transition">
+            <i data-lucide="x" class="w-6 h-6"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="flex-1 overflow-y-auto py-3 space-y-4 pr-1">
+        <div id="mainsQuestionsContainer" class="space-y-4">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 1. LIVE TIMED CBT EXAM MODAL ================= -->
+  <div id="cbtExamModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-6xl w-full h-[95vh] shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+      
+      <!-- CBT Top Header -->
+      <div class="px-5 py-3.5 bg-slate-900 text-white flex flex-wrap justify-between items-center gap-3 border-b border-slate-800 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-black">
+            ⏱️
+          </div>
+          <div>
+            <h3 id="cbtExamHeaderTitle" class="text-base font-extrabold text-white">గ్రాండ్ మాక్ టెస్ట్ • ఆన్‌లైన్ CBT ఎగ్జామ్</h3>
+            <p id="cbtExamHeaderSubtitle" class="text-[11px] text-slate-400">APPSC నెగటివ్ మార్కింగ్ విధానం (-0.33 మార్కులు)</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <!-- Countdown Timer Pill -->
+          <div class="bg-slate-800 border border-slate-700 px-3.5 py-1.5 rounded-xl flex items-center space-x-2">
+            <span class="text-xs text-slate-400 font-semibold">మిగిలిన సమయం:</span>
+            <span id="cbtTimerDisplay" class="font-mono text-base font-black text-amber-400">45:00</span>
+          </div>
+
+          <!-- Submit Test Button -->
+          <button id="cbtSubmitBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold px-4 py-1.5 rounded-xl transition shadow-md flex items-center gap-1.5">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>టెస్ట్ ముగించు (Submit)</span>
+          </button>
+
+          <!-- Close / Exit Button -->
+          <button id="cbtExitBtn" class="text-slate-400 hover:text-white p-1 rounded-lg transition" title="ఎగ్జామ్ నుండి నిష్క్రమించు">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- CBT Section Selector Navigation -->
+      <div id="cbtSectionNav" class="px-5 py-2.5 bg-slate-800/90 border-b border-slate-700/80 flex items-center space-x-2 overflow-x-auto text-xs shrink-0 no-scrollbar">
+        <button class="cbt-sec-tab px-3 py-1.5 rounded-xl font-extrabold transition bg-blue-600 text-white shadow-xs" data-section="all">
+          అన్నీ (<span id="cbtSecCountAll">150</span>)
+        </button>
+        <button class="cbt-sec-tab px-3 py-1.5 rounded-xl font-extrabold transition bg-slate-700/70 hover:bg-slate-700 text-slate-300" data-section="history">
+          🏛️ చరిత్ర (30)
+        </button>
+        <button class="cbt-sec-tab px-3 py-1.5 rounded-xl font-extrabold transition bg-slate-700/70 hover:bg-slate-700 text-slate-300" data-section="geography">
+          🌍 జాగ్రఫీ (30)
+        </button>
+        <button class="cbt-sec-tab px-3 py-1.5 rounded-xl font-extrabold transition bg-slate-700/70 hover:bg-slate-700 text-slate-300" data-section="society">
+          👥 సమాజం (30)
+        </button>
+        <button class="cbt-sec-tab px-3 py-1.5 rounded-xl font-extrabold transition bg-slate-700/70 hover:bg-slate-700 text-slate-300" data-section="current_affairs">
+          📰 కరెంట్ అఫైర్స్ (30)
+        </button>
+        <button class="cbt-sec-tab px-3 py-1.5 rounded-xl font-extrabold transition bg-slate-700/70 hover:bg-slate-700 text-slate-300" data-section="mental_ability">
+          🧠 రీజనింగ్ (30)
+        </button>
+      </div>
+
+      <!-- CBT Body: 2 Columns (Question + Palette) -->
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+        
+        <!-- Left Column: Question Area (8 cols) -->
+        <div class="lg:col-span-8 p-5 sm:p-7 flex flex-col justify-between overflow-y-auto border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800">
+          <div>
+            <!-- Question Number & Category Pill & PYQ Badge -->
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+              <div class="flex items-center space-x-2">
+                <span class="text-xs sm:text-sm font-black px-3 py-1 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                  ప్రశ్న <span id="cbtCurrentQNum">1</span> / <span id="cbtTotalQs">50</span>
+                </span>
+                <span id="cbtCategoryTag" class="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg">
+                  జాతీయం
+                </span>
+              </div>
+              <span id="cbtPyqBadge" class="hidden text-xs font-black px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 border border-amber-300">
+                ★ PYQ 2024
+              </span>
+            </div>
+
+            <!-- Question Text -->
+            <h3 id="cbtQuestionTitle" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-relaxed mb-6">
+              ప్రశ్న లోడ్ అవుతోంది...
+            </h3>
+
+            <!-- 4 Options Container -->
+            <div id="cbtOptionsList" class="space-y-3 mb-6">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap justify-between items-center gap-2 mt-4">
+            <div class="flex items-center gap-2">
+              <button id="cbtPrevBtn" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition">
+                &larr; మునుపటిది
+              </button>
+              <button id="cbtClearBtn" class="text-slate-500 hover:text-rose-600 text-xs sm:text-sm font-bold px-3 py-2 transition">
+                ఎంపిక తొలగించు
+              </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button id="cbtMarkReviewBtn" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 dark:bg-purple-950/30 dark:border-purple-800 dark:text-purple-300 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition">
+                మార్క్ ఫర్ రివ్యూ 🟣
+              </button>
+              <button id="cbtSaveNextBtn" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition shadow-sm">
+                సేవ్ & తదుపరిది &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Question Palette (4 cols) -->
+        <div class="lg:col-span-4 p-5 bg-slate-50 dark:bg-slate-900/50 flex flex-col justify-between overflow-y-auto">
+          <div>
+            <!-- Palette Summary Legend -->
+            <h4 class="text-xs font-black uppercase tracking-wider text-slate-500 mb-3">ప్రశ్నల స్థితి (Palette Status):</h4>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-4 font-bold">
+              <div class="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                <span class="w-3 h-3 rounded-md bg-emerald-600"></span>
+                <span>సమాధానం ఇచ్చినవి: <b id="cbtLegendAnswered">0</b></span>
+              </div>
+              <div class="flex items-center gap-1.5 text-rose-700 dark:text-rose-400">
+                <span class="w-3 h-3 rounded-md bg-rose-200 border border-rose-300"></span>
+                <span>ఇవ్వనివి: <b id="cbtLegendUnanswered">50</b></span>
+              </div>
+              <div class="flex items-center gap-1.5 text-purple-700 dark:text-purple-400">
+                <span class="w-3 h-3 rounded-md bg-purple-600"></span>
+                <span>రివ్యూ మార్క్డ్: <b id="cbtLegendMarked">0</b></span>
+              </div>
+              <div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                <span class="w-3 h-3 rounded-md bg-slate-200 dark:bg-slate-700"></span>
+                <span>చూడనివి: <b id="cbtLegendNotVisited">0</b></span>
+              </div>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800 my-3">
+
+            <!-- 50 Button Palette Grid -->
+            <div class="cbt-palette-grid max-h-[48vh] overflow-y-auto pr-1" id="cbtPaletteContainer">
+              <!-- 50 buttons populated via JS -->
+            </div>
+          </div>
+
+          <!-- Bottom Advice -->
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-200 dark:border-slate-800 mt-3">
+            💡 <b>సూచన:</b> ఏ ప్రశ్న నంబర్‌పై క్లిక్ చేసినా నేరుగా ఆ ప్రశ్నకు వెళ్లవచ్చు.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= CBT RESULT & SCORECARD MODAL ================= -->
+  <div id="cbtResultModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200">
+      
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
+        <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+          🏆 CBT ఎగ్జామ్ ఫలితాలు & స్కోర్‌కార్డ్
+        </h3>
+        <button id="closeCbtResultBtn" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-4 pr-1">
+        <!-- Score Highlights Banner -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl p-5 flex justify-between items-center shadow-lg">
+          <div>
+            <span class="text-[11px] bg-white/20 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">నెట్ స్కోరు (-0.33 నెగటివ్ మార్కింగ్)</span>
+            <h2 class="text-3xl font-black mt-1.5" id="cbtResultNetScore">0.00 / 50</h2>
+            <p class="text-xs text-blue-100 mt-1" id="cbtResultRemark">టెస్ట్ విశ్లేషణ పూర్తయింది</p>
+          </div>
+          <div class="text-right">
+            <span class="text-2xl font-black text-amber-300" id="cbtResultAccuracy">0%</span>
+            <span class="text-xs text-blue-200 block font-semibold">అక్యూరసీ రేటు</span>
+          </div>
+        </div>
+
+        <!-- 4 Metrics Grid -->
+        <div class="grid grid-cols-4 gap-2.5 text-center text-xs">
+          <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <span class="text-slate-500 dark:text-slate-400 block">మొత్తం ప్రశ్నలు</span>
+            <b class="text-base font-black text-slate-900 dark:text-white">50</b>
+          </div>
+          <div class="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800">
+            <span class="text-emerald-700 dark:text-emerald-400 block">సరైనవి (+1.0)</span>
+            <b class="text-base font-black text-emerald-600" id="cbtResultCorrect">0</b>
+          </div>
+          <div class="p-3 bg-rose-50 dark:bg-rose-950/30 rounded-xl border border-rose-200 dark:border-rose-800">
+            <span class="text-rose-700 dark:text-rose-400 block">తప్పులు (-0.33)</span>
+            <b class="text-base font-black text-rose-600" id="cbtResultWrong">0</b>
+          </div>
+          <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <span class="text-slate-500 dark:text-slate-400 block">వదిలేసినవి</span>
+            <b class="text-base font-black text-slate-700 dark:text-slate-300" id="cbtResultSkipped">0</b>
+          </div>
+        </div>
+
+        <!-- Section-wise Performance Breakdown -->
+        <div id="cbtSectionPerformanceContainer" class="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+          <h4 class="font-bold text-slate-900 dark:text-white mb-2.5 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <span>📊</span>
+              <span>విభాగాల వారీగా స్కోరు విశ్లేషణ (Section Breakdown):</span>
+            </span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">నెట్ మార్కులు / మొత్తం</span>
+          </h4>
+          <div id="cbtSectionScoresList" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+        <!-- Detailed Explanations Toggle -->
+        <div>
+          <h4 class="font-bold text-sm text-slate-900 dark:text-white mb-2">సమాధానాల కీ & సమగ్ర వివరణలు:</h4>
+          <div id="cbtReviewList" class="space-y-3 max-h-[35vh] overflow-y-auto pr-1">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs mt-3">
+        <button id="cbtRetakeBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-xl transition">
+          మళ్ళీ ప్రాక్టీస్ చేయి 🔄
+        </button>
+        <button onclick="document.getElementById('cbtResultModal').classList.add('hidden')" class="bg-slate-800 text-white font-bold px-4 py-2 rounded-xl transition">
+          పూర్తయింది
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 2. PERSISTENT AUDIO PODCAST PLAYER BAR ================= -->
+  <div id="podcastPlayerBar" class="hidden-bar fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-2xl px-4 py-2 sm:px-8 flex items-center justify-between gap-3 text-xs sm:text-sm">
+    <audio id="persistentAudioElement"></audio>
+
+    <!-- Left: Track Title & Audio Wave -->
+    <div class="flex items-center space-x-3 truncate max-w-xs sm:max-w-md">
+      <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+        <i data-lucide="radio" class="w-4 h-4"></i>
+      </div>
+      <div class="truncate">
+        <div class="flex items-center gap-1.5">
+          <span class="text-[10px] bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold px-1.5 py-0.2 rounded">ఆడియో బులెటిన్</span>
+          <div class="audio-wave" id="podcastAudioWave">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <p id="podcastCurrentTrackTitle" class="font-bold text-slate-900 dark:text-white truncate mt-0.5">
+          కరెంట్ అఫైర్స్ ఆడియో పాడ్‌కాస్ట్
+        </p>
+      </div>
+    </div>
+
+    <!-- Center: Playback Controls -->
+    <div class="flex items-center space-x-2 shrink-0">
+      <button onclick="skipPodcastTime(-10)" class="p-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition font-bold" title="10 సెకన్లు వెనక్కి">
+        -10s
+      </button>
+
+      <button id="podcastPlayPauseBtn" onclick="togglePodcastPlayback()" class="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-md transition">
+        <i data-lucide="play" id="podcastPlayIcon" class="w-4 h-4 ml-0.5"></i>
+      </button>
+
+      <button onclick="skipPodcastTime(10)" class="p-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition font-bold" title="10 సెకన్లు ముందుకు">
+        +10s
+      </button>
+    </div>
+
+    <!-- Right: Speed & Close -->
+    <div class="flex items-center space-x-2 shrink-0">
+      <button id="podcastSpeedToggleBtn" onclick="cyclePodcastSpeed()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-2.5 py-1 rounded-lg font-bold text-xs transition">
+        <span id="podcastSpeedText">1.0x</span>
+      </button>
+
+      <button onclick="closePodcastBar()" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white transition">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= 3. AI STUDY MENTOR FLOATING TRIGGER ================= -->
+  <div id="aiMentorWidget" class="fixed bottom-20 right-5 z-40">
+    <button onclick="openAiMentorModal()" class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-3.5 py-2.5 rounded-full shadow-2xl flex items-center space-x-2 font-bold text-xs sm:text-sm border-2 border-white/30 transition transform hover:scale-105">
+      <span class="text-base">🤖</span>
+      <span>AI స్టడీ మెంటార్</span>
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+    </button>
+  </div>
+
+  <!-- AI STUDY MENTOR CHAT MODAL -->
+  <div id="aiMentorModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-2 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full h-[80vh] shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+      
+      <!-- Chat Header -->
+      <div class="p-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white flex justify-between items-center border-b border-white/10 shrink-0">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-base shadow-sm">
+            🤖
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">లక్ష్య AI స్టడీ మెంటార్ & డౌట్ సాల్వర్</h3>
+            <p class="text-[10px] text-blue-200">APPSC & TSPSC పరీక్షల సందేహాలకు తక్షణ వివరణ</p>
+          </div>
+        </div>
+        <button onclick="closeAiMentorModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Quick Suggestion Pills -->
+      <div class="p-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center gap-1.5 overflow-x-auto text-[11px] font-bold shrink-0">
+        <button onclick="askAiMentorPrompt('ఇస్రో తాజా ప్రయోగాలు మరియు పరీక్షల ముఖ్యాంశాలు ఏమిటి?')" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-full text-slate-700 dark:text-slate-200 whitespace-nowrap hover:bg-slate-100">
+          🚀 ఇస్రో ప్రయోగాలు
+        </button>
+        <button onclick="askAiMentorPrompt('తెలంగాణ & ఏపీ తాజా సంక్షేమ పథకాల పరీక్షా ముఖ్యాంశాలు ఏమిటి?')" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-full text-slate-700 dark:text-slate-200 whitespace-nowrap hover:bg-slate-100">
+          🌾 సంక్షేమ పథకాలు
+        </button>
+        <button onclick="askAiMentorPrompt('ఆర్బీఐ తాజా ద్రవ్య పరపతి విధానం మరియు రెపో రేటు వివరాలు చెప్పండి')" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-full text-slate-700 dark:text-slate-200 whitespace-nowrap hover:bg-slate-100">
+          📈 ఆర్బీఐ పాలసీ
+        </button>
+        <button onclick="askAiMentorPrompt('భారత రాజ్యాంగంలో ప్రాథమిక హక్కులు మరియు తాజా ఆర్టికల్స్ ఏమిటి?')" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-full text-slate-700 dark:text-slate-200 whitespace-nowrap hover:bg-slate-100">
+          🏛️ రాజ్యాంగం
+        </button>
+      </div>
+
+      <!-- Chat Messages Container -->
+      <div id="aiChatMessages" class="flex-1 p-4 overflow-y-auto space-y-3.5">
+        <!-- Initial Welcome Message -->
+        <div class="chat-bubble-ai p-3.5 text-xs sm:text-sm max-w-[85%] leading-relaxed space-y-1.5">
+          <p class="font-bold text-blue-700 dark:text-blue-400">నమస్తే ఆస్పిరెంట్! 🎓</p>
+          <p>నేను మీ లక్ష్య AI స్టడీ మెంటార్. కరెంట్ అఫైర్స్, ప్రభుత్వ పథకాలు, సైన్స్-టెక్నాలజీ లేదా సిలబస్‌పై మీ సందేహాలను ఇక్కడ అడగండి.</p>
+        </div>
+      </div>
+
+      <!-- Chat Input Bar -->
+      <div class="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
+        <form id="aiMentorForm" onsubmit="handleAiMentorSubmit(event)" class="flex items-center gap-2">
+          <input 
+            type="text" 
+            id="aiMentorInput" 
+            placeholder="మీ సందేహాన్ని ఇక్కడ టైప్ చేయండి (ఉదా: ఇస్రో, బడ్జెట్)..." 
+            class="flex-1 text-xs sm:text-sm bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl font-bold transition flex items-center justify-center shrink-0">
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 4. APPSC / TSPSC SYLLABUS TRACKER MODAL ================= -->
+  <div id="syllabusModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200">
+      
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base">
+            📋
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">APPSC / TSPSC సిలబస్ ట్రాకర్ & చెక్‌లిస్ట్</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">కరెంట్ అఫైర్స్‌తో ముడిపడిన సిలబస్ ప్రిపరేషన్ ట్రాక్ చేయండి</p>
+          </div>
+        </div>
+        <button id="closeSyllabusBtn" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Overall Progress Bar -->
+      <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-4 space-y-1.5">
+        <div class="flex justify-between text-xs font-bold">
+          <span class="text-slate-700 dark:text-slate-300">మొత్తం సిలబస్ పూర్తి:</span>
+          <span class="text-emerald-600 font-extrabold" id="syllabusProgressPercent">0%</span>
+        </div>
+        <div class="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+          <div id="syllabusProgressBar" class="bg-emerald-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Syllabus Category Tabs -->
+      <div class="flex border-b border-slate-200 dark:border-slate-800 mb-3 space-x-2 overflow-x-auto text-xs font-bold">
+        <button onclick="switchSyllabusTab('appsc_g1')" class="syllabus-tab active px-3 py-2 border-b-2 border-emerald-600 text-emerald-600 whitespace-nowrap" data-stab="appsc_g1">
+          🏛️ APPSC గ్రూప్-1 & 2
+        </button>
+        <button onclick="switchSyllabusTab('tspsc_g1')" class="syllabus-tab px-3 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 whitespace-nowrap" data-stab="tspsc_g1">
+          🏛️ TSPSC గ్రూప్-1, 2 & 3
+        </button>
+        <button onclick="switchSyllabusTab('polity_eco')" class="syllabus-tab px-3 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 whitespace-nowrap" data-stab="polity_eco">
+          📈 పాలిటీ & ఎకానమీ
+        </button>
+        <button onclick="switchSyllabusTab('science_tech')" class="syllabus-tab px-3 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 whitespace-nowrap" data-stab="science_tech">
+          🚀 సైన్స్ & పర్యావరణం
+        </button>
+      </div>
+
+      <!-- Checklist Items Container -->
+      <div id="syllabusItemsList" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs sm:text-sm">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Footer Reset -->
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs mt-3">
+        <button onclick="resetSyllabusProgress()" class="text-rose-600 hover:text-rose-700 font-bold flex items-center gap-1">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          చెక్‌లిస్ట్ రీసెట్ చేయి
+        </button>
+        <button onclick="document.getElementById('syllabusModal').classList.add('hidden')" class="bg-slate-800 text-white font-bold px-4 py-1.5 rounded-lg">
+          పూర్తయింది
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl transform translate-y-20 opacity-0 transition duration-300 flex items-center space-x-2 z-50 text-sm">
+    <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMsg">అప్‌డేట్ పూర్తయింది!</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-5 text-center text-xs text-slate-500 no-print mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <p>© 2026 లక్ష్య కరెంట్ అఫైర్స్ | APPSC, TSPSC & UPSC అభ్యర్థుల కోసం రూపొందించబడింది.</p>
+      <div class="flex items-center space-x-4">
+        <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> సర్వర్ యాక్టివ్</span>
+        <span>ఆటో-అప్‌డేట్ ఎనేబుల్ అయింది</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- App Script -->
+  <script src="app.js?v=13"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+﻿services:
+  - type: web
+    name: lakshya-telugu-ca
+    env: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --chdir backend app:app --bind 0.0.0.0:
+    envVars:
+      - key: PYTHONIOENCODING
+        value: utf-8
+      - key: START_EMBEDDED_BOT
+        value: "true"
