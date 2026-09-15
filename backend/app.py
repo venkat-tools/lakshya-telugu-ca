@@ -804,6 +804,12 @@ def omr_appsc_all_view():
     exam_type = request.args.get("exam", "group2")
     return render_omr_appsc_all_html(exam_type)
 
+@app.route("/appsc_syllabus", methods=["GET"])
+@app.route("/syllabus", methods=["GET"])
+def appsc_syllabus_view():
+    from appsc_master_syllabus import render_appsc_syllabus_html
+    return render_appsc_syllabus_html()
+
 if __name__ == "__main__":
     print("==================================================================")
     print("🚀 తెలుగు పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ డ్యాష్‌బోర్డ్ ప్రారంభమైంది!")
