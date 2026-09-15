@@ -8,8 +8,11 @@ from flask import Flask, jsonify, request, send_from_directory, Response, render
 import os
 import sys
 import json
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from tts import generate_telugu_audio
+
+# India Standard Time (IST is UTC + 5:30)
+IST = timezone(timedelta(hours=5, minutes=30))
 
 # Ensure UTF-8 output on Windows console
 if sys.platform == "win32":
@@ -52,6 +55,27 @@ app.config['JSON_AS_ASCII'] = False  # Keep Telugu characters untranslated in JS
 # Ensure DB has tables and initial seed data
 init_db()
 populate_seed_data()
+
+# Startup check: ensure today's news (IST) is synced in DB
+def ensure_today_synced():
+    try:
+        import threading
+        def _sync_worker():
+            import time
+            time.sleep(2)
+            today_ist = datetime.now(IST).strftime("%Y-%m-%d")
+            dates = get_available_dates()
+            if today_ist not in dates:
+                print(f"🔄 [Startup Auto-Sync] నేటి ({today_ist}) వార్తలు డేటాబేస్‌లో లేవు, సింక్ చేస్తున్నాం...")
+                sync_daily_news(target_date=today_ist)
+                from quiz_generator import ensure_daily_quizzes
+                ensure_daily_quizzes(date=today_ist)
+                print(f"✅ [Startup Auto-Sync] నేటి ({today_ist}) వార్తలు మరియు క్విజ్ విజయవంతంగా సిద్ధమయ్యాయి.")
+        threading.Thread(target=_sync_worker, daemon=True).start()
+    except Exception as e:
+        print("Startup sync error:", e)
+
+ensure_today_synced()
 
 # Start background morning scheduler thread
 start_scheduler_thread()
@@ -124,7 +148,7 @@ def api_articles():
     # If no date specified, default to latest available date
     if not date:
         dates = get_available_dates()
-        date = dates[0] if dates else None
+        date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
 
     articles = get_articles(date=date, category=category, search_query=q)
     return jsonify({
@@ -166,9 +190,10 @@ def api_quiz():
     date = request.args.get("date")
     if not date:
         dates = get_available_dates()
-        date = dates[0] if dates else None
+        date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
 
-    quizzes = get_quiz_by_date(date=date)
+    from quiz_generator import ensure_daily_quizzes
+    quizzes = ensure_daily_quizzes(date=date)
     return jsonify({
         "success": True,
         "date": date,
@@ -181,7 +206,7 @@ def api_one_liners():
     date = request.args.get("date")
     if not date:
         dates = get_available_dates()
-        date = dates[0] if dates else None
+        date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
 
     one_liners = get_one_liners_by_date(date=date)
     return jsonify({
@@ -213,6 +238,10 @@ def api_sync():
     date = request.args.get("date")
     try:
         result = sync_daily_news(target_date=date)
+        from quiz_generator import ensure_daily_quizzes
+        target_date = date or result.get("date")
+        if target_date:
+            ensure_daily_quizzes(target_date)
         return jsonify({
             "success": True,
             "message": "వార్తలు విజయవంతంగా సింక్ చేయబడ్డాయి!",

@@ -7,19 +7,66 @@ and persists them into the database for tests, web UI, and Telegram polls.
 
 from db import get_connection, insert_quiz, get_quiz_by_date, get_articles
 
-def ensure_daily_quizzes(date="2026-09-12"):
-    """
-    Checks if quizzes exist for the given date.
-    If not, creates 5 high-standard, authentic exam MCQs based on today's articles.
-    """
-    existing = get_quiz_by_date(date)
-    if existing and len(existing) >= 5:
-        return existing
-
-    # Fresh questions crafted specifically for 2026-09-12 current affairs
-    today_questions = [
+CURATED_DAILY_QUIZZES = {
+    "2026-09-15": [
         {
-            "date": date,
+            "category": "సైన్స్ & టెక్నాలజీ / జాతీయం",
+            "question": "SEMICON India 2026 సదస్సు మరియు భారత సెమీకండక్టర్ మిషన్ (India Semiconductor Mission - ISM) ప్రధాన లక్ష్యం ఏమిటి?",
+            "option_a": "భారత్‌ను గ్లోబల్ చిప్ డిజైన్ మరియు సెమీకండక్టర్ తయారీ హబ్‌గా తీర్చిదిద్దడం మరియు దేశీయ సరఫరా గొలుసును బలోపేతం చేయడం.",
+            "option_b": "దేశంలో ఎలక్ట్రానిక్స్ మరియు మొబైల్ విడిభాగాల వినియోగాన్ని పూర్తిగా పరిమితం చేయడం.",
+            "option_c": "సెమీకండక్టర్ పరిశ్రమను కేవలం విదేశీ దిగుమతులపై మాత్రమే ఆధారపడేలా చేయడం.",
+            "option_d": "ప్రైవేట్ టెక్నాలజీ కంపెనీల కార్యకలాపాలన్నింటినీ నిలిపివేయడం.",
+            "correct_option": "A",
+            "explanation": "భారత ప్రభుత్వం ప్రతిష్టాత్మకంగా చేపట్టిన ISM ద్వారా డిజైన్ లింక్డ్ ఇన్సెంటివ్స్ (DLI), ఫ్యాబ్రికేషన్ యూనిట్లను ప్రోత్సహిస్తూ ప్రపంచ స్థాయి ఎలక్ట్రానిక్స్ మరియు చిప్ తయారీ కేంద్రంగా భారత్‌ను నిలుపుతోంది.",
+            "exam_tag": "UPSC Civil Services / APPSC & TSPSC Group 1 & 2 (Science & Tech)"
+        },
+        {
+            "category": "ప్రాంతీయం / తెలంగాణ పాలసీలు",
+            "question": "తెలంగాణ ప్రభుత్వం స్థానిక సంస్థల పాలనలో ట్రాన్స్‌జెండర్ల ప్రాతినిధ్యం (Transgender Co-option Members) పై తీసుకున్న చారిత్రాత్మక నిర్ణయం ముఖ్య ఉద్దేశ్యం ఏమిటి?",
+            "option_a": "సమాజంలో లింగ సమానత్వం, సామాజిక న్యాయం మరియు స్థానిక నిర్ణయాధికార ప్రక్రియలో ట్రాన్స్‌జెండర్లకు భాగస్వామ్యం కల్పించడం.",
+            "option_b": "కేవలం విదేశీ నిధుల సమీకరణ కోసం మాత్రమే తాత్కాలిక నియామకం చేపట్టడం.",
+            "option_c": "స్థానిక సంస్థల అధికారాలను రద్దు చేసి ప్రత్యేకాధికారులను నియమించడం.",
+            "option_d": "కేవలం 60 ఏళ్లు పైబడిన వారికి మాత్రమే పదవులు పరిమితం చేయడం.",
+            "correct_option": "A",
+            "explanation": "తెలంగాణ ప్రభుత్వం స్థానిక సంస్థలలో ట్రాన్స్‌జెండర్లకు కో-ఆప్షన్ సభ్యులుగా అవకాశం కల్పించడం ద్వారా దేశంలోనే ఆదర్శవంతమైన సామాజిక సాధికారత చర్యను చేపట్టింది.",
+            "exam_tag": "TSPSC Group 1, 2 & Panchayat Secretary (Telangana Governance)"
+        },
+        {
+            "category": "భారత రాజ్యాంగం & పాలిటీ",
+            "question": "భారత రాజ్యాంగంలోని ఏ ఆర్టికల్ ప్రకారం దేశవ్యాప్తంగా పౌరులందరికీ 'ఉమ్మడి పౌరస్మృతి' (Uniform Civil Code - UCC) ను అమలు చేయడానికి రాజ్యం కృషి చేయాలని పేర్కొనబడింది?",
+            "option_a": "ఆర్టికల్ 44 (ఆదేశిక సూత్రాలు - DPSP)",
+            "option_b": "ఆర్టికల్ 21 (జీవించే ప్రాథమిక హక్కు)",
+            "option_c": "ఆర్టికల్ 370 (తాత్కాలిక నిబంధనలు)",
+            "option_d": "ఆర్టికల్ 14 (చట్టం ముందు సమానత్వ హక్కు)",
+            "correct_option": "A",
+            "explanation": "భారత రాజ్యాంగం 4వ భాగంలోని ఆదేశిక సూత్రాలలో (DPSP) ఆర్టికల్ 44 ప్రకారం దేశవ్యాప్తంగా పౌరులందరికీ ఒకే విధమైన పౌరస్మృతి (UCC) అమలుకు రాజ్యం కృషి చేయాలని నిర్దేశిస్తుంది.",
+            "exam_tag": "APPSC & TSPSC Indian Polity / Group 1 & 2"
+        },
+        {
+            "category": "భౌగోళికం & వాతావరణం (AP & TS)",
+            "question": "బంగాళాఖాతంలో ఏర్పడే అల్పపీడనాలు (Low Pressure Areas) మరియు వాయుగుండాల వల్ల ఆంధ్రప్రదేశ్ తీరప్రాంతం మరియు తెలంగాణ జిల్లాలపై చూపే ప్రధాన ప్రభావం ఏమిటి?",
+            "option_a": "తీర ప్రాంతాల్లో ఈదురుగాలులతో కూడిన విస్తారమైన వర్షాలు మరియు రిజర్వాయర్లలోకి భారీగా నీటి ప్రవాహం.",
+            "option_b": "తీర ప్రాంతాలలో అధిక ఉష్ణోగ్రతలు పెరిగి తీవ్రమైన కరువు పరిస్థితులు రావడం.",
+            "option_c": "సముద్రంలో అలలు మరియు నీటి ప్రవాహం పూర్తిగా నిలిచిపోవడం.",
+            "option_d": "వాతావరణంలో ఆక్సిజన్ పరిమాణం అకస్మాత్తుగా తగ్గిపోవడం.",
+            "correct_option": "A",
+            "explanation": "బంగాళాఖాతంలో అల్పపీడనాలు ఏర్పడినప్పుడు ఆంధ్రప్రదేశ్ తీరప్రాంతం, రాయలసీమ మరియు తెలంగాణ జిల్లాల్లో భారీ వర్షాలు కురుస్తాయి. ఇది వ్యవసాయానికి, జలాశయాలకు కీలకమైన వర్షపాతాన్ని అందిస్తుంది.",
+            "exam_tag": "AP & TS Geography / Disaster Management"
+        },
+        {
+            "category": "క్రీడలు & రికార్డులు",
+            "question": "అంతర్జాతీయ టీ20 (T20I) క్రికెట్ చరిత్రలో వేగవంతమైన హాఫ్ సెంచరీ (Fastest Fifty) రికార్డులకు సంబంధించి క్రింది వాటిలో సరైనది ఏది?",
+            "option_a": "యువరాజ్ సింగ్ (ఇంగ్లాండ్‌పై 12 బంతుల్లో) మరియు దీపేంద్ర సింగ్ ఐరీ (మంగోలియాపై 9 బంతుల్లో) అత్యంత వేగవంతమైన అర్ధశతకాలు నమోదు చేశారు.",
+            "option_b": "టీ20లలో ఇప్పటివరకు ఏ బ్యాట్స్‌మెన్ కూడా 25 బంతుల కంటే తక్కువలో హాఫ్ సెంచరీ చేయలేదు.",
+            "option_c": "అంతర్జాతీయ టీ20లలో హాఫ్ సెంచరీల రికార్డులను ఐసీసీ పరిగణనలోకి తీసుకోదు.",
+            "option_d": "కేవలం టెస్ట్ క్రికెట్ లో మాత్రమే వేగవంతమైన హాఫ్ సెంచరీల రికార్డు నమోదు అవుతుంది.",
+            "correct_option": "A",
+            "explanation": "2007 టీ20 వరల్డ్ కప్‌లో యువరాజ్ సింగ్ 12 బంతుల్లో హాఫ్ సెంచరీ చేయగా, నేపాల్‌కు చెందిన దీపేంద్ర సింగ్ ఐరీ ఏషియన్ గేమ్స్‌లో మంగోలియాపై కేవలం 9 బంతుల్లోనే వేగవంతమైన హాఫ్ సెంచరీ సాధించి ప్రపంచ రికార్డు నెలకొల్పారు.",
+            "exam_tag": "Sports Current Affairs / All Competitive Exams"
+        }
+    ],
+    "2026-09-12": [
+        {
             "category": "జాతీయం / అంతర్జాతీయం",
             "question": "2026 లో భారత్‌లో జరగనున్న బ్రిక్స్ (BRICS) సదస్సు మరియు అంతర్జాతీయ దౌత్య సంబంధాలకు సంబంధించి క్రింది వాటిలో సరైన ప్రకటన ఏది?",
             "option_a": "ఏడేళ్ల సుదీర్ఘ విరామం తర్వాత చైనా అధ్యక్షుడు జీ జిన్ పింగ్ భారత్‌లో పర్యటించనున్నారు.",
@@ -31,7 +78,6 @@ def ensure_daily_quizzes(date="2026-09-12"):
             "exam_tag": "UPSC / APPSC / TSPSC Group 1 & 2"
         },
         {
-            "date": date,
             "category": "సంక్షేమ పథకాలు (AP & TS)",
             "question": "తెలంగాణ మరియు ఆంధ్రప్రదేశ్ రాష్ట్రాలలో అమలవుతున్న సంక్షేమ పెన్షన్ల వ్యవస్థ (చేయూత / ఆసరా) ప్రధాన ఉద్దేశ్యం ఏమిటి?",
             "option_a": "కేవలం ప్రభుత్వ ఉద్యోగులకు మాత్రమే అదనపు భత్యాలు ఇవ్వడం.",
@@ -43,7 +89,6 @@ def ensure_daily_quizzes(date="2026-09-12"):
             "exam_tag": "APPSC / TSPSC Group 2, 3 & డిప్యూటీ తహశీల్దార్"
         },
         {
-            "date": date,
             "category": "సైన్స్ & టెక్నాలజీ",
             "question": "ఆర్టిఫిషియల్ ఇంటెలిజెన్స్ (AI) మరియు ఫ్రాంటియర్ మోడల్స్ అభివృద్ధిలో అంతర్జాతీయ పరిశోధకులు ప్రధానంగా హెచ్చరిస్తున్న 'AI సేఫ్టీ రిస్క్' దేనికి సంబంధించినది?",
             "option_a": "మానవ పర్యవేక్షణ లేని స్వయంప్రతిపత్తి (Autonomous) వ్యవస్థల వల్ల సైబర్ భద్రత మరియు ఉనికి ముప్పు.",
@@ -55,7 +100,6 @@ def ensure_daily_quizzes(date="2026-09-12"):
             "exam_tag": "UPSC Civil Services / TSPSC Grp-1 Science & Tech"
         },
         {
-            "date": date,
             "category": "వాతావరణం & భౌగోళిక అంశాలు",
             "question": "బంగాళాఖాతంలో ఏర్పడే అల్పపీడనాలు (Low Pressure Systems) మరియు వాయుగుండాల ప్రభావం వల్ల ఆంధ్రప్రదేశ్, తెలంగాణలపై చూపే ప్రభావం ఏమిటి?",
             "option_a": "తీర ప్రాంతాల్లో ఈదురు గాలులతో కూడిన భారీ వర్షాలు మరియు వ్యవసాయానికి వర్షపాతం.",
@@ -67,7 +111,6 @@ def ensure_daily_quizzes(date="2026-09-12"):
             "exam_tag": "AP Geography / Disaster Management"
         },
         {
-            "date": date,
             "category": "క్రీడలు & అంతర్జాతీయ అంశాలు",
             "question": "అంతర్జాతీయ క్రికెట్ కౌన్సిల్ (ICC) విడుదల చేసిన తాజా షెడ్యూల్ మరియు పోటీలలో భారత జట్టు ప్రాధాన్యత అంశం ఏది?",
             "option_a": "వరల్డ్ టెస్ట్ ఛాంపియన్‌షిప్ (WTC) ఫైనల్ అర్హత మరియు రాబోయే ద్వైపాక్షిక సిరీస్‌లు.",
@@ -79,10 +122,47 @@ def ensure_daily_quizzes(date="2026-09-12"):
             "exam_tag": "General Studies / Sports Current Affairs"
         }
     ]
+}
 
-    for q in today_questions:
+def ensure_daily_quizzes(date="2026-09-15"):
+    """
+    Checks if quizzes exist for the given date.
+    If not, creates 5 high-standard, authentic exam MCQs based on today's articles.
+    """
+    existing = get_quiz_by_date(date)
+    if existing and len(existing) >= 5:
+        return existing
+
+    # Check curated list for specific date, or fallback to today's news
+    if date in CURATED_DAILY_QUIZZES:
+        questions_to_add = CURATED_DAILY_QUIZZES[date]
+    else:
+        # Generate questions from available articles of that date
+        articles = get_articles(date=date)
+        questions_to_add = []
+        for idx, art in enumerate(articles[:5]):
+            title = art.get("title", "")
+            cat = art.get("category", "national")
+            exam_tag = art.get("exam_relevance", "APPSC / TSPSC Group 1 & 2")
+            questions_to_add.append({
+                "category": cat,
+                "question": f"నేటి వార్తాంశం '{title}'కు సంబంధించి పోటీ పరీక్షల కోణంలో సరైన ప్రకటన ఏది?",
+                "option_a": f"{art.get('summary', '')[:90]}...",
+                "option_b": "ఈ అంశం కేవలం విదేశీ వాణిజ్యానికి మాత్రమే సంబంధించినది.",
+                "option_c": "ఈ విషయమై కేంద్ర లేదా రాష్ట్ర ప్రభుత్వాల నుండి ఎటువంటి నిర్ణయం తీసుకోబడలేదు.",
+                "option_d": "పైవేవీ కావు.",
+                "correct_option": "A",
+                "explanation": f"{title} అనే అంశం ప్రస్తుత సమకాలీన పరిణామాలలో చాలా ముఖ్యమైనది. {art.get('summary', '')[:120]}...",
+                "exam_tag": exam_tag
+            })
+        
+        # If not enough articles, use 2026-09-15 template questions
+        if len(questions_to_add) < 5:
+            questions_to_add.extend(CURATED_DAILY_QUIZZES["2026-09-15"][:5 - len(questions_to_add)])
+
+    for q in questions_to_add:
         insert_quiz(
-            q["date"],
+            date,
             q["category"],
             q["question"],
             q["option_a"],
@@ -91,7 +171,7 @@ def ensure_daily_quizzes(date="2026-09-12"):
             q["option_d"],
             q["correct_option"],
             q["explanation"],
-            q["exam_tag"]
+            q.get("exam_tag", "APPSC / TSPSC Group 1 & 2")
         )
 
     print(f"✅ {date} తేదీకి 5 సరికొత్త పరీక్షా క్విజ్ ప్రశ్నలు డేటాబేస్‌లో విజయవంతంగా చేర్చబడ్డాయి!")

@@ -12,8 +12,10 @@ import requests
 import json
 import os
 import html
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from db import get_articles, get_quiz_by_date, get_one_liners_by_date, get_available_dates
+
+IST = timezone(timedelta(hours=5, minutes=30))
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "telegram_config.json")
 
@@ -124,7 +126,7 @@ def send_daily_epaper_pdf(date=None, token=None, chat_id=None):
     from pdf_generator import generate_epaper_pdf
     if not date:
         dates = get_available_dates()
-        date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
+        date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
 
     pdf_path = generate_epaper_pdf(date=date)
     if not pdf_path:
@@ -138,7 +140,7 @@ def send_daily_epaper_pdf(date=None, token=None, chat_id=None):
         f"• ఒక వరుస ముఖ్యాంశాలు (Quick Revision One-Liners)\n"
         f"• వివరణలతో కూడిన 5 ప్రాక్టీస్ MCQs ప్రశ్నలు\n\n"
         f"🎯 <i>APPSC • TSPSC • UPSC • SSC విజేతల ప్రత్యేక ఎడిషన్</i>\n"
-        f"📱 మొబైల్ యాప్: https://tinyurl.com/lakshya-telugu-2026"
+        f"🌐 <b>లైవ్ యాప్:</b> https://lakshya-telugu-ca.onrender.com"
     )
     return send_telegram_document(
         file_path=pdf_path,
@@ -170,7 +172,7 @@ def broadcast_daily_digest(date=None, token=None, chat_id=None):
     """
     if not date:
         dates = get_available_dates()
-        date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
+        date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
 
     from quiz_generator import ensure_daily_quizzes
 
@@ -213,8 +215,8 @@ def broadcast_daily_digest(date=None, token=None, chat_id=None):
             s_point = html.escape(ol.get("point", ""))
             msg += f"• {s_point}\n"
 
-    msg += f"\n📱 <b>మొబైల్ యాప్ లింక్ (4G/5G):</b> https://tinyurl.com/lakshya-telugu-2026\n"
-    msg += f"🌐 <i>డెస్క్‌టాప్ డ్యాష్‌బోర్డ్: http://localhost:5000</i>"
+    msg += f"\n🌐 <b>లైవ్ వెబ్ యాప్ (24/7):</b> https://lakshya-telugu-ca.onrender.com\n"
+    msg += f"📱 <b>మొబైల్ యాక్సెస్:</b> https://tinyurl.com/lakshya-telugu-2026"
 
     # Send Digest Message
     send_res = send_telegram_message(msg, token=token, chat_id=chat_id)
