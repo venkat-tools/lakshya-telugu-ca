@@ -19,11 +19,53 @@ def render_appsc_syllabus_html():
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>APPSC గ్రూప్ 1 & 2 సమగ్ర సిలబస్, స్టడీ మెటీరియల్స్ & మాస్టర్ గైడ్ | లక్ష్య CA</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com">
+    function checkPyq(btn, isCorrect, explanation) {
+      const parent = btn.parentElement;
+      const buttons = parent.querySelectorAll('button');
+      buttons.forEach(b => {
+        b.disabled = true;
+        b.classList.remove('hover:bg-slate-700');
+      });
+      const expBox = parent.parentElement.querySelector('.pyq-exp');
+      if (isCorrect) {
+        btn.classList.remove('bg-slate-900');
+        btn.classList.add('bg-emerald-600', 'text-white', 'font-bold');
+        expBox.innerHTML = '<span class="text-emerald-400 font-bold">✅ సరైన సమాధానం!</span><br>' + explanation;
+      } else {
+        btn.classList.remove('bg-slate-900');
+        btn.classList.add('bg-red-600', 'text-white', 'font-bold');
+        expBox.innerHTML = '<span class="text-red-400 font-bold">❌ తప్పు సమాధానం!</span><br>' + explanation;
+      }
+      expBox.classList.remove('hidden');
+    }
+
+  </script>
   <link rel="icon" type="image/jpeg" href="/lakshya_logo.jpg">
   <link rel="apple-touch-icon" href="/lakshya_logo.jpg">
   <link rel="stylesheet" href="/styles.css?v=14">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@latest">
+    function checkPyq(btn, isCorrect, explanation) {
+      const parent = btn.parentElement;
+      const buttons = parent.querySelectorAll('button');
+      buttons.forEach(b => {
+        b.disabled = true;
+        b.classList.remove('hover:bg-slate-700');
+      });
+      const expBox = parent.parentElement.querySelector('.pyq-exp');
+      if (isCorrect) {
+        btn.classList.remove('bg-slate-900');
+        btn.classList.add('bg-emerald-600', 'text-white', 'font-bold');
+        expBox.innerHTML = '<span class="text-emerald-400 font-bold">✅ సరైన సమాధానం!</span><br>' + explanation;
+      } else {
+        btn.classList.remove('bg-slate-900');
+        btn.classList.add('bg-red-600', 'text-white', 'font-bold');
+        expBox.innerHTML = '<span class="text-red-400 font-bold">❌ తప్పు సమాధానం!</span><br>' + explanation;
+      }
+      expBox.classList.remove('hidden');
+    }
+
+  </script>
   <style>
     @media print {
       .no-print { display: none !important; }
@@ -107,6 +149,12 @@ def render_appsc_syllabus_html():
       </button>
       <button onclick="switchTab('science')" id="tab-science" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
         <span>🔬 సైన్స్, పర్యావరణం & విపత్తులు</span>
+      </button>
+      <button onclick="switchTab('disaster')" id="tab-disaster" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
+        <span>🚨 విపత్తు నిర్వహణ (RC రెడ్డి నోట్స్)</span>
+      </button>
+      <button onclick="switchTab('pyqs')" id="tab-pyqs" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
+        <span>📝 115+ APPSC ప్రీవియస్ Qs (MCQs)</span>
       </button>
       <button onclick="switchTab('mains')" id="tab-mains" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
         <span>✍️ మెయిన్స్ & ఎథిక్స్ గైడ్</span>
@@ -724,6 +772,351 @@ def render_appsc_syllabus_html():
       </div>
     </section>
 
+  
+    <!-- ==================== TAB: DISASTER MANAGEMENT (RC REDDY NOTES) ==================== -->
+    <section id="content-disaster" class="tab-content space-y-6 hidden">
+      <div class="bg-gradient-to-r from-red-950 via-slate-800 to-slate-900 border border-red-800/40 p-6 rounded-2xl shadow-md">
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider bg-red-900/60 text-red-300 px-3 py-1 rounded-full border border-red-700/50">RC రెడ్డి IAS స్టడీ సర్కిల్ • రామన్ రాజు క్లాస్ నోట్స్</span>
+          <span class="text-xs text-slate-400">APPSC గ్రూప్ 1, 2, 3, AEE ప్రత్యేకం</span>
+        </div>
+        <h2 class="text-2xl font-black text-white">విపత్తు నిర్వహణ (Disaster Management) సమగ్ర అధ్యయనం</h2>
+        <p class="text-sm text-slate-300 mt-1">నిర్వచనాలు, వైపరీత్యం-దుర్బలత్వం-రిస్క్ సూత్రం, 2005 జాతీయ చట్టం, NDMA, SDMA, DDMA, NDRF 10వ బెటాలియన్, భూకంపాలు, సునామీలు, తుఫానుల వర్గీకరణ & అంతర్జాతీయ ఒప్పందాలు.</p>
+      </div>
+
+      <!-- Core Concepts & HPC 1999 Committee -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-red-400 flex items-center gap-2">
+              <span>📌 మౌలిక భావనలు & నిర్వచనాలు</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>పదోత్పత్తి (Etymology):</b> గ్రీకు/లాటిన్ పదం <i>Dus + Aster</i> లేదా ఫ్రెంచ్ పదం <i>Des + Aster</i> (అనగా <b>"చెడు నక్షత్రం / దుష్ట గ్రహం"</b>).</li>
+            <li>• <b>విపత్తు నిర్వహణ చట్టం 2005 నిర్వచనం:</b> ప్రకృతి లేదా మానవ తప్పిదాల వల్ల సంభవించి, సమాజం తనంతట తాను కోలుకోలేని స్థాయిలో అపార ధన, ప్రాణ, పర్యావరణ నష్టం కలిగించే ఉత్పాతాన్ని 'విపత్తు' అంటారు.</li>
+            <li>• <b>ఐక్యరాజ్యసమితి (UNO) నిర్వచనం:</b> సమాజపు సాధారణ జీవన విధానాన్ని మరియు వ్యవస్థను తీవ్రంగా అస్తవ్యస్తం చేసే వినాశనం.</li>
+            <li>• <b>ఆపద (Risk) గణిత సూత్రం:</b>
+              <div class="bg-slate-900/90 p-2.5 rounded-lg my-1.5 border border-slate-700 font-mono text-amber-300 text-center text-xs">
+                Risk = (Hazard × Vulnerability) / Capacity<br>
+                ఆపద = (వైపరీత్యం × దుర్బలత్వం) / సామర్థ్యం
+              </div>
+            </li>
+            <li>• <b>వైపరీత్యం (Hazard):</b> ప్రమాదాన్ని లేదా నష్టాన్ని కలిగించే సహజ లేదా మానవ ప్రేరిత సంఘటన (ఉదా: తుఫాను, భూకంపం).</li>
+            <li>• <b>దుర్బలత్వం (Vulnerability):</b> నష్టానికి గురయ్యే బలహీన పరిస్థితుల సముదాయం (పేదరికం, నాసిరకం భవనాలు, అవగాహనా రాహిత్యం).</li>
+            <li>• <b>సామర్థ్యం (Capacity):</b> విపత్తు ప్రభావాన్ని తట్టుకుని నిలబడే వనరులు, సాంకేతికత మరియు సమాజ బలం.</li>
+          </ul>
+        </div>
+
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-red-400 flex items-center gap-2">
+              <span>🏛️ జె.సి. పంత్ ఉన్నతాధికార కమిటీ (HPC 1999) & వర్గీకరణ</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <p class="text-xs text-slate-400 mb-2">1999లో వ్యవసాయ మంత్రిత్వ శాఖ నియమించిన <b>J.C. పంత్ ఉన్నతాధికార కమిటీ (HPC)</b> దేశంలోని <b>31 రకాల విపత్తులను 5 ఉప-సమూహాలుగా</b> వర్గీకరించింది:</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 leading-relaxed">
+            <li>1️⃣ <b>నీరు & వాతావరణ విపత్తులు:</b> తుఫానులు, వరదలు, కరువులు, మేఘ విస్ఫోటనాలు (Cloud bursts), వడగండ్లు, హిమపాతాలు, సముద్ర కోత.</li>
+            <li>2️⃣ <b>భౌగోళిక విపత్తులు:</b> భూకంపాలు, సునామీలు, భూపాతాలు (Landslides), అగ్నిపర్వత విస్ఫోటనాలు, డ్యామ్‌లు తెగిపోవడం, గనులలో ప్రమాదాలు.</li>
+            <li>3️⃣ <b>రసాయన & పారిశ్రామిక విపత్తులు:</b> విషవాయువు లీకేజీ (ఉదా: భోపాల్ 1984), అగ్నిప్రమాదాలు, చమురు చిందటం.</li>
+            <li>4️⃣ <b>జీవసంబంధ విపత్తులు:</b> అంటువ్యాధులు, ప్లేగు, కలరా, జీవాయుధాల దాడి (Anthrax/Smallpox), మిడుతల దండు దాడులు.</li>
+            <li>5️⃣ <b>మానవ ప్రేరిత ప్రమాదాలు:</b> రవాణా/రైలు ప్రమాదాలు, తొక్కిసలాటలు (Stampedes), ఉగ్రవాద దాడులు, అణు ప్రమాదాలు.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Institutional Setup & 2005 Act -->
+      <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="text-base font-bold text-amber-400 flex items-center gap-2">
+            <span>⚖️ విపత్తు నిర్వహణ చట్టం 2005 & 3-అంచెల సంస్థాగత నిర్మాణం</span>
+          </h3>
+          <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+            <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+            <span>చదివాను</span>
+          </label>
+        </div>
+        <p class="text-xs text-slate-300 mb-4 leading-relaxed">2004 హిందూ మహాసముద్ర సునామీ అనంతరం, భారత పార్లమెంట్ <b>డిసెంబర్ 23, 2005</b>న విపత్తు నిర్వహణ చట్టాన్ని ఆమోదించింది. ఇది దేశంలో సహాయ వితరణ (Relief-centric) విధానం నుండి ముందస్తు నివారణ & ఉపశమన (Proactive Mitigation) విధానానికి దారితీసింది.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+            <h4 class="font-bold text-blue-400 mb-2">1. జాతీయ స్థాయి (NDMA)</h4>
+            <ul class="text-slate-300 space-y-1.5">
+              <li>• <b>ఛైర్మన్:</b> ప్రధానమంత్రి (ఎక్స్-అఫీషియో)</li>
+              <li>• <b>సభ్యులు:</b> గరిష్టంగా 9 మంది సభ్యులు (పీఎం నామినేట్ చేస్తారు)</li>
+              <li>• <b>వైస్ ఛైర్మన్:</b> కేంద్ర కేబినెట్ మంత్రి హోదా</li>
+              <li>• <b>నోడల్ మంత్రిత్వ శాఖ:</b> కేంద్ర హోం మంత్రిత్వ శాఖ</li>
+              <li>• <b>కార్యాలయం:</b> న్యూఢిల్లీ</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+            <h4 class="font-bold text-emerald-400 mb-2">2. రాష్ట్ర స్థాయి (SDMA)</h4>
+            <ul class="text-slate-300 space-y-1.5">
+              <li>• <b>ఛైర్మన్:</b> ముఖ్యమంత్రి (ఎక్స్-అఫీషియో)</li>
+              <li>• <b>సభ్యులు:</b> గరిష్టంగా 9 మంది సభ్యులు</li>
+              <li>• <b>వైస్ ఛైర్మన్:</b> సీఎం నామినేట్ చేసిన సభ్యుడు</li>
+              <li>• <b>రాష్ట్ర కార్యనిర్వాహక కమిటీ (SEC):</b> రాష్ట్ర ప్రభుత్వ ప్రధాన కార్యదర్శి (Chief Secretary) అధ్యక్షత</li>
+              <li>• <b>ఏపీ నోడల్ విభాగం:</b> రెవెన్యూ & డిజాస్టర్ మేనేజ్మెంట్</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+            <h4 class="font-bold text-purple-400 mb-2">3. జిల్లా స్థాయి (DDMA)</h4>
+            <ul class="text-slate-300 space-y-1.5">
+              <li>• <b>ఛైర్మన్:</b> జిల్లా కలెక్టర్ / డిస్ట్రిక్ట్ మేజిస్ట్రేట్</li>
+              <li>• <b>కో-ఛైర్మన్:</b> జిల్లా పరిషత్ ఛైర్మన్ (Zilla Parishad)</li>
+              <li>• <b>సభ్యులు:</b> ఎస్పీ, డీఎంహెచ్ఓ, ఈఈ ఇరిగేషన్ మరియు చీఫ్ ఎగ్జిక్యూటివ్ ఆఫీసర్ (CEO)</li>
+              <li>• జిల్లాలోని విపత్తు సహాయక చర్యల ప్రత్యక్ష అమలు అధికారం DDMA కి ఉంటుంది.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-slate-700/60 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
+          <div>
+            <span class="font-bold text-amber-300">🎖️ NDRF (జాతీయ విపత్తు ప్రతిస్పందన దళం):</span> సెక్షన్ 44 ప్రకారం CRPF, CISF, BSF, ITBP నుండి ఏర్పాటైన సుశిక్షిత దళం. మొదట 10 బెటాలియన్లు కాగా, ప్రస్తుతం 16 బెటాలియన్లు ఉన్నాయి. ఆంధ్రప్రదేశ్‌కు కేటాయించబడిన బెటాలియన్: <b>10వ బెటాలియన్ (మంగళగిరి / కొండపల్లి, గుంటూరు-కృష్ణా)</b>.
+          </div>
+          <div>
+            <span class="font-bold text-amber-300">🏢 NIDM (నేషనల్ ఇన్‌స్టిట్యూట్ ఆఫ్ డిజాస్టర్ మేనేజ్మెంట్):</span> న్యూఢిల్లీలో ప్రధాన కేంద్రం, విపత్తు నిర్వహణపై అధికారులు, రెస్క్యూ టీంలకు శిక్షణ, డాక్యుమెంటేషన్ మరియు విధాన పరిశోధన అందిస్తుంది.
+          </div>
+        </div>
+      </div>
+
+      <!-- Natural Disasters Deep-Dive -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Earthquakes & Tsunamis -->
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-red-300 flex items-center gap-2">
+              <span>🌋 భూకంపాలు & సునామీలు</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>భూకంప నాభి (Hypocenter/Focus):</b> భూ అంతర్భాగంలో భూకంప తరంగాలు జనించే కేంద్ర బిందువు.</li>
+            <li>• <b>భూకంప అధికేంద్రం (Epicenter):</b> భూ ఉపరితలంపై నాభికి సరిగ్గా నిట్టనిలువుగా ఉండే ప్రాంతం (ఇక్కడ నష్టం గరిష్టం).</li>
+            <li>• <b>తరంగాలు:</b>
+              <br>1. <b>P-తరంగాలు (ప్రాథమిక):</b> అనుదైర్ఘ్య (ధ్వని వంటివి), వేగం 6-13 km/s, ఘన, ద్రవ, వాయువుల్లో ప్రయాణిస్తాయి.
+              <br>2. <b>S-తరంగాలు (ద్వితీయ):</b> తిర్యక్ (కాంతి వంటివి), వేగం 4-7 km/s, ఘన పదార్థాల్లో మాత్రమే ప్రయాణిస్తాయి.
+              <br>3. <b>L-తరంగాలు (ఉపరితల / లవ్ / రేలే):</b> భూ ఉపరితలంపై ప్రయాణించి అత్యధిక విధ్వంసాన్ని సృష్టిస్తాయి.
+            </li>
+            <li>• <b>కొలిచే సాధనాలు:</b>
+              <br>• <b>రిక్టర్ స్కేల్ (1935):</b> పరిమాణం (Magnitude - విడుదలైన శక్తి) కొలుస్తుంది. లాగరిథమిక్ స్కేలు (0-9).
+              <br>• <b>మెర్కల్లి స్కేల్ (1902):</b> తీవ్రత (Intensity - జరిగిన నష్టం) ఆధారంగా 1 నుండి 12 రోమన్ సంఖ్యల్లో కొలుస్తారు.
+            </li>
+            <li>• <b>భారత సిస్మిక్ జోన్లు:</b> బ్యూరో ఆఫ్ ఇండియన్ స్టాండర్డ్స్ (BIS) ప్రకారం 4 జోన్లు ఉన్నాయి (Zone II, III, IV, V). దేశంలో దాదాపు <b>59% భూభాగం</b> భూకంప ప్రమాద జోన్లలో ఉంది. జోన్ V అత్యంత ప్రమాదకరమైనది (హిమాలయాలు, ఈశాన్య రాష్ట్రాలు, కచ్).</li>
+            <li>• <b>సునామీ (Tsunami):</b> జపనీస్ పదం (Tsu = రేవు/తీరం, Nami = అల). <b>26 డిసెంబర్ 2004</b> సుమత్రా భూకంపం (9.1 M) వల్ల వచ్చిన సునామీతో భారత్‌లో 10,000+ మంది ప్రాణాలు కోల్పోయారు.</li>
+            <li>• <b>ITEWC:</b> ఇండియన్ సునామీ ఎర్లీ వార్నింగ్ సెంటర్ <b>INCOIS (హైదరాబాద్)</b> లో 2007లో ఏర్పాటయింది.</li>
+          </ul>
+        </div>
+
+        <!-- Cyclones, Floods & Droughts -->
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-blue-300 flex items-center gap-2">
+              <span>🌀 తుఫానులు, వరదలు & కరువు</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>భారత వాతావరణ శాఖ (IMD) తుఫానుల వర్గీకరణ:</b>
+              <div class="overflow-x-auto my-1.5">
+                <table class="w-full text-[11px] text-left border border-slate-700 rounded">
+                  <tr class="bg-slate-900 text-amber-400 font-bold"><th class="p-1">దశ</th><th class="p-1">గాలి వేగం (kmph)</th></tr>
+                  <tr class="border-b border-slate-700"><td class="p-1">అల్పపీడనం (Low Pressure)</td><td class="p-1">&lt; 31</td></tr>
+                  <tr class="border-b border-slate-700"><td class="p-1">వాయుగుండం (Depression)</td><td class="p-1">31 - 49</td></tr>
+                  <tr class="border-b border-slate-700"><td class="p-1">తీవ్ర వాయుగుండం (Deep Depression)</td><td class="p-1">49 - 61</td></tr>
+                  <tr class="border-b border-slate-700"><td class="p-1">సైక్లోనిక్ స్టార్మ్ (తుఫాను)</td><td class="p-1">62 - 88</td></tr>
+                  <tr class="border-b border-slate-700"><td class="p-1">తీవ్ర తుఫాను (Severe Cyclone)</td><td class="p-1">89 - 117</td></tr>
+                  <tr class="border-b border-slate-700"><td class="p-1">అతి తీవ్ర తుఫాను (Very Severe)</td><td class="p-1">118 - 221</td></tr>
+                  <tr class="bg-red-950/60 text-red-300 font-bold"><td class="p-1">సూపర్ సైక్లోన్ (Super Cyclone)</td><td class="p-1">≥ 222 (60 m/s)</td></tr>
+                </table>
+              </div>
+            </li>
+            <li>• <b>దివిసీమ తుఫాను:</b> <b>నవంబర్ 19, 1977</b>న కృష్ణా జిల్లా దివిసీమను తాకి 10,000 మందికి పైగా మరణానికి కారణమైంది.</li>
+            <li>• <b>వరదలు:</b> దేశంలో 40 మిలియన్ హెక్టార్లు (12.5% భూభాగం) వరద ముప్పులో ఉంది. బ్రహ్మపుత్ర, గంగా నదీ పరివాహకాలు అత్యధిక ముప్పు ప్రాంతాలు.</li>
+            <li>• <b>కరువు (Drought):</b> IMD ప్రకారం సాధారణ వర్షపాతం కన్నా 26-50% లోటు ఉంటే మధ్యస్థ కరువు, 50% పైగా లోటు ఉంటే తీవ్ర కరువు. దేశ సాగు విస్తీర్ణంలో దాదాపు <b>68% ప్రాంతం</b> ఏదో ఒక స్థాయిలో కరువుకు లోనవుతుంది.</li>
+            <li>• <b>పథకాలు:</b> DPAP (Drought Prone Area Programme - 1973), DDP (Desert Development Programme - 1977).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Man-made Disasters & Climate Change Missions -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-amber-300 flex items-center gap-2">
+              <span>⚠️ మానవ ప్రేరిత & సాంకేతిక విపత్తులు</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>భోపాల్ గ్యాస్ విషాదం (డిసెంబర్ 2-3, 1984):</b> మధ్యప్రదేశ్‌లోని యూనియన్ కార్బైడ్ ఫ్యాక్టరీ నుండి విడుదలైన <b>మిథైల్ ఐసోసైనైట్ (MIC - C₂H₃NO)</b> వాయువు వల్ల 3,000+ మంది తక్షణమే, వేలాది మంది తదనంతరం మరణించారు.</li>
+            <li>• <b>అణు ప్రమాదాలు:</b> చెర్నోబిల్ (ఉక్రెయిన్, 1986 - INES లెవెల్ 7), ఫుకుషిమా దైచీ (జపాన్, మార్చి 11, 2011 - INES లెవెల్ 7), త్రీ మైల్ ఐలాండ్ (USA, 1979).</li>
+            <li>• <b>జీవాయుధాలు (Biological Warfare - "పేదవారి అణ్వాయుధం"):</b> ఆంత్రాక్స్ (Bacillus anthracis), మశూచి (Smallpox), బొటులిజమ్ విషం.</li>
+            <li>• <b>రసాయన ఆయుధాలు:</b> మస్టర్డ్ గ్యాస్, ఫాస్జీన్, సారిన్ గ్యాస్ (టోక్యో సబ్‌వే దాడి 1995), ఏజెంట్ ఆరెంజ్.</li>
+            <li>• <b>ఢిల్లీ మాయాపురి రేడియేషన్ సంఘటన (2010):</b> కోబాల్ట్-60 (Co-60) స్క్రాప్ నిర్లక్ష్యం వల్ల రేడియేషన్ వెలువడింది.</li>
+            <li>• <b>అగ్ని ప్రమాదాలు & తొక్కిసలాటలు:</b> ఉపహార్ సినిమా హాల్ (ఢిల్లీ 1997 - 59 మృతి), కుంభకోణం స్కూల్ (2004 - 94 మంది పిల్లలు), మంధర్‌దేవి ఆలయం (మహారాష్ట్ర 2005 - 265 మంది మృతి).</li>
+          </ul>
+        </div>
+
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-emerald-300 flex items-center gap-2">
+              <span>🌐 అంతర్జాతీయ ఒడంబడికలు & NAPCC 8 మిషన్లు</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>యోకోహామా వ్యూహం (Yokohama Strategy 1994):</b> సహజ విపత్తుల నివారణ, ఉపశమనం కోసం జపాన్‌లో ఆమోదించబడిన తొలి కార్యాచరణ ప్రణాళిక.</li>
+            <li>• <b>హ్యోగో ఫ్రేమ్‌వర్క్ (Hyogo Framework for Action 2005-2015):</b> విపత్తులను తట్టుకునే దేశాలు, సమాజాల నిర్మాణం కొరకు 168 దేశాలు ఆమోదించిన విధానం.</li>
+            <li>• <b>సెండాయ్ ఫ్రేమ్‌వర్క్ (Sendai Framework 2015-2030):</b> 4 ప్రాధాన్యతా రంగాలు, 7 గ్లోబల్ టార్గెట్లతో విపత్తు నష్టాల తగ్గింపు (DRR) లక్ష్యంగా ఏర్పాటయింది.</li>
+            <li>• <b>భారత జాతీయ వాతావరణ మార్పుల కార్యాచరణ ప్రణాళిక (NAPCC - 2008):</b>
+              <br>మన్మోహన్ సింగ్ ప్రభుత్వం జూన్ 30, 2008న <b>8 జాతీయ మిషన్లను</b> ప్రకటించింది:
+              <br>1. నేషనల్ సోలార్ మిషన్
+              <br>2. ఎన్‌హాన్స్‌డ్ ఎనర్జీ ఎఫిషియెన్సీ మిషన్
+              <br>3. సస్టైనబుల్ హ్యాబిటాట్ మిషన్
+              <br>4. నేషనల్ వాటర్ మిషన్
+              <br>5. సస్టైనింగ్ హిమాలయన్ ఎకో-సిస్టమ్ మిషన్
+              <br>6. గ్రీన్ ఇండియా మిషన్
+              <br>7. సస్టైనబుల్ అగ్రికల్చర్ మిషన్
+              <br>8. స్ట్రాటజిక్ నాలెడ్జ్ ఫర్ క్లైమేట్ చేంజ్ మిషన్.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB: SOLVED APPSC PYQS HUB ==================== -->
+    <section id="content-pyqs" class="tab-content space-y-6 hidden">
+      <div class="bg-gradient-to-r from-amber-950 via-slate-800 to-slate-900 border border-amber-800/40 p-6 rounded-2xl shadow-md">
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider bg-amber-900/60 text-amber-300 px-3 py-1 rounded-full border border-amber-700/50">APPSC అసలైన పరీక్షా ప్రశ్నలు</span>
+          <span class="text-xs text-slate-400">Group 1, Group 2, Group 3, AEE, Town Planning Previous Qs</span>
+        </div>
+        <h2 class="text-2xl font-black text-white">115+ సాల్వ్డ్ APPSC ప్రశ్నలు & సమాధానాల నిధి</h2>
+        <p class="text-sm text-slate-300 mt-1">మునుపటి అధికారిక పరీక్షల ప్రశ్నలు. ఆప్షన్ పై క్లిక్ చేయండి - సమాధానం మరియు విశ్లేషణను వెంటనే తెలుసుకోండి!</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="pyqQuizGrid">
+        <!-- Q1 -->
+        <div class="bg-slate-800 border border-slate-700 p-5 rounded-2xl shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-blue-400">APPSC Group-II 2012</span>
+            <span class="text-xs text-slate-400">Q.1</span>
+          </div>
+          <p class="text-sm font-semibold text-slate-100 mb-3">'విపత్తు' (Disaster) అనే పదం ఏ భాషల నుండి ఉద్భవించినది?</p>
+          <div class="space-y-2 text-xs">
+            <button onclick="checkPyq(this, false, 'గ్రీకు మరియు లాటిన్ భాషల నుండి Dus+Aster, Dis+Astro పదాల ద్వారా వచ్చింది.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">A) కేవలం అరబిక్ భాష</button>
+            <button onclick="checkPyq(this, false, 'సమాధానం D (పైవన్నీ - గ్రీకు, లాటిన్ మరియు ఫ్రెంచ్ రూపాలు).')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">B) సంస్కృతం</button>
+            <button onclick="checkPyq(this, false, 'గ్రీకు మరియు ఫ్రెంచ్ రెండూ ఉన్నాయి.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">C) లాటిన్ మాత్రమే</button>
+            <button onclick="checkPyq(this, true, 'గ్రీకు (Dus+Aster), లాటిన్ (Dis+Astro), ఫ్రెంచ్ (Des+Aster) మూలాల కలయిక. సరైన జవాబు D!')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">D) గ్రీకు, లాటిన్ మరియు ఫ్రెంచ్ (పైవన్నీ)</button>
+          </div>
+          <div class="pyq-exp hidden mt-3 p-2.5 rounded-lg bg-slate-900/90 text-xs border border-slate-700"></div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="bg-slate-800 border border-slate-700 p-5 rounded-2xl shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-blue-400">Junior Assistant Inter Board 2012</span>
+            <span class="text-xs text-slate-400">Q.2</span>
+          </div>
+          <p class="text-sm font-semibold text-slate-100 mb-3">భారతదేశ విపత్తు నిర్వహణ చట్టం ఎప్పుడు ఆమోదించబడింది?</p>
+          <div class="space-y-2 text-xs">
+            <button onclick="checkPyq(this, false, '2004లో సునామీ వచ్చింది, చట్టం 2005లో రూపొందింది.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">A) 2004</button>
+            <button onclick="checkPyq(this, true, 'డిసెంబర్ 23, 2005న రాష్ట్రపతి ఆమోదం పొందింది. 2006 నుంచి అమల్లోకి వచ్చింది.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">B) 2005</button>
+            <button onclick="checkPyq(this, false, '2006లో అమల్లోకి వచ్చింది, కానీ చట్టం 2005 నాటిది.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">C) 2006</button>
+            <button onclick="checkPyq(this, false, 'తప్పు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">D) 2008</button>
+          </div>
+          <div class="pyq-exp hidden mt-3 p-2.5 rounded-lg bg-slate-900/90 text-xs border border-slate-700"></div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="bg-slate-800 border border-slate-700 p-5 rounded-2xl shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-blue-400">Assistant Executive Engineers</span>
+            <span class="text-xs text-slate-400">Q.3</span>
+          </div>
+          <p class="text-sm font-semibold text-slate-100 mb-3">జాతీయ విపత్తు నిర్వహణ సంస్థ (NDMA)కు అధ్యక్షుడు ఎవరు?</p>
+          <div class="space-y-2 text-xs">
+            <button onclick="checkPyq(this, false, 'హోం మంత్రి నోడల్ మంత్రిత్వ శాఖను పర్యవేక్షిస్తారు కానీ ఛైర్మన్ కాదు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">A) కేంద్ర హోం మంత్రి</button>
+            <button onclick="checkPyq(this, true, 'NDMA చట్టం ప్రకారం దేశ ప్రధాని పదవీరీత్యా (Ex-officio) ఛైర్మన్‌గా వ్యవహరిస్తారు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">B) ప్రధానమంత్రి (Prime Minister)</button>
+            <button onclick="checkPyq(this, false, 'రాష్ట్రపతి కాదు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">C) రాష్ట్రపతి</button>
+            <button onclick="checkPyq(this, false, 'కేబినెట్ సెక్రటరీ కాదు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">D) కేబినెట్ కార్యదర్శి</button>
+          </div>
+          <div class="pyq-exp hidden mt-3 p-2.5 rounded-lg bg-slate-900/90 text-xs border border-slate-700"></div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="bg-slate-800 border border-slate-700 p-5 rounded-2xl shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-blue-400">APPSC Group-I Prelims</span>
+            <span class="text-xs text-slate-400">Q.4</span>
+          </div>
+          <p class="text-sm font-semibold text-slate-100 mb-3">1984 భోపాల్ గ్యాస్ దుర్ఘటనలో విడుదలైన ప్రాణాంతక విషవాయువు ఏది?</p>
+          <div class="space-y-2 text-xs">
+            <button onclick="checkPyq(this, false, 'తప్పు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">A) ఇథైల్ ఐసోసైనైట్</button>
+            <button onclick="checkPyq(this, false, 'ఫాస్జీన్ కాదు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">B) ఫాస్జీన్</button>
+            <button onclick="checkPyq(this, true, 'యూనియన్ కార్బైడ్ ఫ్యాక్టరీ నుండి మిథైల్ ఐసోసైనైట్ (MIC) లీకైంది. రసాయన సూత్రం CH3NCO.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">C) మిథైల్ ఐసోసైనైట్ (MIC)</button>
+            <button onclick="checkPyq(this, false, 'మస్టర్డ్ గ్యాస్ కాదు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">D) సల్ఫర్ డైయాక్సైడ్</button>
+          </div>
+          <div class="pyq-exp hidden mt-3 p-2.5 rounded-lg bg-slate-900/90 text-xs border border-slate-700"></div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="bg-slate-800 border border-slate-700 p-5 rounded-2xl shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-blue-400">Town Planning 2012</span>
+            <span class="text-xs text-slate-400">Q.5</span>
+          </div>
+          <p class="text-sm font-semibold text-slate-100 mb-3">ఆంధ్రప్రదేశ్ తీరప్రాంతాన్ని వణికించిన దివిసీమ పెనుతుఫాను ఏ తేదీన సంభవించింది?</p>
+          <div class="space-y-2 text-xs">
+            <button onclick="checkPyq(this, false, 'నవంబర్ 15 కాదు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">A) 15 నవంబర్ 1977</button>
+            <button onclick="checkPyq(this, true, 'నవంబర్ 19, 1977న కృష్ణా జిల్లా దివిసీమను తాకింది. 6 మీటర్ల ఎత్తున పోటు అలలతో 10,000+ మంది ప్రాణాలు కోల్పోయారు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">B) 19 నవంబర్ 1977</button>
+            <button onclick="checkPyq(this, false, 'తప్పు సంవత్సరం.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">C) 19 నవంబర్ 1978</button>
+            <button onclick="checkPyq(this, false, 'తప్పు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">D) 25 అక్టోబర్ 1977</button>
+          </div>
+          <div class="pyq-exp hidden mt-3 p-2.5 rounded-lg bg-slate-900/90 text-xs border border-slate-700"></div>
+        </div>
+
+        <!-- Q6 -->
+        <div class="bg-slate-800 border border-slate-700 p-5 rounded-2xl shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-blue-400">Polytechnic Lecturers</span>
+            <span class="text-xs text-slate-400">Q.6</span>
+          </div>
+          <p class="text-sm font-semibold text-slate-100 mb-3">సముద్రంలో సునామీ హెచ్చరిక వ్యవస్థ (ITEWC) భారతదేశంలో ఎక్కడ ఉంది?</p>
+          <div class="space-y-2 text-xs">
+            <button onclick="checkPyq(this, false, 'చెన్నైలో NIOT ఉంది కానీ సునామీ సెంటర్ కాదు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">A) చెన్నై</button>
+            <button onclick="checkPyq(this, false, 'కొచ్చి కాదు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">B) కొచ్చి</button>
+            <button onclick="checkPyq(this, true, 'INCOIS (ఇండియన్ నేషనల్ సెంటర్ ఫర్ ఓషన్ ఇన్ఫర్మేషన్ సర్వీసెస్) హైదరాబాదులో ఉంది.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">C) హైదరాబాద్ (INCOIS)</button>
+            <button onclick="checkPyq(this, false, 'విశాఖపట్నం కాదు.')" class="w-full text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-700 transition border border-slate-700">D) విశాఖపట్నం</button>
+          </div>
+          <div class="pyq-exp hidden mt-3 p-2.5 rounded-lg bg-slate-900/90 text-xs border border-slate-700"></div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Footer -->
@@ -783,6 +1176,27 @@ def render_appsc_syllabus_html():
       const text = encodeURIComponent("🎯 *లక్ష్య APPSC గ్రూప్ 1 & 2 సమగ్ర సిలబస్ & స్టడీ పోర్టల్!*\\nభూగోళశాస్త్రం, ఏపీ విధానాలు 4.0, 120+ మెంటల్ ఎబిలిటీ షార్ట్‌కట్లు & పూర్తి నోట్స్:\\n👉 https://lakshya-telugu-ca.onrender.com/appsc_syllabus");
       window.open('https://api.whatsapp.com/send?text=' + text, '_blank');
     }
+  
+    function checkPyq(btn, isCorrect, explanation) {
+      const parent = btn.parentElement;
+      const buttons = parent.querySelectorAll('button');
+      buttons.forEach(b => {
+        b.disabled = true;
+        b.classList.remove('hover:bg-slate-700');
+      });
+      const expBox = parent.parentElement.querySelector('.pyq-exp');
+      if (isCorrect) {
+        btn.classList.remove('bg-slate-900');
+        btn.classList.add('bg-emerald-600', 'text-white', 'font-bold');
+        expBox.innerHTML = '<span class="text-emerald-400 font-bold">✅ సరైన సమాధానం!</span><br>' + explanation;
+      } else {
+        btn.classList.remove('bg-slate-900');
+        btn.classList.add('bg-red-600', 'text-white', 'font-bold');
+        expBox.innerHTML = '<span class="text-red-400 font-bold">❌ తప్పు సమాధానం!</span><br>' + explanation;
+      }
+      expBox.classList.remove('hidden');
+    }
+
   </script>
 </body>
 </html>
