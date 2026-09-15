@@ -129,9 +129,9 @@ def start_bot_polling():
                         f"• ఆధునిక జాతీయోద్యమం (ఆంధ్రోద్యమం, పొట్టి శ్రీరాములు, 1953 ఆంధ్ర రాష్ట్రం)\n"
                         f"• 2014 AP పునర్విభజన చట్టం (12 భాగాలు, 108 సెక్షన్లు)\n\n"
                         f"🖨️ <b>గ్రూప్స్ 1, 2, 3 OMR టెస్ట్ పేపర్స్ & ఆన్సర్ కీస్ (PDF):</b>\n"
-                        f"👉 గ్రూప్-1 (120 Qs): https://villages-booth-lane-scene.trycloudflare.com/omr_appsc_all?exam=group1\n"
-                        f"👉 గ్రూప్-2 (150 Qs): https://villages-booth-lane-scene.trycloudflare.com/omr_appsc_all?exam=group2\n"
-                        f"👉 గ్రూప్-3 (150 Qs): https://villages-booth-lane-scene.trycloudflare.com/omr_appsc_all?exam=group3\n\n"
+                        f"👉 గ్రూప్-1 (120 Qs): https://lakshya-telugu-ca.onrender.com/omr_appsc_all?exam=group1\n"
+                        f"👉 గ్రూప్-2 (150 Qs): https://lakshya-telugu-ca.onrender.com/omr_appsc_all?exam=group2\n"
+                        f"👉 గ్రూప్-3 (150 Qs): https://lakshya-telugu-ca.onrender.com/omr_appsc_all?exam=group3\n\n"
                         f"👇 <i>క్రింది AP చరిత్ర PYQ మోడల్ ప్రశ్నకు సమాధానం ఇవ్వండి:</i>"
                     )
                     send_telegram_message(hist_msg, token=token, chat_id=chat_id)
@@ -163,7 +163,7 @@ def start_bot_polling():
                         f"🌾 <b>తెలంగాణ 6 గ్యారెంటీలు:</b>\n"
                         f"• మహాలక్ష్మి, గృహజ్యోతి (200 యూనిట్లు ఉచితం), రైతు భరోసా, ఇందిరమ్మ ఇండ్లు, చేయూత, యువ వికాసం\n\n"
                         f"📖 <b>సంక్షేమ పథకాల సమగ్ర హ్యాండ్‌బుక్ PDF:</b>\n"
-                        f"👉 https://villages-booth-lane-scene.trycloudflare.com/schemes_handbook\n\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/schemes_handbook\n\n"
                         f"👇 <i>క్రింది ప్రభుత్వ పథకాల ప్రశ్నకు సమాధానం ఇవ్వండి:</i>"
                     )
                     send_telegram_message(schemes_msg, token=token, chat_id=chat_id)
@@ -191,7 +191,7 @@ def start_bot_polling():
                         f"🏛️ <b>ప్రభుత్వ చర్యలు:</b> {mains_qs[0]['model_answer']['govt_steps'][:120]}...\n\n"
                         f"🎯 <b>ముగింపు:</b> {mains_qs[0]['model_answer']['conclusion'][:120]}...\n\n"
                         f"📖 <b>పూర్తి మెయిన్స్ ఆన్సర్ బ్యాంక్ (PDF ప్రింట్):</b>\n"
-                        f"👉 https://villages-booth-lane-scene.trycloudflare.com/mains_answer_bank\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/mains_answer_bank\n"
                         f"👉 http://localhost:5000/mains_answer_bank"
                     )
                     send_telegram_message(mains_msg, token=token, chat_id=chat_id)
@@ -206,7 +206,7 @@ def start_bot_polling():
                         f"🇮🇳 <b>భారతదేశం:</b> నథూ లా, జోజి లా, షిప్కీ లా, 10 డిగ్రీ ఛానల్, కుడంకుళం, అనైముడి, సియాచిన్\n"
                         f"🌐 <b>ప్రపంచ చోక్‌పాయింట్స్:</b> హార్ముజ్, బాబ్-ఎల్-మందేబ్, మలక్కా, సూయజ్, దక్షిణ చైనా సముద్రం\n\n"
                         f"📖 <b>స్టడీ అట్లాస్ & క్విక్ రివిజన్ PDF:</b>\n"
-                        f"👉 https://villages-booth-lane-scene.trycloudflare.com/map_pointing_atlas\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/map_pointing_atlas\n"
                         f"👉 http://localhost:5000/map_pointing_atlas\n\n"
                         f"👇 <i>క్రింది మ్యాప్ పాయింటింగ్ మోడల్ ప్రశ్నకు సమాధానం ఇవ్వండి:</i>"
                     )
@@ -236,10 +236,10 @@ def start_bot_polling():
                         f"───────────────────────\n"
                         f"⏱️ <b>వ్యవధి:</b> 150 నిమిషాలు | <b>నెగటివ్ మార్కింగ్:</b> 0.33\n\n"
                         f"🌐 <b>వెబ్ & మొబైల్‌లో 150 Qs గ్రాండ్ టెస్ట్ రాయండి:</b>\n"
-                        f"👉 https://villages-booth-lane-scene.trycloudflare.com\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com\n"
                         f"👉 http://localhost:5000\n\n"
                         f"🖨️ <b>150 Qs OMR పేపర్ & ఆన్సర్ కీ ప్రింట్ / PDF:</b>\n"
-                        f"👉 https://villages-booth-lane-scene.trycloudflare.com/omr_group2\n\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/omr_group2\n\n"
                         f"👇 <i>క్రింది APPSC గ్రూప్-2 అసలైన PYQ మోడల్ ప్రశ్నలకు సమాధానం ఇవ్వండి:</i>",
                         token=token,
                         chat_id=chat_id
