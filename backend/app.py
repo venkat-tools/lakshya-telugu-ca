@@ -94,6 +94,29 @@ def start_embedded_bot():
 if os.environ.get("RENDER") or os.environ.get("START_EMBEDDED_BOT"):
     start_embedded_bot()
 
+# Keep-Alive Worker: Self-pings every 10 minutes to prevent Render free-tier sleep
+def start_keep_alive_worker():
+    def _pinger():
+        import time
+        import urllib.request
+        import threading
+        ping_url = os.environ.get("RENDER_EXTERNAL_URL", "https://lakshya-telugu-ca.onrender.com") + "/api/ping"
+        time.sleep(45)
+        while True:
+            try:
+                req = urllib.request.Request(ping_url, headers={"User-Agent": "Lakshya-KeepAlive/1.0"})
+                with urllib.request.urlopen(req, timeout=15) as res:
+                    pass
+                print(f"💓 [Keep-Alive] సర్వర్ పింగ్ విజయవంతం: {ping_url}")
+            except Exception as e:
+                pass
+            time.sleep(600)  # Ping every 10 minutes
+
+    threading.Thread(target=_pinger, daemon=True).start()
+
+if os.environ.get("RENDER") or os.environ.get("START_KEEP_ALIVE"):
+    start_keep_alive_worker()
+
 # ----------------- Frontend Routes -----------------
 @app.route("/")
 def index():
@@ -252,6 +275,22 @@ def api_sync():
             "success": False,
             "error": str(e)
         }), 500
+
+# ----------------- Health & Keep-Alive -----------------
+@app.route("/api/ping", methods=["GET"])
+@app.route("/api/health", methods=["GET"])
+def api_health():
+    now_ist = datetime.now(IST)
+    dates = get_available_dates()
+    return jsonify({
+        "status": "healthy",
+        "app": "Lakshya Telugu Current Affairs",
+        "ist_time": now_ist.strftime("%Y-%m-%d %H:%M:%S IST"),
+        "today_date": now_ist.strftime("%Y-%m-%d"),
+        "total_available_dates": len(dates),
+        "latest_date": dates[0] if dates else None,
+        "uptime": "online 24/7"
+    })
 
 # ----------------- Telegram Bot Endpoints -----------------
 @app.route("/api/telegram/config", methods=["GET", "POST"])

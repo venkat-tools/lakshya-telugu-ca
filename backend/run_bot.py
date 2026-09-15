@@ -20,23 +20,23 @@ if sys.platform == "win32":
 
 def check_and_send_daily_notification():
     try:
-        from scheduler import load_scheduler_config, save_scheduler_config
+        from scheduler import load_scheduler_config, save_scheduler_config, get_ist_now, get_ist_today
         cfg = load_scheduler_config()
         if not cfg.get("enabled", True):
             return
 
-        now = datetime.now()
-        today_str = now.strftime("%Y-%m-%d")
+        now_ist = get_ist_now()
+        today_str = get_ist_today()
         target_time = cfg.get("scheduled_time", "07:00")
-        current_hm = now.strftime("%H:%M")
+        current_hm = now_ist.strftime("%H:%M")
 
-        # If current time is past target time and hasn't been sent today
+        # If current IST time is past target time and hasn't been sent today
         if current_hm >= target_time and cfg.get("last_run_date") != today_str:
-            print(f"⏰ [Auto Notification] నేటి డైలీ కరెంట్ అఫైర్స్ బ్రాడ్‌కాస్ట్ ప్రారంభం ({today_str})...")
+            print(f"⏰ [Auto Notification] నేటి డైలీ కరెంట్ అఫైర్స్ బ్రాడ్‌కాస్ట్ ప్రారంభం ({today_str} IST)...")
             res = broadcast_daily_digest(date=today_str)
             if res.get("success"):
                 cfg["last_run_date"] = today_str
-                cfg["last_run_time"] = now.strftime("%Y-%m-%d %H:%M:%S")
+                cfg["last_run_time"] = now_ist.strftime("%Y-%m-%d %H:%M:%S IST")
                 cfg["last_status"] = "Success"
                 import os, json
                 SCHEDULER_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "scheduler_config.json")
@@ -270,8 +270,8 @@ def start_bot_polling():
                 elif text == "/mobile":
                     mobile_msg = (
                         f"📱 <b>మొబైల్ ఫోన్ (4G / 5G డేటా) వెబ్ యాప్ లింక్:</b>\n"
-                        f"👉 https://tinyurl.com/lakshya-telugu-2026\n\n"
-                        f"✨ ఈ లింక్‌తో మీరు ఎక్కడి నుంచైనా మొబైల్ బ్రౌజర్‌లో 56 ఆర్టికల్స్, క్విజ్‌లు మరియు ఒక వరుస ముఖ్యాంశాలు చదువుకోవచ్చు!"
+                        f"👉 https://lakshya-telugu-ca.onrender.com\n\n"
+                        f"✨ ఈ లింక్‌తో మీరు ఎక్కడి నుంచైనా మొబైల్ బ్రౌజర్‌లో 24/7 ఆర్టికల్స్, క్విజ్‌లు మరియు గ్రాండ్ టెస్టులు చదువుకోవచ్చు!"
                     )
                     send_telegram_message(mobile_msg, token=token, chat_id=chat_id)
 
@@ -287,7 +287,7 @@ def start_bot_polling():
                         if a.get("exam_relevance"):
                             s_er = html.escape(a["exam_relevance"])
                             resp += f"<i>🎯 {s_er}</i>\n"
-                    resp += f"\n📱 <b>మొత్తం {len(articles)} ఆర్టికల్స్ మొబైల్ లో చదవండి:</b> https://tinyurl.com/lakshya-telugu-2026"
+                    resp += f"\n🌐 <b>మొత్తం {len(articles)} ఆర్టికల్స్ మొబైల్ లో చదవండి:</b> https://lakshya-telugu-ca.onrender.com"
                     send_telegram_message(resp, token=token, chat_id=chat_id)
 
                 elif text == "/quiz":
@@ -316,7 +316,7 @@ def start_bot_polling():
                     for ol in ols[:12]:
                         s_pt = html.escape(ol.get("point", ""))
                         resp += f"• {s_pt}\n"
-                    resp += f"\n📱 <b>పూర్తి 56 ముఖ్యాంశాల కోసం క్లిక్ చేయండి:</b> https://tinyurl.com/lakshya-telugu-2026"
+                    resp += f"\n🌐 <b>పూర్తి ముఖ్యాంశాల కోసం క్లిక్ చేయండి:</b> https://lakshya-telugu-ca.onrender.com"
                     send_telegram_message(resp, token=token, chat_id=chat_id)
 
                 elif text == "/all":
