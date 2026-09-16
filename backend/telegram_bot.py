@@ -18,6 +18,7 @@ from db import get_articles, get_quiz_by_date, get_one_liners_by_date, get_avail
 IST = timezone(timedelta(hours=5, minutes=30))
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "telegram_config.json")
+SUBSCRIBERS_PATH = os.path.join(os.path.dirname(__file__), "subscribers.json")
 
 def load_config():
     if os.path.exists(CONFIG_PATH):
@@ -28,6 +29,34 @@ def load_config():
             pass
     return {"bot_token": "", "chat_id": ""}
 
+def load_subscribers():
+    subscribers = set()
+    cfg = load_config()
+    if cfg.get("chat_id"):
+        subscribers.add(str(cfg["chat_id"]))
+    if os.path.exists(SUBSCRIBERS_PATH):
+        try:
+            with open(SUBSCRIBERS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    for s in data:
+                        if s:
+                            subscribers.add(str(s))
+        except Exception:
+            pass
+    return list(subscribers)
+
+def add_subscriber(chat_id):
+    if not chat_id:
+        return
+    subscribers = set(load_subscribers())
+    subscribers.add(str(chat_id))
+    try:
+        with open(SUBSCRIBERS_PATH, "w", encoding="utf-8") as f:
+            json.dump(list(subscribers), f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
 def save_config(bot_token, chat_id):
     config = {
         "bot_token": bot_token.strip(),
@@ -35,6 +64,7 @@ def save_config(bot_token, chat_id):
     }
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
+    add_subscriber(chat_id.strip())
     return config
 
 def send_telegram_message(text, token=None, chat_id=None):
@@ -264,37 +294,49 @@ def broadcast_daily_digest(date=None, token=None, chat_id=None):
     msg += f"\n🌐 <b>లైవ్ వెబ్ యాప్ (24/7):</b> https://lakshya-telugu-ca.onrender.com\n"
     msg += f"📱 <b>మొబైల్ యాక్సెస్:</b> https://tinyurl.com/lakshya-telugu-2026"
 
-    # Send Digest Message
-    send_res = send_telegram_message(msg, token=token, chat_id=chat_id)
-    if not send_res.get("success"):
-        print("Failed to send digest message:", send_res)
+    target_chats = [str(chat_id)] if chat_id else load_subscribers()
+    if not target_chats:
+        cfg = load_config()
+        if cfg.get("chat_id"):
+            target_chats = [str(cfg["chat_id"])]
 
-    # 2. Send Native Quiz Polls (Today's fresh 5 questions)
-    sent_polls = 0
     option_map = {"A": 0, "B": 1, "C": 2, "D": 3}
-    for q in quizzes[:5]:
-        correct_idx = option_map.get(q.get("correct_option", "A").upper(), 0)
-        opts = [q["option_a"], q["option_b"], q["option_c"], q["option_d"]]
-        poll_res = send_telegram_quiz_poll(
-            question=f"❓ [డైలీ క్విజ్ {date}] {q['question']}"[:255],
-            options=[o[:100] for o in opts],
-            correct_index=correct_idx,
-            explanation=q.get("explanation", "")[:200],
-            token=token,
-            chat_id=chat_id
-        )
-        if poll_res.get("success"):
-            sent_polls += 1
+    sent_polls = 0
+    pdf_sent_count = 0
 
-    # 3. Send Daily E-Paper PDF Document
-    pdf_res = send_daily_epaper_pdf(date=date, token=token, chat_id=chat_id)
+    for cid in target_chats:
+        # 1. Send Digest Message
+        send_res = send_telegram_message(msg, token=token, chat_id=cid)
+        if not send_res.get("success"):
+            print(f"Failed to send digest message to {cid}:", send_res)
+
+        # 2. Send Native Quiz Polls (Today's fresh 5 questions)
+        for q in quizzes[:5]:
+            correct_idx = option_map.get(q.get("correct_option", "A").upper(), 0)
+            opts = [q["option_a"], q["option_b"], q["option_c"], q["option_d"]]
+            poll_res = send_telegram_quiz_poll(
+                question=f"❓ [డైలీ క్విజ్ {date}] {q['question']}"[:255],
+                options=[o[:100] for o in opts],
+                correct_index=correct_idx,
+                explanation=q.get("explanation", "")[:200],
+                token=token,
+                chat_id=cid
+            )
+            if poll_res.get("success"):
+                sent_polls += 1
+
+        # 3. Send Daily E-Paper PDF Document
+        pdf_res = send_daily_epaper_pdf(date=date, token=token, chat_id=cid)
+        if pdf_res.get("success"):
+            pdf_sent_count += 1
 
     return {
         "success": True,
-        "message": f"{date} నాటి డైజెస్ట్, {sent_polls} క్విజ్ పోల్స్ మరియు ఈ-పేపర్ PDF టెలిగ్రామ్‌కు విజయవంతంగా పంపబడ్డాయి!",
+        "message": f"{date} నాటి డైజెస్ట్, క్విజ్ పోల్స్ మరియు ఈ-పేపర్ PDF {len(target_chats)} మందికి టెలిగ్రామ్‌కు విజయవంతంగా పంపబడ్డాయి!",
         "articles_sent": len(articles),
         "quizzes_sent": sent_polls,
-        "pdf_sent": pdf_res.get("success", False)
+        "pdf_sent": pdf_sent_count > 0,
+        "subscribers_count": len(target_chats)
     }
 
 if __name__ == "__main__":

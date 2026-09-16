@@ -8,7 +8,7 @@ import time
 import requests
 import sys
 from datetime import datetime
-from telegram_bot import load_config, broadcast_daily_digest, send_telegram_message, send_telegram_quiz_poll
+from telegram_bot import load_config, broadcast_daily_digest, send_telegram_message, send_telegram_quiz_poll, add_subscriber
 from db import get_articles, get_quiz_by_date, get_one_liners_by_date, get_available_dates
 
 if sys.platform == "win32":
@@ -87,6 +87,7 @@ def start_bot_polling():
                     continue
 
                 chat_id = msg["chat"]["id"]
+                add_subscriber(chat_id)
                 text = msg["text"].strip()
                 user_name = msg.get("from", {}).get("first_name", "మిత్రమా")
 
@@ -104,8 +105,9 @@ def start_bot_polling():
                         f"👉 <b>/today</b> - నేటి 56 ఆర్టికల్స్ ముఖ్యాంశాలు 📰\n"
                         f"👉 <b>/quiz</b> - నేటి 5 ప్రాక్టీస్ క్విజ్ పోల్స్ (MCQs) 📝\n"
                         f"👉 <b>/oneliners</b> - ఒక వరుస ముఖ్యాంశాలు (Quick Revision) ⚡\n"
-                        f"👉 <b>/syllabus</b> లేదా <b>/material</b> - APPSC గ్రూప్ 1 & 2 సమగ్ర సిలబస్ & 6 పుస్తకాలు (PDF) 📚\n"
-                        f"👉 <b>/history</b> - AP చరిత్ర & గ్రూప్స్ 1, 2, 3 గ్రాండ్ టెస్ట్ 🏛️\n"
+                        f"👉 <b>/subscribe</b> - ప్రతిరోజూ ఉదయం ఆటోమేటిక్ PDF డెలివరీకి సబ్‌స్క్రైబ్ 🔔\n"
+                        f"👉 <b>/syllabus</b> లేదా <b>/material</b> - APPSC గ్రూప్ 1 & 2 సమగ్ర సిలబస్ & 7 పుస్తకాలు (PDF) 📚\n"
+                        f"👉 <b>/history</b> - భారత & AP చరిత్ర మాస్టర్ బుక్ (PDF) & టెస్ట్ 🏛️\n"
                         f"👉 <b>/schemes</b> - సంక్షేమ పథకాలు 2026 (సూపర్ సిక్స్ & 6 గ్యారెంటీలు) 🌾\n"
                         f"👉 <b>/mains</b> - గ్రూప్ 1 & 2 మెయిన్స్ మోడల్ సమాధానాలు ✍️\n"
                         f"👉 <b>/group2</b> లేదా <b>/mock</b> - APPSC గ్రూప్-2 గ్రాండ్ టెస్ట్ (150 Qs) & PYQs 🎯\n"
@@ -114,6 +116,15 @@ def start_bot_polling():
                         f"👉 <b>/all</b> - నేటి మొత్తం డైజెస్ట్ + క్విజ్ + ఈ-పేపర్ PDF 🚀\n"
                     )
                     send_telegram_message(welcome, token=token, chat_id=chat_id)
+
+                elif text == "/subscribe":
+                    sub_msg = (
+                        f"✅ <b>సబ్‌స్క్రిప్షన్ విజయవంతమైంది!</b> 🙏\n\n"
+                        f"మీరు డైలీ తెలుగు కరెంట్ అఫైర్స్ & ఈ-పేపర్ PDF ఆటోమేటిక్ డెలివరీకి విజయవంతంగా సబ్‌స్క్రైబ్ చేసుకున్నారు.\n"
+                        f"⏰ ప్రతిరోజూ ఉదయం 7:00 గంటలకు (IST) నేటి పూర్తి ఈ-పేపర్ PDF, ముఖ్యాంశాలు మరియు క్విజ్ పోల్స్ మీ టెలిగ్రామ్‌కు నేరుగా వస్తాయి!\n\n"
+                        f"📥 నేటి PDF ని ఇప్పుడే పొందడానికి <b>/pdf</b> లేదా <b>/epaper</b> అని టైప్ చేయండి."
+                    )
+                    send_telegram_message(sub_msg, token=token, chat_id=chat_id)
 
                 elif text == "/syllabus" or text == "/material":
                     syl_msg = (
