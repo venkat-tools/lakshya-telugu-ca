@@ -323,30 +323,39 @@ def api_telegram_config():
         "chat_id": cfg.get("chat_id", "")
     })
 
-@app.route("/api/telegram/test", methods=["POST"])
+@app.route("/api/telegram/test", methods=["POST", "GET"])
 def api_telegram_test():
-    data = request.json or {}
-    token = data.get("bot_token")
-    chat_id = data.get("chat_id")
+    try:
+        data = request.get_json(silent=True) or {}
+    except Exception:
+        data = {}
+    token = data.get("bot_token") or request.args.get("bot_token")
+    chat_id = data.get("chat_id") or request.args.get("chat_id")
     test_msg = "🔔 <b>టెస్ట్ అలర్ట్:</b> మీ తెలుగు కరెంట్ అఫైర్స్ టెలిగ్రామ్ బోట్ విజయవంతంగా కనెక్ట్ అయింది! 🚀"
     res = send_telegram_message(test_msg, token=token, chat_id=chat_id)
     return jsonify(res)
 
-@app.route("/api/telegram/send", methods=["POST"])
+@app.route("/api/telegram/send", methods=["POST", "GET"])
 def api_telegram_send():
-    data = request.json or {}
-    date = data.get("date")
-    token = data.get("bot_token")
-    chat_id = data.get("chat_id")
+    try:
+        data = request.get_json(silent=True) or {}
+    except Exception:
+        data = {}
+    date = data.get("date") or request.args.get("date")
+    token = data.get("bot_token") or request.args.get("bot_token")
+    chat_id = data.get("chat_id") or request.args.get("chat_id")
     res = broadcast_daily_digest(date=date, token=token, chat_id=chat_id)
     return jsonify(res)
 
-@app.route("/api/telegram/send_epaper_pdf", methods=["POST"])
+@app.route("/api/telegram/send_epaper_pdf", methods=["POST", "GET"])
 def api_telegram_send_epaper_pdf():
-    data = request.json or {}
-    date = data.get("date") or request.args.get("date")
-    token = data.get("bot_token")
-    chat_id = data.get("chat_id")
+    try:
+        data = request.get_json(silent=True) or {}
+    except Exception:
+        data = {}
+    date = request.args.get("date") or data.get("date")
+    token = request.args.get("bot_token") or data.get("bot_token")
+    chat_id = request.args.get("chat_id") or data.get("chat_id")
     res = send_daily_epaper_pdf(date=date, token=token, chat_id=chat_id)
     return jsonify(res)
 

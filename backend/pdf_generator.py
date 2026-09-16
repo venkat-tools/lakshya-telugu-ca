@@ -455,12 +455,22 @@ def render_epaper_html(date=None):
       btn.disabled = true;
       btn.innerHTML = '⏳ పంపుతోంది...';
       try {{
-        const res = await fetch('/api/telegram/send_epaper_pdf?date=' + date, {{ method: 'POST' }});
-        const data = await res.json();
-        if (data.success) {{
+        const res = await fetch('/api/telegram/send_epaper_pdf?date=' + encodeURIComponent(date), {{
+          method: 'POST',
+          headers: {{ 'Content-Type': 'application/json' }},
+          body: JSON.stringify({{ date: date }})
+        }});
+        let data;
+        try {{
+          data = await res.json();
+        }} catch (parseErr) {{
+          const txt = await res.text();
+          throw new Error('సర్వర్ నుంచి అసాధారణ స్పందన: ' + txt.substring(0, 100));
+        }}
+        if (data && data.success) {{
           alert('✅ తెలుగు ఈ-పేపర్ PDF మీ టెలిగ్రామ్‌కు విజయవంతంగా పంపబడింది!');
         }} else {{
-          alert('⚠️ లోపం: ' + (data.error || 'టెలిగ్రామ్ పంపడంలో లోపం'));
+          alert('⚠️ లోపం: ' + ((data && data.error) || 'టెలిగ్రామ్ పంపడంలో లోపం'));
         }}
       }} catch (e) {{
         alert('ఎర్రర్: ' + e.message);
