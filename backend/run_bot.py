@@ -128,8 +128,9 @@ def start_bot_polling():
                         f"6️⃣ <b>ఎకానమీ & మనీ మార్కెట్:</b> మనీ మార్కెట్ సాధనాలు, ద్రవ్యోల్బణం, RBI పాలసీలు, నీతి ఆయోగ్ సూచీలు\n"
                         f"7️⃣ <b>సైన్స్, టెక్నాలజీ & పర్యావరణం:</b> ISRO/DRDO మిషన్లు, బయోస్పియర్ రిజర్వ్‌లు, పర్యావరణ ఒప్పందాలు\n"
                         f"8️⃣ <b>మెయిన్స్ ఆన్సర్ రైటింగ్ & ఎథిక్స్:</b> 4-దశల ఫ్రేమ్‌వర్క్, కేస్ స్టడీ టెక్నిక్స్, టాప్ స్కోరింగ్ మోడల్స్\n\n"
-                        f"🌐 <b>ఇంటరాక్టివ్ సిలబస్ ట్రాకర్ & పూర్తి గైడ్ చదవండి:</b>\n"
-                        f"👉 https://lakshya-telugu-ca.onrender.com/appsc_syllabus\n\n"
+                        f"📚 <b>7 ఒరిజినల్ మాస్టర్ టెక్స్ట్‌బుక్స్ PDF హబ్:</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/appsc_syllabus\n"
+                        f"👉 📥 <b>చరిత్ర మాస్టర్ బుక్ (PDF):</b> https://lakshya-telugu-ca.onrender.com/pdfs/indian_and_ap_history_master_notes.pdf\n\n"
                         f"🖨️ <b>హై-క్వాలిటీ ప్రింట్ / PDF కూడా వెబ్‌సైట్‌లో డౌన్‌లోడ్ చేసుకోవచ్చు!</b>"
                     )
                     send_telegram_message(syl_msg, token=token, chat_id=chat_id)
@@ -148,6 +149,8 @@ def start_bot_polling():
                         f"• విజయనగర సామ్రాజ్యం (శ్రీకృష్ణదేవరాయలు, అముక్తమాల్యద)\n"
                         f"• ఆధునిక జాతీయోద్యమం (ఆంధ్రోద్యమం, పొట్టి శ్రీరాములు, 1953 ఆంధ్ర రాష్ట్రం)\n"
                         f"• 2014 AP పునర్విభజన చట్టం (12 భాగాలు, 108 సెక్షన్లు)\n\n"
+                        f"📥 <b>భారత & AP సమగ్ర చరిత్ర మాస్టర్ బుక్ (PDF డౌన్‌లోడ్):</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/pdfs/indian_and_ap_history_master_notes.pdf\n\n"
                         f"🖨️ <b>గ్రూప్స్ 1, 2, 3 OMR టెస్ట్ పేపర్స్ & ఆన్సర్ కీస్ (PDF):</b>\n"
                         f"👉 గ్రూప్-1 (120 Qs): https://lakshya-telugu-ca.onrender.com/omr_appsc_all?exam=group1\n"
                         f"👉 గ్రూప్-2 (150 Qs): https://lakshya-telugu-ca.onrender.com/omr_appsc_all?exam=group2\n"

@@ -302,15 +302,26 @@ def render_appsc_syllabus_html():
           <span class="text-xl">📚</span>
           <div>
             <h3 class="text-sm font-bold text-white flex items-center gap-2">
-              పూర్తి ఒరిజినల్ టెక్స్ట్‌బుక్స్ PDF డౌన్‌లోడ్ హబ్ (All 720 Pages Uncut)
+              పూర్తి ఒరిజినల్ టెక్స్ట్‌బుక్స్ & నోట్స్ PDF డౌన్‌లోడ్ హబ్ (All 7 Master Books)
               <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">100% Original PDFs</span>
             </h3>
-            <p class="text-xs text-slate-400">వెబ్ పోర్టల్ సారాంశంతో పాటు, మీరు అప్‌లోడ్ చేసిన మొత్తం 6 ఒరిజినల్ పుస్తకాలను నేరుగా డౌన్‌లోడ్ చేసుకోండి:</p>
+            <p class="text-xs text-slate-400">వెబ్ పోర్టల్ సారాంశంతో పాటు, చరిత్ర, జాగ్రఫీ, ఆప్టిట్యూడ్, పాలసీలతో కూడిన మొత్తం 7 ఒరిజినల్ పుస్తకాలను నేరుగా డౌన్‌లోడ్ చేసుకోండి:</p>
           </div>
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+        <a href="/pdfs/indian_and_ap_history_master_notes.pdf" download class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700 transition group">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📜</span>
+            <div>
+              <p class="font-bold text-slate-200 group-hover:text-amber-400">భారత & ఆంధ్రప్రదేశ్ సమగ్ర చరిత్ర</p>
+              <p class="text-[11px] text-slate-400">ప్రాచీన, మధ్యయుగ, ఆధునిక & AP చరిత్ర • 9 పేజీల మాస్టర్ బుక్ (2.4 MB)</p>
+            </div>
+          </div>
+          <span class="bg-amber-600/30 text-amber-300 font-bold px-2 py-1 rounded text-[11px] border border-amber-500/40 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
         <a href="/pdfs/rc_reddy_disaster_management_geography_notes.pdf" download class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700 transition group">
           <div class="flex items-center space-x-2.5">
             <span class="text-xl">📕</span>
@@ -411,6 +422,23 @@ def render_appsc_syllabus_html():
         </div>
         <h2 class="text-2xl font-black text-white">భారత & ఆంధ్రప్రదేశ్ చరిత్ర సంపూర్ణ పాఠ్య గ్రంథం (History Master Textbook)</h2>
         <p class="text-sm text-slate-300 mt-1">సింధు లోయ నాగరికత నుండి 1947 స్వాతంత్ర్యం వరకు మరియు శాతవాహనుల నుండి 2014 ఆంధ్రప్రదేశ్ పునర్విభజన చట్టం వరకు పూర్తి వివరాలు.</p>
+      </div>
+
+      <!-- 1-Click History Master PDF Download Banner -->
+      <div class="bg-gradient-to-r from-amber-900/60 via-orange-950/40 to-slate-900 border border-amber-500/50 p-4 rounded-2xl mb-5 flex flex-wrap items-center justify-between gap-3 no-print shadow-sm">
+        <div class="flex items-center space-x-3">
+          <span class="text-2xl">📜</span>
+          <div>
+            <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+              భారత & ఆంధ్రప్రదేశ్ సమగ్ర చరిత్ర మాస్టర్ టెక్స్ట్‌బుక్ (Full PDF)
+              <span class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded-full border border-amber-500/30">100% Complete Notes</span>
+            </h4>
+            <p class="text-[11px] text-slate-300">సింధు నాగరికత, మౌర్యులు, గుప్తులు, మొఘలులు, 1857 తిరుగుబాటు, జాతీయోద్యమం, శాతవాహనులు నుండి 2014 పునర్విభజన చట్టం వరకు పూర్తి నోట్స్ & PYQs.</p>
+          </div>
+        </div>
+        <a href="/pdfs/indian_and_ap_history_master_notes.pdf" download class="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow transition">
+          <span>📥</span> పూర్తి చరిత్ర PDF డౌన్‌లోడ్ (2.4 MB)
+        </a>
       </div>
 
       <!-- Part 1: Ancient India -->
