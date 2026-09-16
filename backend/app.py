@@ -359,6 +359,39 @@ def api_telegram_send_epaper_pdf():
     res = send_daily_epaper_pdf(date=date, token=token, chat_id=chat_id)
     return jsonify(res)
 
+
+@app.route("/api/telegram/channels", methods=["GET", "POST", "DELETE"])
+def api_telegram_channels():
+    from telegram_bot import load_channels, add_channel, remove_channel
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        channel_id = data.get("channel_id") or request.args.get("channel_id")
+        title = data.get("title") or request.args.get("title", "")
+        if not channel_id:
+            return jsonify({"success": False, "error": "Channel ID / Username అవసరం."}), 400
+        chs = add_channel(channel_id, title)
+        return jsonify({"success": True, "message": "ఛానల్ విజయవంతంగా సేవ్ చేయబడింది!", "channels": chs})
+    elif request.method == "DELETE":
+        data = request.get_json(silent=True) or {}
+        channel_id = data.get("channel_id") or request.args.get("channel_id")
+        chs = remove_channel(channel_id)
+        return jsonify({"success": True, "message": "ఛానల్ తొలగించబడింది!", "channels": chs})
+    else:
+        return jsonify({"success": True, "channels": load_channels()})
+
+@app.route("/api/telegram/send_monthly_magazine", methods=["POST", "GET"])
+def api_telegram_send_monthly():
+    from telegram_bot import send_monthly_magazine_telegram
+    try:
+        data = request.get_json(silent=True) or {}
+    except Exception:
+        data = {}
+    month = data.get("month") or request.args.get("month", "2026-09")
+    token = data.get("bot_token") or request.args.get("bot_token")
+    chat_id = data.get("chat_id") or request.args.get("chat_id")
+    res = send_monthly_magazine_telegram(month=month, token=token, chat_id=chat_id)
+    return jsonify(res)
+
 @app.route("/api/epaper/pdf", methods=["GET"])
 def api_epaper_pdf():
     date = request.args.get("date")
@@ -379,6 +412,40 @@ def api_epaper_pdf():
         os.path.basename(pdf_path),
         as_attachment=True,
         download_name=f"Lakshya_Telugu_EPaper_{date}.pdf"
+    )
+
+
+@app.route("/api/magazine/pdf", methods=["GET"])
+@app.route("/api/magazine/download", methods=["GET"])
+def api_magazine_pdf():
+    month = request.args.get("month", "2026-09")
+    as_download = request.args.get("download", "0") == "1" or request.path.endswith("/download")
+    
+    cache_dir = os.path.join(os.path.dirname(__file__), "pdf_cache")
+    candidates = [
+        os.path.join(FRONTEND_DIR, "pdfs", "Lakshya_September_2026_Monthly_Magazine.pdf"),
+        os.path.join(FRONTEND_DIR, "pdfs", f"Lakshya_{month}_Monthly_Magazine.pdf"),
+        os.path.join(cache_dir, f"Lakshya_Telugu_Monthly_{month}.pdf")
+    ]
+    pdf_path = None
+    for p in candidates:
+        if os.path.exists(p) and os.path.getsize(p) > 1000:
+            pdf_path = p
+            break
+            
+    if not pdf_path:
+        from magazine import generate_magazine_pdf
+        pdf_path = generate_magazine_pdf(year_month=month, force_refresh=False)
+
+    if not pdf_path or not os.path.exists(pdf_path):
+        return jsonify({"success": False, "error": "మాస పత్రిక PDF సిద్ధంగా లేదు."}), 404
+
+    return send_from_directory(
+        os.path.dirname(pdf_path),
+        os.path.basename(pdf_path),
+        as_attachment=as_download,
+        download_name=f"Lakshya_Monthly_Magazine_{month}.pdf",
+        mimetype="application/pdf"
     )
 
 @app.route("/epapers_directory", methods=["GET"])
@@ -823,6 +890,48 @@ def omr_appsc_all_view():
     from appsc_handbooks import render_omr_appsc_all_html
     exam_type = request.args.get("exam", "group2")
     return render_omr_appsc_all_html(exam_type)
+
+
+@app.route("/api/mains", methods=["GET"])
+def api_mains():
+    from mains_descriptive_data import get_all_mains_questions
+    qs = get_all_mains_questions()
+    return jsonify({
+        "success": True,
+        "total": len(qs),
+        "questions": qs
+    })
+
+@app.route("/api/subject_tests", methods=["GET"])
+def api_subject_tests():
+    from subject_tests_data import get_all_subject_tests
+    return jsonify({
+        "success": True,
+        "tests": get_all_subject_tests()
+    })
+
+@app.route("/api/subject_tests/<subject_id>", methods=["GET"])
+def api_subject_test_single(subject_id):
+    from subject_tests_data import get_subject_test
+    test = get_subject_test(subject_id)
+    if not test:
+        return jsonify({"success": False, "error": f"{subject_id} సబ్జెక్ట్ టెస్ట్ లభించలేదు."}), 404
+    return jsonify({
+        "success": True,
+        "subject": subject_id,
+        "test": test
+    })
+
+@app.route("/subject_tests", methods=["GET"])
+def subject_tests_view():
+    from flask import make_response
+    from subject_tests_view import render_subject_tests_html
+    subj = request.args.get("subject", "history")
+    resp = make_response(render_subject_tests_html(subj))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 @app.route("/appsc_syllabus", methods=["GET"])
 @app.route("/syllabus", methods=["GET"])

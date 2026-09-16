@@ -29,6 +29,9 @@ def load_config():
             pass
     return {"bot_token": "", "chat_id": ""}
 
+SUBSCRIBERS_PATH = os.path.join(os.path.dirname(__file__), "subscribers.json")
+CHANNELS_PATH = os.path.join(os.path.dirname(__file__), "channels.json")
+
 def load_subscribers():
     subscribers = set()
     cfg = load_config()
@@ -56,6 +59,48 @@ def add_subscriber(chat_id):
             json.dump(list(subscribers), f, ensure_ascii=False, indent=2)
     except Exception:
         pass
+
+def load_channels():
+    """Load list of registered Telegram broadcast channels and study groups"""
+    if os.path.exists(CHANNELS_PATH):
+        try:
+            with open(CHANNELS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    return data
+        except Exception:
+            pass
+    return []
+
+def add_channel(channel_id, title=""):
+    """Register a Telegram channel or group for auto-broadcast"""
+    if not channel_id:
+        return load_channels()
+    channels = load_channels()
+    cid_str = str(channel_id).strip()
+    for ch in channels:
+        if ch.get("channel_id") == cid_str:
+            if title:
+                ch["title"] = title
+            break
+    else:
+        channels.append({"channel_id": cid_str, "title": title or cid_str})
+    try:
+        with open(CHANNELS_PATH, "w", encoding="utf-8") as f:
+            json.dump(channels, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+    return channels
+
+def remove_channel(channel_id):
+    """Remove a channel from auto-broadcast"""
+    channels = [ch for ch in load_channels() if ch.get("channel_id") != str(channel_id).strip()]
+    try:
+        with open(CHANNELS_PATH, "w", encoding="utf-8") as f:
+            json.dump(channels, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+    return channels
 
 def save_config(bot_token, chat_id):
     config = {
@@ -298,11 +343,17 @@ def broadcast_daily_digest(date=None, token=None, chat_id=None):
     msg += f"\n🌐 <b>లైవ్ వెబ్ యాప్ (24/7):</b> https://lakshya-telugu-ca.onrender.com\n"
     msg += f"📱 <b>మొబైల్ యాక్సెస్:</b> https://tinyurl.com/lakshya-telugu-2026"
 
-    target_chats = [str(chat_id)] if chat_id else load_subscribers()
-    if not target_chats:
+    if chat_id:
+        target_chats = [str(chat_id)]
+    else:
+        all_targets = set(load_subscribers())
+        for ch in load_channels():
+            if ch.get("channel_id"):
+                all_targets.add(str(ch["channel_id"]))
         cfg = load_config()
         if cfg.get("chat_id"):
-            target_chats = [str(cfg["chat_id"])]
+            all_targets.add(str(cfg["chat_id"]))
+        target_chats = list(all_targets)
 
     option_map = {"A": 0, "B": 1, "C": 2, "D": 3}
     sent_polls = 0
@@ -342,6 +393,61 @@ def broadcast_daily_digest(date=None, token=None, chat_id=None):
         "pdf_sent": pdf_sent_count > 0,
         "subscribers_count": len(target_chats)
     }
+
+
+def send_monthly_magazine_telegram(month="2026-09", token=None, chat_id=None):
+    """Send pre-compiled Monthly Current Affairs Magazine PDF to Telegram"""
+    from magazine import generate_magazine_pdf
+    caption = (
+        f"📘 <b>లక్ష్య తెలుగు కరెంట్ అఫైర్స్ మాస పత్రిక (Monthly Magazine Special)</b>\n"
+        f"📅 <b>ఎడిషన్: {month}</b>\n"
+        f"───────────────────────\n\n"
+        f"📌 <b>మాస పత్రిక ప్రధాన ముఖ్యాంశాలు (34 పేజీలు):</b>\n"
+        f"• 🏛️ 6 ప్రధాన సిలబస్ విభాగాలు (జాతీయం, AP & TS, ఆర్థికం, సైన్స్ & స్పేస్, క్రీడలు, నియామకాలు)\n"
+        f"• ⚡ 50 ఒక వరుస క్విక్ రివిజన్ రౌండప్ (50 One-Liners Round-Up)\n"
+        f"• 📝 22 స్టాండర్డ్ పరీక్ష ప్రాక్టీస్ ప్రశ్నలు (సమగ్ర వివరణలతో)\n"
+        f"• 🏆 100% పోటీ పరీక్షల ప్రమాణాలు (Zero Fillers & Non-Exam Content)\n\n"
+        f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్ లింక్:</b>\n"
+        f"👉 https://lakshya-telugu-ca.onrender.com/api/magazine/pdf?month={month}\n\n"
+        f"📖 <b>ఆన్‌లైన్ డిజిటల్ మాగజైన్:</b>\n"
+        f"👉 https://lakshya-telugu-ca.onrender.com/magazine?month={month}\n\n"
+        f"🎯 <i>APPSC • TSPSC గ్రూప్ 1, 2, 3 • UPSC • SSC ప్రత్యేకం</i>"
+    )
+
+    pdf_path = generate_magazine_pdf(year_month=month, force_refresh=False)
+    if not pdf_path or not os.path.exists(pdf_path):
+        # Check static frontend path
+        static_p = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "pdfs", "Lakshya_September_2026_Monthly_Magazine.pdf")
+        if os.path.exists(static_p):
+            pdf_path = static_p
+
+    if not pdf_path or not os.path.exists(pdf_path):
+        fallback_msg = (
+            f"📘 <b>లక్ష్య కరెంట్ అఫైర్స్ మాస పత్రిక ({month})</b>\n\n"
+            f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/api/magazine/pdf?month={month}\n\n"
+            f"📖 <b>ఆన్‌లైన్ రీడర్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/magazine?month={month}"
+        )
+        return send_telegram_message(fallback_msg, token=token, chat_id=chat_id)
+
+    res = send_telegram_document(
+        file_path=pdf_path,
+        caption=caption,
+        filename=f"Lakshya_Monthly_Magazine_{month}.pdf",
+        token=token,
+        chat_id=chat_id
+    )
+    if not res.get("success"):
+        fallback_msg = (
+            f"📘 <b>లక్ష్య కరెంట్ అఫైర్స్ మాస పత్రిక ({month})</b>\n\n"
+            f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/api/magazine/pdf?month={month}\n\n"
+            f"📖 <b>ఆన్‌లైన్ రీడర్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/magazine?month={month}"
+        )
+        send_telegram_message(fallback_msg, token=token, chat_id=chat_id)
+    return res
 
 if __name__ == "__main__":
     cfg = load_config()

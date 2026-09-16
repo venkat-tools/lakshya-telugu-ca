@@ -114,6 +114,18 @@
           <span>బుక్‌లెట్స్ (PDF)</span>
         </button>
 
+        <!-- Monthly Current Affairs Magazine (PDF & Online) -->
+        <a href="/api/magazine/pdf?download=1" download class="bg-gradient-to-r from-purple-800 to-indigo-800 hover:from-purple-700 hover:to-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-purple-400/40">
+          <i data-lucide="book-open-check" class="w-4 h-4 text-amber-300"></i>
+          <span>📘 మాస పత్రిక (Monthly PDF)</span>
+        </a>
+
+        <!-- Subject-Wise Chapter Practice Tests Hub (150 MCQs) -->
+        <a href="/subject_tests" class="bg-gradient-to-r from-indigo-700 to-blue-700 hover:from-indigo-600 hover:to-blue-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-indigo-400/40">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-300"></i>
+          <span>📝 150 చాప్టర్ టెస్ట్స్ (CBT)</span>
+        </a>
+
         <!-- Telugu E-Papers & PDF Hub Button -->
         <button id="openEpaperModalBtn" class="bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition shadow-sm">
           <i data-lucide="newspaper" class="w-4 h-4"></i>
@@ -700,6 +712,31 @@
         </div>
       </div>
 
+      <!-- Telegram Channels & Study Groups Broadcast (Feature 3) -->
+      <div class="bg-indigo-50/50 border border-indigo-200 rounded-xl p-3.5 mb-4 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-indigo-950 flex items-center gap-1.5">
+            <i data-lucide="radio" class="w-3.5 h-3.5 text-indigo-600"></i>
+            టెలిగ్రామ్ ఛానల్స్ & గ్రూప్స్ ఆటో-బ్రోడ్‌కాస్ట్:
+          </span>
+          <span class="text-[10px] bg-indigo-200 text-indigo-900 font-black px-2 py-0.5 rounded-full" id="channelsCountBadge">0 ఛానల్స్</span>
+        </div>
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="newChannelInput" 
+            placeholder="ఉదా: @telugugroups_study లేదా -1001234567" 
+            class="flex-1 text-xs px-3 py-1.5 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+          />
+          <button type="button" onclick="addNewBroadcastChannel()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shrink-0 flex items-center gap-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> చేర్చు
+          </button>
+        </div>
+        <div id="channelsListContainer" class="max-h-24 overflow-y-auto space-y-1 text-xs">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
       <!-- Action Buttons -->
       <div class="flex flex-wrap gap-2 justify-end pt-3 border-t border-slate-100">
         <button id="tgTestBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition">
@@ -769,6 +806,36 @@
             </a>
           </div>
           <div id="epaperTgStatus" class="mt-2 text-xs font-semibold text-amber-300 hidden"></div>
+        </div>
+
+        <!-- Monthly Magazine PDF Card (Feature 1) -->
+        <div class="bg-gradient-to-br from-purple-950 via-indigo-950 to-slate-950 text-white p-4 sm:p-5 rounded-2xl shadow-lg border border-purple-700/60">
+          <div class="flex justify-between items-start mb-2">
+            <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              📘 మాస పత్రిక స్పెషల్ (34 పేజీలు)
+            </span>
+            <span class="text-xs text-purple-200 font-bold">సెప్టెంబర్ 2026 ఎడిషన్</span>
+          </div>
+          <h4 class="text-lg sm:text-xl font-black mb-1">లక్ష్య కరెంట్ అఫైర్స్ మాస పత్రిక (Monthly Magazine PDF)</h4>
+          <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+            6 సిలబస్ అధ్యాయాలు, 50 ఒక వరుస రౌండప్, 22 ప్రాక్టీస్ ప్రశ్నలు మరియు సమగ్ర తెలుగు విశ్లేషణతో కూడిన 34 పేజీల పూర్తి మాస పత్రిక PDF (7.0 MB).
+          </p>
+          
+          <div class="flex flex-wrap gap-2.5">
+            <a href="/api/magazine/pdf?download=1" download="Lakshya_September_2026_Monthly_Magazine.pdf" class="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>మాస పత్రిక PDF డౌన్‌లోడ్</span>
+            </a>
+            <button id="magazineSendTelegramBtn" onclick="sendMagazineToTelegram()" class="bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>టెలిగ్రామ్‌కు మాస పత్రిక పంపండి</span>
+            </button>
+            <a href="/magazine" target="_blank" class="bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+              <i data-lucide="external-link" class="w-4 h-4"></i>
+              <span>ఆన్‌లైన్ డిజిటల్ పేజీ</span>
+            </a>
+          </div>
+          <div id="magazineTgStatus" class="mt-2 text-xs font-semibold text-amber-300 hidden"></div>
         </div>
 
         <!-- 2. Official Telugu E-Papers Portals Directory -->

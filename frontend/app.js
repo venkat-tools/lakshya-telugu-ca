@@ -761,6 +761,7 @@ function setupTelegramHandlers() {
   // Open & Load Config
   openBtn.addEventListener("click", async () => {
     modal.classList.remove("hidden");
+    if (window.loadBroadcastChannels) window.loadBroadcastChannels();
     try {
       const res = await fetch(`${API_BASE}/api/telegram/config`);
       const data = await res.json();
@@ -1014,6 +1015,118 @@ function initEpaperModal() {
     });
   }
 }
+
+// ----------------- Monthly Magazine & Channels Telegram Dispatch -----------------
+window.sendMagazineToTelegram = async function() {
+  const btn = document.getElementById("magazineSendTelegramBtn");
+  const status = document.getElementById("magazineTgStatus");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="animate-spin mr-1">⏳</span><span>మాస పత్రిక పంపుతోంది...</span>`;
+  }
+  if (status) {
+    status.classList.remove("hidden");
+    status.className = "mt-2 text-xs font-semibold text-blue-300";
+    status.textContent = "టెలిగ్రామ్ బోట్‌కు మాస పత్రిక PDF పంపబడుతోంది...";
+  }
+  try {
+    const res = await fetch("/api/telegram/send_monthly_magazine", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ month: "2026-09" })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (status) {
+        status.className = "mt-2 text-xs font-semibold text-emerald-300";
+        status.textContent = "✅ సెప్టెంబర్ 2026 మాస పత్రిక PDF టెలిగ్రామ్‌కు విజయవంతంగా పంపబడింది!";
+      }
+    } else {
+      if (status) {
+        status.className = "mt-2 text-xs font-semibold text-rose-300";
+        status.textContent = `⚠️ ఎర్రర్: ${data.error || "పంపడం సాధ్యపడలేదు"}`;
+      }
+    }
+  } catch (err) {
+    if (status) {
+      status.className = "mt-2 text-xs font-semibold text-rose-300";
+      status.textContent = `⚠️ నెట్‌వర్క్ ఎర్రర్: ${err.message}`;
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i><span>టెలిగ్రామ్‌కు మాస పత్రిక పంపండి</span>`;
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+};
+
+window.loadBroadcastChannels = async function() {
+  try {
+    const res = await fetch("/api/telegram/channels");
+    const data = await res.json();
+    const list = document.getElementById("channelsListContainer");
+    const badge = document.getElementById("channelsCountBadge");
+    if (badge && data.channels) badge.textContent = `${data.channels.length} ఛానల్స్`;
+    if (!list) return;
+    if (!data.channels || data.channels.length === 0) {
+      list.innerHTML = `<div class="text-slate-500 text-[11px] py-1 font-medium">ఇంకా ఏ ఛానల్ నమోదు కాలేదు. పై బాక్స్‌లో @channel_name చేర్చండి.</div>`;
+      return;
+    }
+    list.innerHTML = data.channels.map(ch => `
+      <div class="flex items-center justify-between p-1.5 bg-white border border-indigo-100 rounded-lg text-xs">
+        <div class="truncate">
+          <b class="text-indigo-950">${ch.title || ch.channel_id}</b>
+          <span class="text-[10px] text-slate-500 ml-1 font-mono">(${ch.channel_id})</span>
+        </div>
+        <button type="button" onclick="deleteBroadcastChannel('${ch.channel_id}')" class="text-rose-500 hover:text-rose-700 p-1 text-[11px] font-black">
+          ✕
+        </button>
+      </div>
+    `).join("");
+  } catch (e) {
+    console.error("Channels load error:", e);
+  }
+};
+
+window.addNewBroadcastChannel = async function() {
+  const input = document.getElementById("newChannelInput");
+  if (!input || !input.value.trim()) return;
+  const channel_id = input.value.trim();
+  try {
+    const res = await fetch("/api/telegram/channels", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ channel_id })
+    });
+    const data = await res.json();
+    if (data.success) {
+      input.value = "";
+      window.loadBroadcastChannels();
+    } else {
+      alert(data.error || "ఛానల్ చేర్చడం సాధ్యపడలేదు");
+    }
+  } catch (e) {
+    alert("ఎర్రర్: " + e.message);
+  }
+};
+
+window.deleteBroadcastChannel = async function(channel_id) {
+  if (!confirm(`ఈ ఛానల్‌ను ఆటో-బ్రోడ్‌కాస్ట్ నుండి తీసివేయాలా: ${channel_id}?`)) return;
+  try {
+    const res = await fetch("/api/telegram/channels", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ channel_id })
+    });
+    const data = await res.json();
+    if (data.success) {
+      window.loadBroadcastChannels();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
 
 // ==================== MOCK TESTS MODULE (Feature 4) ====================
 const mockState = {

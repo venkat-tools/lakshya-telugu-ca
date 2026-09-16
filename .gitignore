@@ -7,3 +7,5 @@ backend/pdf_cache/
 backend/audio_cache/
 *.log
 push_to_github.bat
+
+scratch/

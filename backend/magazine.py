@@ -95,7 +95,31 @@ def fetch_period_data(period_type="monthly", year_month=None, start_date=None, e
         sub_title = f"{m_name} నెల సంపూర్ణ సమగ్ర కరెంట్ అఫైర్స్ & క్వశ్చన్ బ్యాంక్"
 
     conn.close()
-    return articles, quizzes, one_liners, period_title, sub_title
+
+    # Filter and deduplicate for high-yield exam quality
+    from pdf_generator import is_exam_worthy, BANNED_EXAM_JUNK
+    
+    seen_titles = set()
+    clean_articles = []
+    for a in articles:
+        norm = a.get("title", "").strip().lower()
+        if norm not in seen_titles and is_exam_worthy(a):
+            seen_titles.add(norm)
+            clean_articles.append(a)
+    
+    # Cap to top 40 high-yield articles
+    clean_articles = clean_articles[:40]
+
+    seen_ol = set()
+    clean_one_liners = []
+    for ol in one_liners:
+        norm = ol.get("point", "").strip().lower()
+        if norm not in seen_ol and not any(j in norm for j in BANNED_EXAM_JUNK):
+            seen_ol.add(norm)
+            clean_one_liners.append(ol)
+    clean_one_liners = clean_one_liners[:50]
+
+    return clean_articles, quizzes, clean_one_liners, period_title, sub_title
 
 def render_magazine_html(period_type="monthly", year_month=None, start_date=None, end_date=None):
     articles, quizzes, one_liners, period_title, sub_title = fetch_period_data(
@@ -312,3 +336,54 @@ def render_magazine_html(period_type="monthly", year_month=None, start_date=None
 </html>
 """
     return html
+
+def generate_magazine_pdf(year_month="2026-09", force_refresh=False):
+    """
+    Renders the Monthly Magazine HTML and compiles it to a high-resolution PDF.
+    """
+    import subprocess
+    from pdf_generator import get_browser_executable, PDF_CACHE_DIR
+    
+    pdf_filename = f"Lakshya_September_2026_Monthly_Magazine.pdf" if year_month == "2026-09" else f"Lakshya_Monthly_Magazine_{year_month}.pdf"
+    out_pdf_path = os.path.join(PDF_CACHE_DIR, pdf_filename)
+    static_pdf_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "pdfs", pdf_filename)
+
+    if os.path.exists(out_pdf_path) and not force_refresh and os.path.getsize(out_pdf_path) > 1000:
+        return out_pdf_path
+
+    if os.path.exists(static_pdf_path) and not force_refresh and os.path.getsize(static_pdf_path) > 1000:
+        return static_pdf_path
+
+    browser_exe = get_browser_executable()
+    if browser_exe:
+        html_content = render_magazine_html(period_type="monthly", year_month=year_month)
+        temp_html_path = os.path.join(PDF_CACHE_DIR, f"temp_mag_{year_month}.html")
+        try:
+            with open(temp_html_path, "w", encoding="utf-8") as f:
+                f.write(html_content)
+
+            file_uri = f"file:///{temp_html_path.replace(os.sep, '/')}"
+            cmd = f'"{browser_exe}" --headless --disable-gpu --no-pdf-header-footer --print-to-pdf="{out_pdf_path}" "{file_uri}"'
+            subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=60)
+
+            if os.path.exists(out_pdf_path) and os.path.getsize(out_pdf_path) > 1000:
+                import shutil
+                try:
+                    os.makedirs(os.path.dirname(static_pdf_path), exist_ok=True)
+                    shutil.copy2(out_pdf_path, static_pdf_path)
+                except Exception as cp_err:
+                    print(f"Error copying magazine PDF to frontend: {cp_err}")
+        except Exception as e:
+            print(f"Magazine PDF generation error: {e}")
+        finally:
+            if os.path.exists(temp_html_path):
+                try:
+                    os.remove(temp_html_path)
+                except Exception:
+                    pass
+
+    if os.path.exists(out_pdf_path) and os.path.getsize(out_pdf_path) > 1000:
+        return out_pdf_path
+    if os.path.exists(static_pdf_path) and os.path.getsize(static_pdf_path) > 1000:
+        return static_pdf_path
+    return None

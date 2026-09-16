@@ -235,6 +235,15 @@ def render_appsc_syllabus_html():
       <button type="button" onclick="switchTab('mains')" data-tab="mains" id="tab-mains" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5 shrink-0 transition border border-slate-700/50">
         <span>✍️ మెయిన్స్ & ఎథిక్స్ గైడ్</span>
       </button>
+      <a href="/subject_tests" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-indigo-400 shadow-sm">
+        <span>📝 150 చాప్టర్ టెస్ట్స్ (CBT)</span>
+      </a>
+      <a href="/mains_answer_bank" class="px-3.5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-purple-400 shadow-sm">
+        <span>✍️ మెయిన్స్ మోడల్ ఆన్సర్స్</span>
+      </a>
+      <a href="/magazine" class="px-3.5 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-slate-950 font-black flex items-center gap-1.5 shrink-0 transition border border-amber-400 shadow-sm">
+        <span>📘 మాస పత్రిక (Online & PDF)</span>
+      </a>
     </div>
   </header>
 
@@ -386,6 +395,28 @@ def render_appsc_syllabus_html():
             </div>
           </div>
           <span class="bg-blue-600/30 text-blue-300 font-bold px-2 py-1 rounded text-[11px] border border-blue-500/40 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/api/magazine/pdf?download=1" download="Lakshya_September_2026_Monthly_Magazine.pdf" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-purple-950/70 to-indigo-950/70 hover:from-purple-900/80 hover:to-indigo-900/80 border border-purple-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📘</span>
+            <div>
+              <p class="font-black text-amber-300 group-hover:text-amber-200">సెప్టెంబర్ 2026 మాస పత్రిక (Monthly PDF)</p>
+              <p class="text-[11px] text-purple-200">6 విభాగాలు, 50 వన్‌లైనర్స్, 22 క్విజ్ • 34 పేజీలు (7.0 MB)</p>
+            </div>
+          </div>
+          <span class="bg-purple-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-purple-400 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/api/epaper/pdf" download class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-emerald-950/70 to-teal-950/70 hover:from-emerald-900/80 hover:to-teal-900/80 border border-emerald-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📰</span>
+            <div>
+              <p class="font-black text-emerald-300 group-hover:text-emerald-200">డైలీ తెలుగు ఈ-పేపర్ (నేటి PDF)</p>
+              <p class="text-[11px] text-emerald-200">హై-యీల్డ్ ఎగ్జామ్ పేపర్ • 10 పేజీలు (3.5 MB)</p>
+            </div>
+          </div>
+          <span class="bg-emerald-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-emerald-400 shrink-0">డౌన్‌లోడ్ 📥</span>
         </a>
       </div>
     </div>

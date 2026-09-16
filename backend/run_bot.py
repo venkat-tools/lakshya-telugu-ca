@@ -8,7 +8,7 @@ import time
 import requests
 import sys
 from datetime import datetime
-from telegram_bot import load_config, broadcast_daily_digest, send_telegram_message, send_telegram_quiz_poll, add_subscriber
+from telegram_bot import load_config, broadcast_daily_digest, send_telegram_message, send_telegram_quiz_poll, add_subscriber, send_monthly_magazine_telegram, load_channels, add_channel, remove_channel
 from db import get_articles, get_quiz_by_date, get_one_liners_by_date, get_available_dates
 
 if sys.platform == "win32":
@@ -113,7 +113,11 @@ def start_bot_polling():
                         f"👉 <b>/group2</b> లేదా <b>/mock</b> - APPSC గ్రూప్-2 గ్రాండ్ టెస్ట్ (150 Qs) & PYQs 🎯\n"
                         f"👉 <b>/map</b> - మ్యాప్ పాయింటింగ్ అట్లాస్ (AP, India, World) 🗺️\n"
                         f"👉 <b>/mobile</b> - మొబైల్ యాప్ లింక్ 📱\n"
-                        f"👉 <b>/all</b> - నేటి మొత్తం డైజెస్ట్ + క్విజ్ + ఈ-పేపర్ PDF 🚀\n"
+                        f"👉 <b>/all</b> - నేటి మొత్తం డైజెస్ట్ + క్విజ్ + ఈ-పేపర్ PDF 🚀\n\
+👉 <b>/monthly</b> - సెప్టెంబర్ 2026 మాస పత్రిక PDF (34 పేజీలు) 📘\n\
+👉 <b>/tests</b> - 150 చాప్టర్ ప్రాక్టీస్ MCQs (చరిత్ర, భౌగోళికం, సమాజం, ఆప్టిట్యూడ్) 📝\n\
+👉 <b>/channels</b> - కనెక్ట్ అయిన టెలిగ్రామ్ ఛానల్స్ & గ్రూప్స్ జాబితా 📢\n\
+👉 <b>/setchannel @channel_name</b> - కొత్త ఛానల్‌ను బ్రోడ్‌కాస్ట్‌కు లింక్ చేయండి 🔗\n"
                     )
                     send_telegram_message(welcome, token=token, chat_id=chat_id)
 
@@ -364,6 +368,52 @@ def start_bot_polling():
                         resp += f"• {s_pt}\n"
                     resp += f"\n🌐 <b>పూర్తి ముఖ్యాంశాల కోసం క్లిక్ చేయండి:</b> https://lakshya-telugu-ca.onrender.com"
                     send_telegram_message(resp, token=token, chat_id=chat_id)
+
+                                elif text == "/monthly" or text == "/magazine":
+                    send_telegram_message("📘 <b>సెప్టెంబర్ 2026 మాస పత్రిక PDF సిద్ధం చేయబడుతోంది... క్షణాల్లో మీ టెలిగ్రామ్‌కు వస్తుంది!</b>", token=token, chat_id=chat_id)
+                    send_monthly_magazine_telegram(month="2026-09", token=token, chat_id=chat_id)
+
+                elif text == "/tests" or text == "/subject_tests":
+                    t_msg = (
+                        f"📝 <b>APPSC & TSPSC సబ్జెక్ట్-వైజ్ చాప్టర్ టెస్ట్స్ హబ్ (150 MCQs)</b>\n"
+                        f"───────────────────────\n\n"
+                        f"🎯 <b>అందుబాటులో ఉన్న 5 ప్రధాన సబ్జెక్ట్స్ (30 MCQs Each):</b>\n"
+                        f"1. 🏛️ చరిత్ర (సింధు నాగరికత, శాతవాహనులు, విజయనగరం, ఆధునిక ఏపీ)\n"
+                        f"2. 🌍 భౌగోళికం (భూస్వరూపాలు, నదులు, తీరరేఖ, 26 జిల్లాలు, ఖనిజాలు)\n"
+                        f"3. 👥 భారతీయ సమాజం (సామాజిక నిర్మాణం, చట్టాలు, మహిళలు, గిరిజనులు)\n"
+                        f"4. 🧠 మెంటల్ ఎబిలిటీ & ఆప్టిట్యూడ్ (షార్ట్‌కట్స్, శ్రేణులు, రీజనింగ్)\n"
+                        f"5. 🌪️ విపత్తు నిర్వహణ (చట్టం 2005, సెండాయ్, తుఫానులు, కాలుష్యం)\n\n"
+                        f"🌐 <b>ఇంటరాక్టివ్ ఆన్‌లైన్ టెస్ట్ రాయండి:</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/subject_tests\n"
+                        f"👉 http://localhost:5000/subject_tests\n\n"
+                        f"💡 <i>వెబ్‌సైట్‌లో తక్షణ ఫలితాలు, మార్కులు మరియు వివరణలు పొందవచ్చు!</i>"
+                    )
+                    send_telegram_message(t_msg, token=token, chat_id=chat_id)
+
+                elif text == "/channels":
+                    chs = load_channels()
+                    if not chs:
+                        ch_text = (
+                            f"📢 <b>కనెక్ట్ అయిన టెలిగ్రామ్ ఛానల్స్:</b> ఏవీ లేవు.\n\n"
+                            f"మీ స్టడీ ఛానల్ లేదా గ్రూప్‌ను లింక్ చేయడానికి:\n"
+                            f"👉 బోట్‌ను మీ ఛానల్‌లో అడ్మిన్‌గా చేర్చి <b>/setchannel @channel_username</b> అని టైప్ చేయండి."
+                        )
+                    else:
+                        ch_text = f"📢 <b>కనెక్ట్ అయిన టెలిగ్రామ్ బ్రోడ్‌కాస్ట్ ఛానల్స్ ({len(chs)}):</b>\n───────────────────────\n"
+                        for c in chs:
+                            ch_text += f"• <b>{c.get('title', c.get('channel_id'))}</b> (ID: <code>{c.get('channel_id')}</code>)\n"
+                        ch_text += f"\n✅ ప్రతిరోజూ ఉదయం 7 గంటలకు వీటన్నింటికీ ఈ-పేపర్ PDF ఆటోమేటిక్‌గా పంపబడుతుంది!"
+                    send_telegram_message(ch_text, token=token, chat_id=chat_id)
+
+                elif text.startswith("/setchannel"):
+                    parts = text.split(maxsplit=2)
+                    if len(parts) < 2:
+                        send_telegram_message("⚠️ దయచేసి ఛానల్ యూజర్‌నేమ్ ఇవ్వండి. ఉదాహరణ: <code>/setchannel @telugugroups_study</code>", token=token, chat_id=chat_id)
+                    else:
+                        new_ch_id = parts[1].strip()
+                        new_title = parts[2].strip() if len(parts) > 2 else new_ch_id
+                        add_channel(new_ch_id, new_title)
+                        send_telegram_message(f"✅ <b>ఛానల్ విజయవంతంగా నమోదు చేయబడింది!</b>\n📢 ఛానల్: <code>{new_ch_id}</code>\nఇకపై ఈ ఛానల్‌కు డైలీ ఈ-పేపర్ PDF & డైజెస్ట్ ఆటోమేటిక్‌గా బ్రాడ్‌కాస్ట్ అవుతుంది.", token=token, chat_id=chat_id)
 
                 elif text == "/all":
                     broadcast_daily_digest(date=today_date, token=token, chat_id=chat_id)
