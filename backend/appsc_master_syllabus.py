@@ -19,11 +19,14 @@ def render_appsc_syllabus_html():
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>APPSC గ్రూప్ 1 & 2 సమగ్ర డిజిటల్ టెక్స్ట్‌బుక్ & మాస్టర్ సిలబస్ పోర్టల్ | లక్ష్య CA</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" type="image/jpeg" href="/lakshya_logo.jpg">
   <link rel="apple-touch-icon" href="/lakshya_logo.jpg">
-  <link rel="stylesheet" href="/styles.css?v=16">
+  <link rel="stylesheet" href="/styles.css?v=20">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     @media print {
@@ -38,7 +41,121 @@ def render_appsc_syllabus_html():
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 4px; }
     .highlight-match { background-color: rgba(251, 191, 36, 0.35); border-radius: 2px; }
+
+    /* Bulletproof Tab Display Engine */
+    .tab-content {
+      display: none !important;
+    }
+    .tab-content.active {
+      display: block !important;
+      animation: tabFadeIn 0.2s ease-in-out;
+    }
+    @keyframes tabFadeIn {
+      from { opacity: 0.3; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .tab-btn {
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab-btn.active {
+      background-color: #2563eb !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.5) !important;
+      border-color: #60a5fa !important;
+    }
+    .quick-tab-btn {
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .quick-tab-btn.active {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.5) !important;
+      border-color: #93c5fd !important;
+      transform: scale(1.02);
+    }
   </style>
+
+  <!-- Global Head Tab Switcher (Immediately Ready Before Body Renders) -->
+  <script>
+    window.switchTab = function(tabId) {
+      try {
+        if (!tabId) tabId = 'history';
+        console.log('Switching to tab:', tabId);
+        
+        // 1. Toggle Tab Contents
+        var contents = document.querySelectorAll('.tab-content');
+        for (var i = 0; i < contents.length; i++) {
+          contents[i].classList.remove('active');
+        }
+        var target = document.getElementById('content-' + tabId);
+        if (target) {
+          target.classList.add('active');
+        } else {
+          console.warn('Target content not found: content-' + tabId);
+          var hist = document.getElementById('content-history');
+          if (hist) hist.classList.add('active');
+          return;
+        }
+
+        // 2. Toggle Top Tab Buttons
+        var buttons = document.querySelectorAll('.tab-btn');
+        for (var j = 0; j < buttons.length; j++) {
+          buttons[j].classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-lg');
+          buttons[j].classList.add('bg-slate-800', 'text-slate-300');
+        }
+        var activeBtn = document.getElementById('tab-' + tabId);
+        if (activeBtn) {
+          activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
+          activeBtn.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-lg');
+          try {
+            activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          } catch(e) {}
+        }
+
+        // 3. Toggle Quick 9-Subject Selector Cards
+        var quickButtons = document.querySelectorAll('.quick-tab-btn');
+        for (var k = 0; k < quickButtons.length; k++) {
+          quickButtons[k].classList.remove('active', 'bg-blue-600', 'text-white', 'border-blue-400');
+          quickButtons[k].classList.add('bg-slate-900/90', 'text-slate-300', 'border-slate-700/80');
+        }
+        var activeQuick = document.getElementById('quick-' + tabId);
+        if (activeQuick) {
+          activeQuick.classList.remove('bg-slate-900/90', 'text-slate-300', 'border-slate-700/80');
+          activeQuick.classList.add('active', 'bg-blue-600', 'text-white', 'border-blue-400');
+        }
+
+        // 4. Update Current Active Subject Banner
+        var tabTitles = {
+          'history': '📜 భారత & ఆంధ్రప్రదేశ్ సమగ్ర చరిత్ర (History Master Textbook)',
+          'geo': '🌍 ఆంధ్రప్రదేశ్ & భారత సమగ్ర భూగోళశాస్త్రం (Ekam & RC రెడ్డి 334 పేజీలు)',
+          'disaster': '🚨 విపత్తు నిర్వహణ (Disaster Management - RC రెడ్డి 88 పేజీలు)',
+          'policies': '💼 ఆంధ్రప్రదేశ్ నూతన విధానాలు 4.0 (AP Policies 2024–2029)',
+          'aptitude': '🧮 మెంటల్ ఎబిలిటీ & ఆప్టిట్యూడ్ (228 పేజీల బుక్ & 120 షార్ట్‌కట్స్)',
+          'polity': '⚖️ భారత రాజ్యాంగం & పాలన (Polity Master Notes)',
+          'economy': '💰 భారత ఆర్థిక వ్యవస్థ & ద్రవ్య మార్కెట్లు (Economy & Financial Markets)',
+          'pyqs': '📝 115+ సాల్వ్డ్ APPSC అధికారిక ప్రశ్నలు (Interactive MCQs Hub)',
+          'mains': '✍️ మెయిన్స్ ఆన్సర్ రైటింగ్, ఎథిక్స్ & ఇంటర్వ్యూ గైడ్'
+        };
+        var banner = document.getElementById('activeSubjectBanner');
+        if (banner && tabTitles[tabId]) {
+          banner.innerText = tabTitles[tabId];
+        }
+
+        // 5. Update URL Hash without jump
+        try {
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, null, '#' + tabId);
+          }
+        } catch(e) {}
+      } catch (err) {
+        console.error('Error in switchTab:', err);
+      }
+    };
+  </script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased">
 
@@ -78,44 +195,44 @@ def render_appsc_syllabus_html():
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2.5">
-        <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition shadow-sm">
+        <button type="button" onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition shadow-sm cursor-pointer">
           <i data-lucide="printer" class="w-4 h-4"></i>
           <span>ప్రింట్ / PDF డౌన్‌లోడ్</span>
         </button>
-        <button onclick="shareToWhatsApp()" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition shadow-sm">
+        <button type="button" onclick="shareToWhatsApp()" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition shadow-sm cursor-pointer">
           <i data-lucide="share-2" class="w-4 h-4"></i>
           <span>వాట్సాప్ షేర్</span>
         </button>
       </div>
     </div>
 
-    <!-- Subject Tabs Bar -->
+    <!-- Top Sticky Horizontal Tabs Bar -->
     <div class="max-w-7xl mx-auto px-4 overflow-x-auto custom-scrollbar border-t border-slate-700/60 flex space-x-2 py-2 text-xs font-bold">
-      <button onclick="switchTab('history')" id="tab-history" class="tab-btn px-3.5 py-2 rounded-lg bg-blue-600 text-white flex items-center gap-1.5 shrink-0 transition">
+      <button type="button" onclick="switchTab('history')" data-tab="history" id="tab-history" class="tab-btn active px-3.5 py-2 rounded-lg bg-blue-600 text-white flex items-center gap-1.5 shrink-0 transition border border-transparent shadow-lg">
         <span>📜 చరిత్ర (భారత & ఏపీ పూర్తి బుక్)</span>
       </button>
-      <button onclick="switchTab('geo')" id="tab-geo" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
+      <button type="button" onclick="switchTab('geo')" data-tab="geo" id="tab-geo" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5 shrink-0 transition border border-slate-700/50">
         <span>🌍 భూగోళశాస్త్రం (Ekam & RC రెడ్డి 334 పేజీలు)</span>
       </button>
-      <button onclick="switchTab('disaster')" id="tab-disaster" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
+      <button type="button" onclick="switchTab('disaster')" data-tab="disaster" id="tab-disaster" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5 shrink-0 transition border border-slate-700/50">
         <span>🚨 విపత్తు నిర్వహణ (RC రెడ్డి 88 పేజీలు)</span>
       </button>
-      <button onclick="switchTab('policies')" id="tab-policies" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
+      <button type="button" onclick="switchTab('policies')" data-tab="policies" id="tab-policies" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5 shrink-0 transition border border-slate-700/50">
         <span>💼 ఏపీ నూతన విధానాలు 4.0 (2024–2029)</span>
       </button>
-      <button onclick="switchTab('aptitude')" id="tab-aptitude" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
+      <button type="button" onclick="switchTab('aptitude')" data-tab="aptitude" id="tab-aptitude" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5 shrink-0 transition border border-slate-700/50">
         <span>🧮 మెంటల్ ఎబిలిటీ (228 పేజీల బుక్ & 120 షార్ట్‌కట్స్)</span>
       </button>
-      <button onclick="switchTab('polity')" id="tab-polity" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
+      <button type="button" onclick="switchTab('polity')" data-tab="polity" id="tab-polity" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5 shrink-0 transition border border-slate-700/50">
         <span>⚖️ రాజ్యాంగం & పాలన</span>
       </button>
-      <button onclick="switchTab('economy')" id="tab-economy" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
+      <button type="button" onclick="switchTab('economy')" data-tab="economy" id="tab-economy" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5 shrink-0 transition border border-slate-700/50">
         <span>💰 ఆర్థిక వ్యవస్థ & ద్రవ్య మార్కెట్లు</span>
       </button>
-      <button onclick="switchTab('pyqs')" id="tab-pyqs" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
+      <button type="button" onclick="switchTab('pyqs')" data-tab="pyqs" id="tab-pyqs" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5 shrink-0 transition border border-slate-700/50">
         <span>📝 115+ సాల్వ్డ్ APPSC ప్రశ్నలు (MCQs)</span>
       </button>
-      <button onclick="switchTab('mains')" id="tab-mains" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5 shrink-0 transition">
+      <button type="button" onclick="switchTab('mains')" data-tab="mains" id="tab-mains" class="tab-btn px-3.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5 shrink-0 transition border border-slate-700/50">
         <span>✍️ మెయిన్స్ & ఎథిక్స్ గైడ్</span>
       </button>
     </div>
@@ -123,6 +240,60 @@ def render_appsc_syllabus_html():
 
   <!-- Container -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- 9-Subject Quick Selector Panel & Active Status -->
+    <div class="bg-gradient-to-br from-slate-800 via-slate-800/90 to-slate-900 border border-slate-700/90 p-4 rounded-2xl mb-6 shadow-md no-print">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-3 border-b border-slate-700/60 pb-3">
+        <div class="flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">ప్రస్తుతం మీరు చదువుతున్న విభాగం:</span>
+          <span id="activeSubjectBanner" class="text-xs sm:text-sm font-black text-amber-400">📜 భారత & ఆంధ్రప్రదేశ్ సమగ్ర చరిత్ర (History Master Textbook)</span>
+        </div>
+        <div class="text-xs text-slate-400">
+          కింది 9 సబ్జెక్టులలో దేనినైనా ఎంచుకుని నేరుగా చదవండి 👇
+        </div>
+      </div>
+
+      <!-- 9-Subject Interactive Quick Buttons Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-2 text-xs font-bold">
+        <button type="button" onclick="switchTab('history')" data-tab="history" id="quick-history" class="quick-tab-btn active px-3 py-2.5 rounded-xl text-center transition flex flex-col items-center justify-center gap-1 border border-blue-400 bg-blue-600 text-white shadow-md">
+          <span class="text-lg">📜</span>
+          <span class="truncate w-full">చరిత్ర</span>
+        </button>
+        <button type="button" onclick="switchTab('geo')" data-tab="geo" id="quick-geo" class="quick-tab-btn px-3 py-2.5 rounded-xl text-center transition flex flex-col items-center justify-center gap-1 border border-slate-700/80 bg-slate-900/90 hover:bg-slate-700 hover:text-white text-slate-300">
+          <span class="text-lg">🌍</span>
+          <span class="truncate w-full">భూగోళశాస్త్రం</span>
+        </button>
+        <button type="button" onclick="switchTab('disaster')" data-tab="disaster" id="quick-disaster" class="quick-tab-btn px-3 py-2.5 rounded-xl text-center transition flex flex-col items-center justify-center gap-1 border border-slate-700/80 bg-slate-900/90 hover:bg-slate-700 hover:text-white text-slate-300">
+          <span class="text-lg">🚨</span>
+          <span class="truncate w-full">విపత్తు నిర్వహణ</span>
+        </button>
+        <button type="button" onclick="switchTab('policies')" data-tab="policies" id="quick-policies" class="quick-tab-btn px-3 py-2.5 rounded-xl text-center transition flex flex-col items-center justify-center gap-1 border border-slate-700/80 bg-slate-900/90 hover:bg-slate-700 hover:text-white text-slate-300">
+          <span class="text-lg">💼</span>
+          <span class="truncate w-full">పాలసీలు 4.0</span>
+        </button>
+        <button type="button" onclick="switchTab('aptitude')" data-tab="aptitude" id="quick-aptitude" class="quick-tab-btn px-3 py-2.5 rounded-xl text-center transition flex flex-col items-center justify-center gap-1 border border-slate-700/80 bg-slate-900/90 hover:bg-slate-700 hover:text-white text-slate-300">
+          <span class="text-lg">🧮</span>
+          <span class="truncate w-full">మెంటల్ ఎబిలిటీ</span>
+        </button>
+        <button type="button" onclick="switchTab('polity')" data-tab="polity" id="quick-polity" class="quick-tab-btn px-3 py-2.5 rounded-xl text-center transition flex flex-col items-center justify-center gap-1 border border-slate-700/80 bg-slate-900/90 hover:bg-slate-700 hover:text-white text-slate-300">
+          <span class="text-lg">⚖️</span>
+          <span class="truncate w-full">రాజ్యాంగం</span>
+        </button>
+        <button type="button" onclick="switchTab('economy')" data-tab="economy" id="quick-economy" class="quick-tab-btn px-3 py-2.5 rounded-xl text-center transition flex flex-col items-center justify-center gap-1 border border-slate-700/80 bg-slate-900/90 hover:bg-slate-700 hover:text-white text-slate-300">
+          <span class="text-lg">💰</span>
+          <span class="truncate w-full">ఆర్థిక వ్యవస్థ</span>
+        </button>
+        <button type="button" onclick="switchTab('pyqs')" data-tab="pyqs" id="quick-pyqs" class="quick-tab-btn px-3 py-2.5 rounded-xl text-center transition flex flex-col items-center justify-center gap-1 border border-slate-700/80 bg-slate-900/90 hover:bg-slate-700 hover:text-white text-slate-300">
+          <span class="text-lg">📝</span>
+          <span class="truncate w-full">115+ PYQs</span>
+        </button>
+        <button type="button" onclick="switchTab('mains')" data-tab="mains" id="quick-mains" class="quick-tab-btn px-3 py-2.5 rounded-xl text-center transition flex flex-col items-center justify-center gap-1 border border-slate-700/80 bg-slate-900/90 hover:bg-slate-700 hover:text-white text-slate-300">
+          <span class="text-lg">✍️</span>
+          <span class="truncate w-full">మెయిన్స్ & ఎథిక్స్</span>
+        </button>
+      </div>
+    </div>
 
     <!-- Search & Preparation Tracker -->
     <div class="bg-slate-800/90 border border-slate-700/80 p-4 rounded-2xl mb-6 shadow-sm flex flex-wrap items-center justify-between gap-4 no-print">
@@ -148,7 +319,7 @@ def render_appsc_syllabus_html():
     </div>
 
     <!-- ==================== TAB 1: HISTORY (భారత & ఆంధ్రప్రదేశ్ సమగ్ర చరిత్ర) ==================== -->
-    <section id="content-history" class="tab-content space-y-6" style="display: block !important;">
+    <section id="content-history" class="tab-content space-y-6 active">
       <div class="bg-gradient-to-r from-amber-950 via-slate-800 to-slate-900 border border-amber-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-amber-900/60 text-amber-300 px-3 py-1 rounded-full border border-amber-700/50">APPSC Group 1 & 2 • 30 మార్కులు</span>
@@ -392,7 +563,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 2: GEOGRAPHY (Ekam IAS 112-Page + RC Reddy 222-Page Notes) ==================== -->
-    <section id="content-geo" class="tab-content space-y-6" style="display: none !important;">
+    <section id="content-geo" class="tab-content space-y-6">
       <div class="bg-gradient-to-r from-blue-950 via-slate-800 to-slate-900 border border-blue-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-blue-900/60 text-blue-300 px-3 py-1 rounded-full border border-blue-700/50">Ekam IAS 112 పేజీల టెక్స్ట్‌బుక్ + RC రెడ్డి 222 పేజీల నోట్స్</span>
@@ -567,7 +738,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 3: DISASTER MANAGEMENT (RC REDDY NOTES) ==================== -->
-    <section id="content-disaster" class="tab-content space-y-6" style="display: none !important;">
+    <section id="content-disaster" class="tab-content space-y-6">
       <div class="bg-gradient-to-r from-red-950 via-slate-800 to-slate-900 border border-red-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-red-900/60 text-red-300 px-3 py-1 rounded-full border border-red-700/50">RC రెడ్డి IAS స్టడీ సర్కిల్ • రామన్ రాజు క్లాస్ నోట్స్</span>
@@ -795,7 +966,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 4: AP POLICIES 4.0 (2024-2029) ==================== -->
-    <section id="content-policies" class="tab-content space-y-6" style="display: none !important;">
+    <section id="content-policies" class="tab-content space-y-6">
       <div class="bg-gradient-to-r from-emerald-950 via-slate-800 to-slate-900 border border-emerald-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-emerald-900/60 text-emerald-300 px-3 py-1 rounded-full border border-emerald-700/50">ఆంధ్రప్రదేశ్ ప్రభుత్వం • 2024–2029 అధికారిక జీవోలు</span>
@@ -913,7 +1084,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 5: MENTAL ABILITY & APTITUDE ==================== -->
-    <section id="content-aptitude" class="tab-content space-y-6" style="display: none !important;">
+    <section id="content-aptitude" class="tab-content space-y-6">
       <div class="bg-gradient-to-r from-cyan-950 via-slate-800 to-slate-900 border border-cyan-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-cyan-900/60 text-cyan-300 px-3 py-1 rounded-full border border-cyan-700/50">228 పేజీల సమగ్ర పాఠ్య పుస్తకం • 120+ షార్ట్‌కట్ ఫార్ములాలు</span>
@@ -1041,7 +1212,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 6: POLITY & CONSTITUTION ==================== -->
-    <section id="content-polity" class="tab-content space-y-6" style="display: none !important;">
+    <section id="content-polity" class="tab-content space-y-6">
       <div class="bg-gradient-to-r from-purple-950 via-slate-800 to-slate-900 border border-purple-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-purple-900/60 text-purple-300 px-3 py-1 rounded-full border border-purple-700/50">APPSC Group 1 & 2 • 30 మార్కులు</span>
@@ -1114,7 +1285,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 7: ECONOMY & FINANCIAL MARKETS ==================== -->
-    <section id="content-economy" class="tab-content space-y-6" style="display: none !important;">
+    <section id="content-economy" class="tab-content space-y-6">
       <div class="bg-gradient-to-r from-yellow-950 via-slate-800 to-slate-900 border border-yellow-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-yellow-900/60 text-yellow-300 px-3 py-1 rounded-full border border-yellow-700/50">Ekam IAS సమగ్ర ఆర్థిక మార్కెట్ల గైడ్ (6 పేజీలు)</span>
@@ -1186,7 +1357,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 8: SOLVED APPSC PYQS HUB ==================== -->
-    <section id="content-pyqs" class="tab-content space-y-6" style="display: none !important;">
+    <section id="content-pyqs" class="tab-content space-y-6">
       <div class="bg-gradient-to-r from-amber-950 via-slate-800 to-slate-900 border border-amber-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-amber-900/60 text-amber-300 px-3 py-1 rounded-full border border-amber-700/50">APPSC అధికారిక మునుపటి ప్రశ్నలు (PYQs)</span>
@@ -1296,7 +1467,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 9: MAINS & ETHICS GUIDE ==================== -->
-    <section id="content-mains" class="tab-content space-y-6" style="display: none !important;">
+    <section id="content-mains" class="tab-content space-y-6">
       <div class="bg-gradient-to-r from-pink-950 via-slate-800 to-slate-900 border border-pink-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-pink-900/60 text-pink-300 px-3 py-1 rounded-full border border-pink-700/50">APPSC Group 1 Mains & Interview Special</span>
@@ -1341,42 +1512,6 @@ def render_appsc_syllabus_html():
   </footer>
 
   <script>
-    // Bulletproof Global Tab Switcher
-    window.switchTab = function(tabId) {
-      try {
-        console.log('Switching to tab:', tabId);
-        const contents = document.querySelectorAll('.tab-content');
-        contents.forEach(el => {
-          el.style.setProperty('display', 'none', 'important');
-        });
-
-        const buttons = document.querySelectorAll('.tab-btn');
-        buttons.forEach(btn => {
-          btn.classList.remove('bg-blue-600', 'text-white', 'shadow-lg');
-          btn.classList.add('bg-slate-800', 'text-slate-300');
-        });
-
-        const activeContent = document.getElementById('content-' + tabId);
-        const activeBtn = document.getElementById('tab-' + tabId);
-
-        if (activeContent) {
-          activeContent.style.setProperty('display', 'block', 'important');
-        } else {
-          console.error('Section not found: content-' + tabId);
-        }
-
-        if (activeBtn) {
-          activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
-          activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
-          activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-        }
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (err) {
-        console.error('Error switching tab:', err);
-      }
-    };
-
     function updateProgress() {
       try {
         const checkboxes = document.querySelectorAll('.study-check');
@@ -1440,9 +1575,7 @@ def render_appsc_syllabus_html():
         if (window.lucide && typeof lucide.createIcons === 'function') {
           lucide.createIcons();
         }
-      } catch (err) {
-        console.warn('Lucide icons warning:', err);
-      }
+      } catch (err) {}
 
       // Restore checklist
       try {
@@ -1454,10 +1587,30 @@ def render_appsc_syllabus_html():
         updateProgress();
       } catch (err) {}
 
-      // Default active tab
-      window.switchTab('history');
+      // Check URL Hash or default to history
+      let initTab = 'history';
+      if (window.location.hash) {
+        const h = window.location.hash.replace('#', '').trim();
+        if (document.getElementById('content-' + h)) {
+          initTab = h;
+        }
+      }
+      if (typeof window.switchTab === 'function') {
+        window.switchTab(initTab);
+      }
+
+      // Attach backup click listeners to any [data-tab] elements
+      document.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const t = btn.getAttribute('data-tab');
+          if (t && typeof window.switchTab === 'function') {
+            window.switchTab(t);
+          }
+        });
+      });
     });
   </script>
 </body>
 </html>
+
 """

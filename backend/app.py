@@ -808,8 +808,13 @@ def omr_appsc_all_view():
 @app.route("/appsc_syllabus", methods=["GET"])
 @app.route("/syllabus", methods=["GET"])
 def appsc_syllabus_view():
+    from flask import make_response
     from appsc_master_syllabus import render_appsc_syllabus_html
-    return render_appsc_syllabus_html()
+    resp = make_response(render_appsc_syllabus_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 if __name__ == "__main__":
     print("==================================================================")
