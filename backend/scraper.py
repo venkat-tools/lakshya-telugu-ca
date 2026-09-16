@@ -93,6 +93,21 @@ TELUGU_SOURCES = [
     }
 ]
 
+BANNED_EXAM_KEYWORDS = [
+    "సినిమా", "షూటింగ్", "సూర్య", "జ్యోతిక", "సంపూర్ణేష్", "బిర్యానీ", "భార్య", "భర్త", 
+    "షాక్", "దొంగతనం", "ముక్కు", "చైత్ర", "హత్య", "SPY CAM", "లండన్", "వైకాపా", 
+    "వైసీపీ", "ఎమ్మెల్సీ", "గాజువాక", "క్షమాపణ", "బతికుండగానే", "నిమజ్జనం", "కోటీశ్వరుడు",
+    "పులస", "రొయ్య", "హెలికాప్టర్ క్రాష్", "శ్రీకాకుళం జిల్లాలో వైకాపా", "ప్రేమ", "వివాహం",
+    "పెళ్లి", "ట్రైలర్", "గాసిప్", "రివ్యూ", "ఆత్మహత్య", "చోరీ", "అరెస్ట్", "బంగారం ధర", "పసిడి ధర"
+]
+
+def is_exam_worthy_content(text):
+    text_lower = text.lower()
+    for b in BANNED_EXAM_KEYWORDS:
+        if b.lower() in text_lower:
+            return False
+    return True
+
 def detect_category(text):
     text_lower = text.lower()
     for cat, keywords in KEYWORD_CATEGORIES.items():
@@ -189,6 +204,9 @@ def sync_daily_news(target_date=None):
     for item in all_fetched_news:
         title = item["title"]
         if title in existing_titles or len(title) < 10:
+            continue
+
+        if not is_exam_worthy_content(title + " " + item["summary"]):
             continue
 
         cat = detect_category(title + " " + item["summary"])

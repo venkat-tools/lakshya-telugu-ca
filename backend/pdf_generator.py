@@ -111,13 +111,28 @@ OFFICIAL_TELUGU_EPAPERS = [
 ]
 
 CATEGORY_LABELS = {
-    "national": "🏛️ జాతీయ అంశాలు (National Affairs)",
-    "regional": "🌾 ఆంధ్రప్రదేశ్ & తెలంగాణ (AP & TS Affairs)",
+    "national": "🏛️ జాతీయ అంశాలు & రాజ్యాంగం (National Affairs & Polity)",
+    "regional": "🌾 ఆంధ్రప్రదేశ్ & తెలంగాణ పాలసీలు (AP & TS Schemes & Policies)",
     "economy": "📈 ఆర్థిక రంగం & బ్యాంకింగ్ (Economy & Banking)",
-    "science_tech": "🚀 సైన్స్, టెక్నాలజీ & పర్యావరణం (Science & Tech)",
+    "science_tech": "🚀 సైన్స్, టెక్నాలజీ, ఇస్రో & రక్షణ (Science, Tech & Defence)",
     "sports_awards": "🏆 క్రీడలు & అవార్డులు (Sports & Awards)",
-    "appointments": "👤 ప్రముఖ నియామకాలు (Appointments)"
+    "appointments": "👤 ప్రముఖ నియామకాలు (Constitutional & Key Appointments)"
 }
+
+BANNED_EXAM_JUNK = [
+    "సినిమా", "షూటింగ్", "సూర్య", "జ్యోతిక", "సంపూర్ణేష్", "బిర్యానీ", "భార్య", "భర్త", 
+    "షాక్", "దొంగతనం", "ముక్కు", "చైత్ర", "హత్య", "SPY CAM", "లండన్", "వైకాపా", 
+    "వైసీపీ", "ఎమ్మెల్సీ", "గాజువాక", "క్షమాపణ", "బతికుండగానే", "నిమజ్జనం", "కోటీశ్వరుడు",
+    "పులస", "రొయ్య", "హెలికాప్టర్ క్రాష్", "శ్రీకాకుళం జిల్లాలో వైకాపా", "ప్రేమ", "వివాహం",
+    "పెళ్లి", "ట్రైలర్", "గాసిప్", "రివ్యూ", "ఆత్మహత్య", "చోరీ", "అరెస్ట్"
+]
+
+def is_exam_worthy(art):
+    text = (art.get("title", "") + " " + art.get("summary", "")).lower()
+    for junk in BANNED_EXAM_JUNK:
+        if junk.lower() in text:
+            return False
+    return True
 
 def format_notes_html(notes):
     if not notes:
@@ -140,13 +155,21 @@ def render_epaper_html(date=None):
     """
     Generate complete, beautiful, newspaper-styled HTML layout
     for the Daily Telugu E-Paper edition.
+    Strictly filters out non-exam filler news, movie gossip, and local crimes.
     """
     if not date:
         dates = get_available_dates()
         date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
 
-    articles = get_articles(date=date)
-    one_liners = get_one_liners_by_date(date=date)
+    raw_articles = get_articles(date=date)
+    # Strictly filter for competitive exam high-yield content
+    articles = [a for a in raw_articles if is_exam_worthy(a)]
+    
+    raw_one_liners = get_one_liners_by_date(date=date)
+    one_liners = [
+        ol for ol in raw_one_liners 
+        if not any(junk.lower() in ol.get("point", "").lower() for junk in BANNED_EXAM_JUNK)
+    ]
     quizzes = get_quiz_by_date(date=date)
 
     # Group articles by category
@@ -214,7 +237,7 @@ def render_epaper_html(date=None):
       <h1 class="font-bold text-slate-800 text-base sm:text-lg flex items-center gap-2">
         <span>📰</span> లక్ష్య తెలుగు డైలీ ఈ-పేపర్ (E-Paper) • {date}
       </h1>
-      <p class="text-xs text-slate-500">ఈనాడు, సాక్షి, నమస్తే తెలంగాణ సమగ్ర పరీక్షా విశ్లేషణ</p>
+      <p class="text-xs text-slate-500">పోటీ పరీక్షల ప్రత్యేకం (APPSC • TSPSC • UPSC • SSC • బ్యాంకింగ్)</p>
     </div>
     <div class="flex gap-2">
       <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5">
@@ -232,17 +255,17 @@ def render_epaper_html(date=None):
   <div class="newspaper-container max-w-5xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-300 p-6 sm:p-10">
 
     <!-- NEWSPAPER MASTHEAD -->
-    <header class="border-b-4 border-slate-900 pb-4 mb-6">
+    <header class="border-b-4 border-slate-900 pb-4 mb-5">
       <div class="flex flex-col sm:flex-row justify-between items-center border-b border-slate-300 pb-2 mb-3 text-xs text-slate-600 font-semibold gap-1">
         <div class="flex items-center gap-2">
-          <span class="bg-red-600 text-white font-black px-2 py-0.5 rounded text-[10px] uppercase">డైలీ ఈ-పేపర్</span>
+          <span class="bg-red-600 text-white font-black px-2 py-0.5 rounded text-[10px] uppercase">పోటీ పరీక్షల స్పెషల్</span>
           <span>సంపుటి: 2026 • సంచిక: {date}</span>
         </div>
         <div class="font-bold text-slate-800">
           📅 {date} ({day_name}) • ఆంధ్రప్రదేశ్ & తెలంగాణ ఎడిషన్
         </div>
         <div>
-          <span>APPSC • TSPSC • UPSC • BANKING స్పెషల్</span>
+          <span>APPSC • TSPSC • UPSC • SSC • BANKING స్పెషల్</span>
         </div>
       </div>
 
@@ -251,17 +274,25 @@ def render_epaper_html(date=None):
           లక్ష్య తెలుగు ఈ-పేపర్
         </h1>
         <p class="text-xs sm:text-sm font-bold text-blue-900 tracking-wide">
-          తెలుగు దినపత్రికల సమగ్ర కరెంట్ అఫైర్స్ & డైలీ ఎగ్జామ్ డైజెస్ట్
+          100% పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ & సిలబస్ ఆధారిత ఎగ్జామ్ డైజెస్ట్
         </p>
         <p class="text-[11px] text-slate-500 mt-0.5">
-          కవరేజ్: ఈనాడు • సాక్షి • ఆంధ్రజ్యోతి • నమస్తే తెలంగాణ • BBC న్యూస్ తెలుగు • ఏషియానెట్ • ABP దేశం
+          ఈనాడు • సాక్షి • ఆంధ్రజ్యోతి • నమస్తే తెలంగాణ • ది హిందూ • PIB అధికారిక సమాచార నిగ్గుతేల్చిన విశ్లేషణ
         </p>
+      </div>
+
+      <!-- 100% Competitive Exams Special Edition Banner -->
+      <div class="bg-gradient-to-r from-red-700 via-rose-700 to-red-800 text-white p-2.5 rounded-lg mb-3 text-center font-bold text-xs sm:text-sm shadow">
+        🎯 100% పోటీ పరీక్షల ప్రత్యేక ఎడిషన్ (కేవలం ఎగ్జామ్ సిలబస్ ఆధారిత వార్తలు మాత్రమే - Zero Fillers)
+        <div class="text-[11px] font-normal text-rose-100 mt-0.5">
+          APPSC గ్రూప్-1, 2, 3 • TSPSC గ్రూప్-1, 2, 3 • UPSC GS • SSC CGL • బ్యాంకింగ్ ప్రత్యేక విశ్లేషణ
+        </div>
       </div>
 
       <!-- Quick Metrics Bar -->
       <div class="grid grid-cols-4 bg-slate-900 text-white text-center py-2 px-3 rounded-lg text-xs font-bold gap-2">
         <div>📊 ప్రధాన ఆర్టికల్స్: <span class="text-amber-400">{len(articles)}</span></div>
-        <div>⚡ ఒక వరుస ముఖ్యాంశాలు: <span class="text-amber-400">{len(one_liners)}</span></div>
+        <div>⚡ రివిజన్ ముఖ్యాంశాలు: <span class="text-amber-400">{len(one_liners)}</span></div>
         <div>📝 క్విజ్ ప్రశ్నలు: <span class="text-amber-400">{len(quizzes)}</span></div>
         <div>🎯 ప్రాముఖ్యత: <span class="text-emerald-400">గ్రూప్స్ & సివిల్స్</span></div>
       </div>
@@ -300,21 +331,21 @@ def render_epaper_html(date=None):
 
             html += f"""
           <article class="article-item mb-5 pb-4 border-b border-slate-200 last:border-none">
-            <div class="flex items-center justify-between text-[11px] text-slate-500 font-bold mb-1 flex-wrap gap-1">
+            <div class="flex items-center justify-between text-[11px] text-slate-500 font-bold mb-1.5 flex-wrap gap-1">
               <div class="flex items-center gap-1.5">
-                <span class="text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded font-black">[{source}]</span>
+                <span class="text-blue-800 bg-blue-100 px-2 py-0.5 rounded font-black text-[10px]">[{source}]</span>
                 {f'''<a href="{art_url}" target="_blank" rel="noopener noreferrer" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1 no-underline cursor-pointer" style="background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 10px;" onclick="window.open(\'{art_url}\', \'_blank\'); return true;">🌐 మూల కథనం ↗</a>''' if art_url else ''}
               </div>
-              <span class="text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded">🎯 {relevance}</span>
+              <span class="text-purple-900 bg-purple-100 border border-purple-200 px-2 py-0.5 rounded font-black text-[10px]">🎯 సిలబస్: {relevance}</span>
             </div>
             <h3 class="text-sm sm:text-base font-black text-slate-900 leading-snug mb-1.5 hover:text-blue-700">
               {f'''<a href="{art_url}" target="_blank" rel="noopener noreferrer" class="hover:underline text-slate-900" style="color: inherit; text-decoration: none;" onclick="window.open(\'{art_url}\', \'_blank\'); return true;">{art["title"]} <span style="color: #2563eb; font-size: 11px;">↗</span></a>''' if art_url else art['title']}
             </h3>
-            <p class="text-xs text-slate-700 leading-relaxed text-justify mb-2">
+            <p class="text-xs text-slate-700 leading-relaxed text-justify mb-2 font-normal">
               {art['summary']}
             </p>
-            {f'''<div class="bg-blue-50/80 p-2.5 rounded-lg border border-blue-200 text-[11px] text-blue-950 font-bold leading-relaxed whitespace-pre-line">
-              <span class="text-blue-800 font-black">📌 పరీక్షల కీలకాంశం:</span>\n{format_notes_html(art.get("detailed_notes", ""))}
+            {f'''<div class="bg-blue-50/90 p-3 rounded-lg border border-blue-300 text-[11px] text-blue-950 font-medium leading-relaxed whitespace-pre-line shadow-sm">
+              <span class="text-blue-900 font-black text-xs">📌 పరీక్షల కీలకాంశాలు & అడిగే ప్రశ్నలు (Key Exam Facts):</span>\n{format_notes_html(art.get("detailed_notes", ""))}
             </div>''' if art.get("detailed_notes") else ''}
           </article>
             """
@@ -330,7 +361,7 @@ def render_epaper_html(date=None):
       <section class="border-b-2 border-slate-200 pb-6">
         <div class="bg-amber-100 border-l-4 border-amber-600 px-3 py-1.5 mb-4 flex justify-between items-center">
           <h2 class="text-base sm:text-lg font-black text-amber-950">
-            ⚡ ఒక వరుస ముఖ్యాంశాలు (Quick Revision One-Liners)
+            ⚡ ఒక వరుస రివిజన్ ముఖ్యాంశాలు (Exam High-Yield One-Liners)
           </h2>
           <span class="text-xs font-bold text-amber-800">{len(one_liners)} ముఖ్యాంశాలు</span>
         </div>
@@ -355,7 +386,7 @@ def render_epaper_html(date=None):
       <section class="border-b-2 border-slate-200 pb-6">
         <div class="bg-emerald-100 border-l-4 border-emerald-700 px-3 py-1.5 mb-4 flex justify-between items-center">
           <h2 class="text-base sm:text-lg font-black text-emerald-950">
-            📝 నేటి డైలీ ప్రాక్టీస్ క్విజ్ (5 MCQs & Explanations)
+            📝 నేటి డైలీ ప్రాక్టీస్ క్విజ్ (Exam Standard 5 MCQs with Explanations)
           </h2>
           <span class="text-xs font-bold text-emerald-800">వివరణలతో</span>
         </div>
@@ -463,8 +494,8 @@ def generate_epaper_pdf(date=None, force_refresh=False):
     if os.path.exists(out_pdf_path) and not force_refresh and os.path.getsize(out_pdf_path) > 1000:
         return out_pdf_path
 
-    # 2. Return pre-generated static PDF from frontend/pdfs if available
-    if os.path.exists(static_pdf_path) and os.path.getsize(static_pdf_path) > 1000:
+    # 2. Return pre-generated static PDF from frontend/pdfs if available and not force refresh
+    if os.path.exists(static_pdf_path) and not force_refresh and os.path.getsize(static_pdf_path) > 1000:
         return static_pdf_path
 
     # 3. Generate HTML and convert to PDF via headless browser if executable is found
@@ -478,7 +509,17 @@ def generate_epaper_pdf(date=None, force_refresh=False):
 
             file_uri = f"file:///{temp_html_path.replace(os.sep, '/')}"
             cmd = f'"{browser_exe}" --headless --disable-gpu --no-pdf-header-footer --print-to-pdf="{out_pdf_path}" "{file_uri}"'
-            subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
+            subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=40)
+            
+            # Copy freshly generated PDF to static directory as well
+            if os.path.exists(out_pdf_path) and os.path.getsize(out_pdf_path) > 1000:
+                import shutil
+                try:
+                    os.makedirs(os.path.dirname(static_pdf_path), exist_ok=True)
+                    shutil.copy2(out_pdf_path, static_pdf_path)
+                    shutil.copy2(out_pdf_path, fallback_today)
+                except Exception as cp_err:
+                    print(f"Error copying generated PDF to frontend: {cp_err}")
         except Exception as e:
             print(f"PDF generation error: {e}")
         finally:
