@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initApHistoryHub();
   initSchemesHub();
   initMainsHub();
+  initTabsHideFeature();
   await loadAvailableDates();
   await refreshCurrentView();
   if (window.lucide) lucide.createIcons();
@@ -178,6 +179,18 @@ function switchTab(tabName) {
     } else {
       tab.classList.remove("active", "border-blue-600", "text-blue-600");
       tab.classList.add("border-transparent", "text-slate-600");
+    }
+  });
+
+  // Synchronize Compact Tabs Pills (shown when main tabs are hidden)
+  document.querySelectorAll(".compact-nav-btn").forEach(btn => {
+    const fn = btn.getAttribute("onclick") || "";
+    if (fn.includes(`'${tabName}'`)) {
+      btn.classList.add("bg-blue-600", "text-white");
+      btn.classList.remove("text-slate-700", "dark:text-slate-300");
+    } else {
+      btn.classList.remove("bg-blue-600", "text-white");
+      btn.classList.add("text-slate-700", "dark:text-slate-300");
     }
   });
 
@@ -4571,6 +4584,120 @@ function renderMainsQuestions() {
     `;
     container.appendChild(card);
   });
+}
+
+// ----------------- Collapsible Tabs & Full-Screen Reading Mode Feature -----------------
+function initTabsHideFeature() {
+  const toggleTabsBtn = document.getElementById("toggleTabsVisibilityBtn");
+  const floatingToggleBtn = document.getElementById("floatingTabsToggleBtn");
+  const modulesTrayBtn = document.getElementById("toggleModulesTrayBtn");
+  const modulesContainer = document.getElementById("collapsibleModulesContainer");
+  const navTabsBar = document.getElementById("collapsibleNavTabsBar");
+  const toggleTabsText = document.getElementById("toggleTabsText");
+  const floatingToggleText = document.getElementById("floatingToggleText");
+  const readingIndicator = document.getElementById("readingModeIndicator");
+  const compactTabPills = document.getElementById("compactTabPills");
+  const modulesTrayChevron = document.getElementById("modulesTrayChevron");
+
+  // Read saved state: default is false (visible), or if user previously hid it
+  let isTabsHidden = localStorage.getItem("lakshya_hide_tabs") === "true";
+  let isModulesHidden = localStorage.getItem("lakshya_hide_modules") === "true";
+
+  function applyTabsState(hidden, showNotification = true) {
+    isTabsHidden = hidden;
+    localStorage.setItem("lakshya_hide_tabs", hidden ? "true" : "false");
+
+    if (hidden) {
+      if (modulesContainer) modulesContainer.classList.add("hidden");
+      if (navTabsBar) navTabsBar.classList.add("hidden");
+      if (readingIndicator) readingIndicator.classList.remove("hidden");
+      if (compactTabPills) compactTabPills.classList.remove("hidden");
+      if (floatingToggleBtn) {
+        floatingToggleBtn.classList.remove("hidden");
+        floatingToggleBtn.classList.add("flex");
+      }
+      if (toggleTabsText) toggleTabsText.textContent = "ట్యాబ్స్ చూపించు (Show)";
+      if (toggleTabsBtn) {
+        toggleTabsBtn.classList.remove("from-indigo-600", "via-blue-600", "to-indigo-700");
+        toggleTabsBtn.classList.add("from-emerald-600", "to-teal-700");
+        toggleTabsBtn.setAttribute("title", "ట్యాబ్స్ మరియు మెనూను మళ్లీ చూపించడానికి క్లిక్ చేయండి (Shortcut: 'H')");
+      }
+      if (floatingToggleText) floatingToggleText.textContent = "ట్యాబ్స్ చూపించు (Show Tabs)";
+      document.body.classList.add("reading-mode-active");
+      if (showNotification && typeof showToast === "function") {
+        showToast("📖 రీడింగ్ స్పేస్ గరిష్టంగా విస్తరించబడింది! (షార్ట్‌కట్: 'H')");
+      }
+    } else {
+      if (!isModulesHidden && modulesContainer) modulesContainer.classList.remove("hidden");
+      if (navTabsBar) navTabsBar.classList.remove("hidden");
+      if (readingIndicator) readingIndicator.classList.add("hidden");
+      if (compactTabPills) compactTabPills.classList.add("hidden");
+      if (floatingToggleBtn) {
+        floatingToggleBtn.classList.add("hidden");
+        floatingToggleBtn.classList.remove("flex");
+      }
+      if (toggleTabsText) toggleTabsText.textContent = "ట్యాబ్స్ దాచు (Hide)";
+      if (toggleTabsBtn) {
+        toggleTabsBtn.classList.remove("from-emerald-600", "to-teal-700");
+        toggleTabsBtn.classList.add("from-indigo-600", "via-blue-600", "to-indigo-700");
+        toggleTabsBtn.setAttribute("title", "రీడింగ్ స్పేస్ పెంచడానికి ట్యాబ్స్ & మెనూ బటన్లను దాచండి (Shortcut: 'H')");
+      }
+      if (floatingToggleText) floatingToggleText.textContent = "ట్యాబ్స్ దాచు (Hide Tabs)";
+      document.body.classList.remove("reading-mode-active");
+      if (showNotification && typeof showToast === "function") {
+        showToast("👁️ ట్యాబ్స్ మరియు మెనూ మళ్లీ కనిపిస్తున్నాయి!");
+      }
+    }
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function toggleTabs() {
+    applyTabsState(!isTabsHidden, true);
+  }
+
+  // Toggle modules tray independently (allows keeping navigation tabs while hiding the 30+ portal buttons)
+  function toggleModulesTray() {
+    if (!modulesContainer) return;
+    const isNowHidden = !modulesContainer.classList.contains("hidden");
+    if (isNowHidden) {
+      modulesContainer.classList.add("hidden");
+      isModulesHidden = true;
+      localStorage.setItem("lakshya_hide_modules", "true");
+      if (modulesTrayChevron) modulesTrayChevron.style.transform = "rotate(0deg)";
+      if (typeof showToast === "function") showToast("పోర్టల్స్ ట్రే దాచబడింది");
+    } else {
+      modulesContainer.classList.remove("hidden");
+      isModulesHidden = false;
+      localStorage.setItem("lakshya_hide_modules", "false");
+      if (modulesTrayChevron) modulesTrayChevron.style.transform = "rotate(180deg)";
+      if (typeof showToast === "function") showToast("పోర్టల్స్ ట్రే తెరవబడింది");
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  if (toggleTabsBtn) toggleTabsBtn.addEventListener("click", toggleTabs);
+  if (floatingToggleBtn) floatingToggleBtn.addEventListener("click", toggleTabs);
+  if (modulesTrayBtn) modulesTrayBtn.addEventListener("click", toggleModulesTray);
+
+  // Keyboard shortcut: Press 'H' (or 'h') outside of text inputs to toggle
+  document.addEventListener("keydown", (e) => {
+    const tag = e.target.tagName ? e.target.tagName.toLowerCase() : "";
+    if (tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable) {
+      return;
+    }
+    if (e.key === "h" || e.key === "H") {
+      e.preventDefault();
+      toggleTabs();
+    }
+  });
+
+  // Apply saved or default state on initial load without popup toast
+  applyTabsState(isTabsHidden, false);
+  if (isModulesHidden && modulesContainer && !isTabsHidden) {
+    modulesContainer.classList.add("hidden");
+    if (modulesTrayChevron) modulesTrayChevron.style.transform = "rotate(0deg)";
+  }
 }
 
 

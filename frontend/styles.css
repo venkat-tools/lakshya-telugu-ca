@@ -59,6 +59,29 @@ body {
   transition: all 0.2s ease-in-out;
 }
 
+/* Reading Mode & Header Collapsible Transitions */
+#collapsibleModulesContainer {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#collapsibleModulesContainer.hidden {
+  display: none !important;
+}
+
+#collapsibleNavTabsBar {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#collapsibleNavTabsBar.hidden {
+  display: none !important;
+}
+
+body.reading-mode-active header {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.12) !important;
+}
+
+body.reading-mode-active main {
+  padding-top: 1rem !important;
+}
+
 /* Category Left Border Color Highlights */
 .border-cat-national { border-left: 6px solid #2563eb !important; }
 .border-cat-regional { border-left: 6px solid #d97706 !important; }
