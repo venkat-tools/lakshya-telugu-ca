@@ -1171,20 +1171,28 @@ def render_appsc_syllabus_html():
     <section id="content-aptitude" class="tab-content space-y-6">
       <div class="bg-gradient-to-r from-cyan-950 via-slate-800 to-slate-900 border border-cyan-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
-          <span class="text-xs font-bold uppercase tracking-wider bg-cyan-900/60 text-cyan-300 px-3 py-1 rounded-full border border-cyan-700/50">228 పేజీల సమగ్ర పాఠ్య పుస్తకం • 120+ షార్ట్‌కట్ ఫార్ములాలు</span>
+          <span class="text-xs font-bold uppercase tracking-wider bg-cyan-900/60 text-cyan-300 px-3 py-1 rounded-full border border-cyan-700/50">34 పేజీల షార్ట్‌కట్స్ బుక్‌లెట్ (120+ ఫార్ములాలు) & 228 పేజీల మాస్టర్ బుక్</span>
           <span class="text-xs text-slate-400">APPSC Group 1 & 2 • 30 మార్కులు</span>
         </div>
-        <h2 class="text-2xl font-black text-white">క్వాంటిటేటివ్ ఆప్టిట్యూడ్ & మెంటల్ ఎబిలిటీ మాస్టర్ బుక్</h2>
-        <p class="text-sm text-slate-300 mt-1">సంపూర్ణ అధ్యాయాలు: క్షేత్రమితి, రైళ్ల లెక్కలు, మిశ్రమాలు, కాలం-పని, చక్రవడ్డీ-బారువడ్డీ, గడియారాలు, క్యాలెండర్, సిలాజిజమ్ & షార్ట్‌కట్లు.</p>
+        <h2 class="text-2xl font-black text-white">క్వాంటిటేటివ్ ఆప్టిట్యూడ్ & మెంటల్ ఎబిలిటీ సంపూర్ణ పాఠ్య గ్రంథం</h2>
+        <p class="text-sm text-slate-300 mt-1">అన్ని 8 ప్రధాన విభాగాలు, 120+ వేగవంతమైన ఫార్ములాలు, స్టెప్-బై-స్టెప్ ఉదాహరణలు మరియు లాజికల్ రీజనింగ్ గోల్డెన్ షార్ట్‌కట్లు.</p>
+        
+        <div class="mt-4 flex flex-wrap gap-2 text-xs">
+          <a href="/pdfs/quantitative_aptitude_120_shortcuts.pdf" download class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow">
+            <span>📥 డౌన్‌లోడ్ 120+ షార్ట్‌కట్స్ బుక్‌లెట్ PDF (34 పేజీలు)</span>
+          </a>
+          <a href="/pdfs/appsc_mental_ability_master_book.pdf" download class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow">
+            <span>📥 డౌన్‌లోడ్ సమగ్ర మెంటల్ ఎబిలిటీ బుక్ PDF (228 పేజీలు)</span>
+          </a>
+        </div>
       </div>
 
-      <!-- Quantitative Formulas Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <!-- Mensuration 2D & 3D -->
+        <!-- Ch 1: Mensuration 2D & 3D -->
         <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
           <div class="flex justify-between items-start mb-3">
             <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
-              <span>📐 1. క్షేత్రమితి (Mensuration 2D & 3D)</span>
+              <span>📐 1. క్షేత్రమితి (Mensuration 2D & 3D) - 15 రూపాలు</span>
             </h3>
             <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
               <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
@@ -1192,31 +1200,35 @@ def render_appsc_syllabus_html():
             </label>
           </div>
           <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
-            <li>• <b>స్కేలింగ్ నియమం (Scaling Rule - గోల్డెన్ షార్ట్‌కట్):</b>
-              <div class="bg-slate-900/90 p-2 rounded border border-slate-700 font-mono text-amber-300 text-center text-xs my-1">
-                పొడవు/వ్యాసార్థం: k రెట్లు $\to$ వైశాల్యం: k² రెట్లు $\to$ ఘనపరిమాణం: k³ రెట్లు
-              </div>
-              ఉదాహరణ: గోళం వ్యాసార్థం 3 రెట్లు పెరిగితే వైశాల్యం $3^2=9$ రెట్లు, ఘనపరిమాణం $3^3=27$ రెట్లు పెరుగుతుంది.
+            <li>• <b>గోల్డెన్ స్కేలింగ్ రూల్:</b> కొలత (భుజం/వ్యాసార్థం) $k$ రెట్లు పెరిగితే $\to$ వైశాల్యం $k^2$ రెట్లు, ఘనపరిమాణం $k^3$ రెట్లు పెరుగుతుంది!</li>
+            <li>• <b>2D సమతల పటాలు:</b>
+              <br>• <b>చతురస్రం:</b> $Area = a^2 = \frac{1}{2}d^2$ | $P = 4a$ | కర్ణం $d = a\sqrt{2}$.
+              <br>• <b>దీర్ఘచతురస్రం:</b> $Area = l \times b$ | $P = 2(l+b)$ | కర్ణం $d = \sqrt{l^2 + b^2}$.
+              <br>• <b>త్రిభుజం:</b> సాధారణ $Area = \frac{1}{2}bh$ | హెరాన్ సూత్రం: $\sqrt{s(s-a)(s-b)(s-c)}, s = \frac{a+b+c}{2}$ | సమబాహు: $A = \frac{\sqrt{3}}{4}a^2, h = \frac{\sqrt{3}}{2}a$.
+              <br>• <b>సమాంతర చతుర్భుజం:</b> $A = bh$ | $P = 2(a+b)$.
+              <br>• <b>రాంబస్:</b> $A = \frac{1}{2}d_1 d_2$ | $P = 4a$ | భుజం $a = \frac{1}{2}\sqrt{d_1^2 + d_2^2}$.
+              <br>• <b>ట్రెపీజియం:</b> $A = \frac{1}{2}(a+b)h$.
+              <br>• <b>వృత్తం:</b> $A = \pi r^2$ | పరిధి $= 2\pi r$.
+              <br>• <b>సెక్టార్:</b> $A = \frac{\theta}{360^\circ}\pi r^2 = \frac{1}{2}Lr$ | చాపం పొడవు $L = \frac{\theta}{360^\circ} 2\pi r$.
+              <br>• <b>అర్ధవృత్తం:</b> $A = \frac{1}{2}\pi r^2$ | చుట్టుకొలత $= \pi r + 2r = \frac{36}{7}r$.
+              <br>• <b>వృత్తాకార రింగ్ (Annulus):</b> $A = \pi(R^2 - r^2) = \pi(R+r)(R-r)$ | వెడల్పు $= R - r$.
             </li>
-            <li>• <b>2D సూత్రాలు:</b>
-              <br>• చతురస్రం: వైశాల్యం $A = a^2 = \frac{1}{2}d^2$, కర్ణం $d = a\sqrt{2}$.
-              <br>• సమబాహు త్రిభుజం: వైశాల్యం $A = \frac{\sqrt{3}}{4}a^2$, ఎత్తు $h = \frac{\sqrt{3}}{2}a$.
-              <br>• వృత్తం: వైశాల్యం $A = \pi r^2$, చుట్టుకొలత $P = 2\pi r$. అర్ధవృత్త చుట్టుకొలత $= \frac{36}{7}r$.
-            </li>
-            <li>• <b>3D సూత్రాలు:</b>
-              <br>• సమఘనం (Cube): ఘనపరిమాణం $V = a^3$, మొత్తం ఉపరితల వైశాల్యం $TSA = 6a^2$, కర్ణం $d = a\sqrt{3}$.
-              <br>• స్థూపం (Cylinder): ఘనపరిమాణం $V = \pi r^2 h$, వక్రతల వైశాల్యం $CSA = 2\pi rh$.
-              <br>• శంకువు (Cone): ఘనపరిమాణం $V = \frac{1}{3}\pi r^2 h$, ఏటవాలు ఎత్తు $l = \sqrt{r^2 + h^2}$.
-              <br>• గోళం (Sphere): ఘనపరిమాణం $V = \frac{4}{3}\pi r^3$, ఉపరితల వైశాల్యం $A = 4\pi r^2$.
+            <li>• <b>3D ఘనరూపాలు:</b>
+              <br>• <b>ఘనం (Cube):</b> $V = a^3$ | $TSA = 6a^2$ | $LSA = 4a^2$ | పొడవైన కర్ణం $= a\sqrt{3}$.
+              <br>• <b>దీర్ఘఘనం (Cuboid):</b> $V = lbh$ | $TSA = 2(lb+bh+hl)$ | 4 గోడల వైశాల్యం $= 2h(l+b)$ | కర్ణం $= \sqrt{l^2+b^2+h^2}$.
+              <br>• <b>స్థూపం (Cylinder):</b> $V = \pi r^2 h$ | $CSA = 2\pi rh$ | $TSA = 2\pi r(h+r)$. బోలు స్థూపం: $V = \pi h(R^2 - r^2)$.
+              <br>• <b>శంకువు (Cone):</b> $V = \frac{1}{3}\pi r^2 h$ | వాలు ఎత్తు $l = \sqrt{r^2+h^2}$ | $CSA = \pi rl$ | $TSA = \pi r(l+r)$.
+              <br>• <b>గోళం (Sphere):</b> $V = \frac{4}{3}\pi r^3$ | ఉపరితలం $= 4\pi r^2$.
+              <br>• <b>అర్ధగోళం:</b> $V = \frac{2}{3}\pi r^3$ | $CSA = 2\pi r^2$ | $TSA = 3\pi r^2$.
             </li>
           </ul>
         </div>
 
-        <!-- Trains, Speed & Distance -->
+        <!-- Ch 2: Permutations & Combinations -->
         <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
           <div class="flex justify-between items-start mb-3">
             <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
-              <span>🚆 2. రైళ్లు & సాపేక్ష వేగం (Trains & Relative Speed)</span>
+              <span>🎲 2. ప్రస్తారాలు & సంయోగాలు (P & C)</span>
             </h3>
             <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
               <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
@@ -1224,29 +1236,59 @@ def render_appsc_syllabus_html():
             </label>
           </div>
           <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
-            <li>• <b>వేగం యూనిట్ల మార్పిడి:</b>
-              <div class="bg-slate-900/90 p-2 rounded border border-slate-700 font-mono text-cyan-300 text-center text-xs my-1">
-                km/h నుండి m/s కి మార్చడానికి: × 5/18<br>
-                m/s నుండి km/h కి మార్చడానికి: × 18/5
-              </div>
+            <li>• <b>ఫ్యాక్టోరియల్:</b> $n! = n(n-1)(n-2)...2 \cdot 1$. ప్రత్యేక విలువలు: $0! = 1, 1! = 1$. ($5! = 120, 6! = 720, 7! = 5040$).</li>
+            <li>• <b>ప్రస్తారాలు ($^nP_r$ - అమరిక):</b> ఆర్డర్ ముఖ్యం. $^nP_r = \frac{n!}{(n-r)!}$. (ఉదా: $^5P_2 = 5 \times 4 = 20$).</li>
+            <li>• <b>సంయోగాలు ($^nC_r$ - ఎంపిక):</b> క్రమం అవసరం లేదు. $^nC_r = \frac{n!}{r!(n-r)!}$. (ఉదా: $^5C_2 = \frac{5 \times 4}{2 \times 1} = 10$).</li>
+            <li>• <b>కీలక ధర్మాలు:</b> $^nC_r = ^nC_{n-r}$ | $^nC_0 = 1, ^nC_n = 1$ | $^nC_1 = n, ^nP_1 = n$ | $^nP_n = n!$.</li>
+            <li>• <b>వృత్తాకార అమరిక:</b> గుండ్రని బల్ల చుట్టూ అమర్చే మార్గాలు $= (n-1)!$.</li>
+            <li>• <b>దండలు & పూసల హారాలు:</b> సవ్య, అపసవ్య దిశల తేడా ఉండదు కాబట్టి $= \frac{1}{2}(n-1)!$.</li>
+            <li>• <b>పునరావృతమయ్యే అక్షరాలు:</b> $\frac{n!}{p! q! r!}$. ('INDIA' లో 5 అక్షరాలు, 'I' రెండు సార్లు $\to \frac{5!}{2!} = 60$).</li>
+            <li>• <b>హస్తలాఘవాలు (Handshakes):</b> $^nC_2 = \frac{n(n-1)}{2}$. (10 మంది ఒకరికొకరు షేక్‌హ్యాండ్ ఇస్తే $= \frac{10 \times 9}{2} = 45$).</li>
+            <li>• <b>బహుభుజి కర్ణాలు (Diagonals):</b> $^nC_2 - n = \frac{n(n-3)}{2}$. (అష్టభుజి 8 భుజాలు $\to \frac{8 \times 5}{2} = 20$).</li>
+            <li>• <b>గోల్డెన్ రూల్స్:</b> AND (మరియు) వస్తే గుణించండి ($\times$). OR (లేదా) వస్తే కూడండి ($+$). మొత్తం ఉపసమితులు $= 2^n$. కనీసం ఒకటి ఎంపిక $= 2^n - 1$. సంబంధం: $^nP_r = ^nC_r \times r!$.</li>
+          </ul>
+        </div>
+
+        <!-- Ch 3: Trains, Speed & Distance & Boats -->
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
+              <span>🚆 3. రైళ్లు, వేగం-దూరం & బోట్లు-ప్రవాహాలు</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>చలన సూత్రాలు & యూనిట్లు:</b> $Speed = \frac{D}{T}, D = S \times T, T = \frac{D}{S}$.
+              <br>• $km/h \to m/s$: $\times \frac{5}{18}$ ($72 km/h = 72 \times \frac{5}{18} = 20 m/s$).
+              <br>• $m/s \to km/h$: $\times \frac{18}{5}$ ($25 m/s = 25 \times \frac{18}{5} = 90 km/h$).
+            </li>
+            <li>• <b>వస్తువులను దాటే సమయం:</b>
+              <br>• స్తంభం/మనిషి/చెట్టు (Point Object): కాలం $= \frac{L_{train}}{S}$.
+              <br>• ప్లాట్‌ఫారమ్/వంతెన: కాలం $= \frac{L_{train} + L_{platform}}{S}$.
             </li>
             <li>• <b>సాపేక్ష వేగం (Relative Speed):</b>
-              <br>• రెండు రైళ్లు <b>ఎదురెదురుగా</b> వస్తే: వేగం = $S_1 + S_2$.
-              <br>• రెండు రైళ్లు <b>ఒకే దిశలో</b> వెళ్తుంటే: వేగం = $|S_1 - S_2|$.
+              <br>• ఒకే దిశలో (Same Direction): $S_{rel} = S_1 - S_2$ (తీసివేయాలి).
+              <br>• వ్యతిరేక దిశలో (Opposite Direction): $S_{rel} = S_1 + S_2$ (కూడాలి).
+              <br>• రెండు రైళ్లు ఒకదానికొకటి దాటడానికి కాలం $= \frac{L_1 + L_2}{S_1 \pm S_2}$ (పొడవులు ఎల్లప్పుడూ కూడాలి!).
             </li>
-            <li>• <b>రైలు వస్తువులను దాటడానికి పట్టే సమయం:</b>
-              <br>• స్తంభం / మనిషిని దాటడానికి: సమయం $= \frac{\text{రైలు పొడవు }(L)}{S}$.
-              <br>• ప్లాట్‌ఫారమ్ / వంతెన / సొరంగాన్ని దాటడానికి: సమయం $= \frac{L_{\text{రైలు}} + L_{\text{ప్లాట్‌ఫారమ్}}}{S}$.
+            <li>• <b>కదులుతున్న రైలులోని వ్యక్తిని దాటడం:</b> కాలం $= \frac{L_{\text{దాటే రైలు}}}{S_{rel}}$.</li>
+            <li>• <b>బోట్లు & ప్రవాహాలు (Boats & Streams):</b>
+              <br>• అనుకూల ప్రవాహం (Downstream): $D = u + v$.
+              <br>• ఎదురు ప్రవాహం (Upstream): $U = u - v$.
+              <br>• నిశ్చల నీటిలో పడవ వేగం $u = \frac{D + U}{2}$; ప్రవాహ వేగం $v = \frac{D - U}{2}$.
+              <br>• దూరం ఫార్ములా: $Distance = \frac{T(u^2 - v^2)}{2u}$ (వెళ్లి రావడానికి మొత్తం కాలం T అయినప్పుడు).
             </li>
-            <li>• <b>బోట్లు & ప్రవాహాలు:</b> ప్రవాహ దిశలో వేగం (Downstream) $= u + v$; ప్రవాహ వ్యతిరేక దిశలో వేగం (Upstream) $= u - v$. నిశ్చల నీటిలో పడవ వేగం $u = \frac{\text{Downstream} + \text{Upstream}}{2}$.</li>
           </ul>
         </div>
 
-        <!-- Interest & Mixtures -->
+        <!-- Ch 4: Mixtures & Alligations -->
         <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
           <div class="flex justify-between items-start mb-3">
             <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
-              <span>💰 3. వడ్డీ లెక్కలు & మిశ్రమాలు (Interest & Mixtures)</span>
+              <span>🧪 4. మిశ్రమాలు & అలిగేషన్లు (Alligations)</span>
             </h3>
             <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
               <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
@@ -1254,26 +1296,27 @@ def render_appsc_syllabus_html():
             </label>
           </div>
           <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
-            <li>• <b>చక్రవడ్డీ - బారువడ్డీ తేడా (CI - SI Difference):</b>
-              <br>• 2 సంవత్సరాలకు: $\text{Difference} = P \left(\frac{R}{100}\right)^2$
-              <br>• 3 సంవత్సరాలకు: $\text{Difference} = P \left(\frac{R}{100}\right)^2 \left(3 + \frac{R}{100}\right)$
+            <li>• <b>సగటు ధర సూత్రం:</b> $\text{Mean Price } (M) = \frac{q_1 p_1 + q_2 p_2}{q_1 + q_2}$.</li>
+            <li>• <b>అలిగేషన్ క్రాస్ పద్ధతి:</b>
+              <br>తక్కువ ధర పరిమాణం : ఎక్కువ ధర పరిమాణం $= (Dearer - Mean) : (Mean - Cheaper)$.
+              <br>ఉదాహరణ: ₹10 మరియు ₹20 గోధుమలు కలిపి ₹14 సగటు ధర పొందాలంటే: $(20-14):(14-10) = 6:4 = 3:2$.
             </li>
-            <li>• <b>రూల్ ఆఫ్ 72 (Rule of 72):</b> చక్రవడ్డీతో సొమ్ము రెట్టింపు కావడానికి పట్టే కాలం $t \approx \frac{72}{R}$ సంవత్సరాలు. (ఉదా: 8% వడ్డీ అయితే $72/8 = 9$ ఏళ్లలో సొమ్ము రెట్టింపు అవుతుంది).</li>
-            <li>• <b>మిశ్రమాల పునరావృత భర్తీ సూత్రం (Repeated Dilution):</b>
-              <br>V పరిమాణం గల స్వచ్ఛమైన ద్రవం నుండి x లీటర్లు తీసివేసి నీటితో n సార్లు భర్తీ చేస్తే, మిగిలిన స్వచ్ఛమైన ద్రవం:
-              <div class="bg-slate-900/90 p-2 rounded border border-slate-700 font-mono text-amber-300 text-center text-xs my-1">
-                మిగిలిన పరిమాణం = V [ 1 - (x / V) ]ⁿ
-              </div>
+            <li>• <b>మిశ్రమంపై లాభం/నష్టం:</b> అలిగేషన్ రూల్‌లో ఎల్లప్పుడూ CP (కొనుగోలు ధర) మాత్రమే వాడాలి. ప్రశ్నలో SP, లాభం% ఇస్తే: $CP_{mean} = \frac{SP \times 100}{100 + \text{లాభం}\%}$.</li>
+            <li>• <b>పునరావృత మార్పిడి సూత్రం (Repeated Replacement):</b>
+              <br>$V$ లీటర్ల స్వచ్ఛమైన ద్రవం నుండి $x$ లీటర్లు తీసివేసి నీరు పోసే ప్రక్రియను $n$ సార్లు పునరావృతం చేస్తే:
+              <br>$\text{మిగిలిన స్వచ్ఛ ద్రవం} = V \times \left[1 - \frac{x}{V}\right]^n$.
+              <br>ఉదాహరణ: 40 లీటర్ల పాలలో 4 లీటర్లు తీసి నీరు పోసే పనిని 2 సార్లు చేస్తే: $40 \times (1 - 4/40)^2 = 40 \times 0.81 = 32.4$ లీటర్లు.
             </li>
-            <li>• <b>లాభ నష్టాల స్పెషల్ కేసు:</b> రెండు వస్తువులను ఒకే అమ్మకం ధరకు అమ్మి, ఒకదానిపై x% లాభం, రెండవదానిపై x% నష్టం వస్తే, వ్యాపారంలో ఎల్లప్పుడూ <b>నష్టమే</b> వస్తుంది: $\text{నష్టం }\% = \left(\frac{x}{10}\right)^2\%$.</li>
+            <li>• <b>గాఢతపై అలిగేషన్:</b> నిష్పత్తి $= (\text{ఎక్కువ } \% - \text{సగటు } \%) : (\text{సగటు } \% - \text{తక్కువ } \%)$.</li>
+            <li>• <b>పాల వ్యాపారి గోల్డెన్ రూల్:</b> కొన్న ధరకే పాలు అమ్ముతూ $P\%$ లాభం వస్తే: పాలు:నీరు నిష్పత్తి $= 100 : P$.</li>
           </ul>
         </div>
 
-        <!-- Clocks, Calendar & Syllogism -->
+        <!-- Ch 5: Pipes & Cisterns -->
         <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
           <div class="flex justify-between items-start mb-3">
             <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
-              <span>⏰ 4. గడియారాలు, క్యాలెండర్ & సిలాజిజమ్</span>
+              <span>🚰 5. పైపులు & తొట్టెలు (Pipes & Cisterns)</span>
             </h3>
             <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
               <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
@@ -1281,15 +1324,140 @@ def render_appsc_syllabus_html():
             </label>
           </div>
           <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
-            <li>• <b>గడియారంలో ముల్లుల మధ్య కోణం (Angle Formula):</b>
-              <div class="bg-slate-900/90 p-2 rounded border border-slate-700 font-mono text-cyan-300 text-center text-xs my-1">
-                కోణం (θ) = | 30H - (11/2)M |
-              </div>
-              ఉదాహరణ: 4 గంటల 20 నిమిషాల వద్ద కోణం: $|30(4) - 5.5(20)| = |120 - 110| = 10^\circ$.
+            <li>• <b>ఇన్లెట్ & ఔట్లెట్:</b> నింపే పైపు ధనాత్మకం ($+$), లీక్/ఖాళీ చేసే పైపు రుణాత్మకం ($-$). 1 గంట పని $= \frac{1}{\text{కాలం}}$.</li>
+            <li>• <b>రెండు పైపుల డైరెక్ట్ షార్ట్‌కట్:</b>
+              <br>• రెండూ నింపడానికి: $\frac{x \times y}{x + y}$ గంటలు.
+              <br>• ఒకటి నింపుతూ మరొకటి ఖాళీ చేస్తుంటే: $\frac{x \times y}{y - x}$ గంటలు ($y > x$).
             </li>
-            <li>• <b>ముల్లుల స్థానాలు:</b> 1 గంటలో 1 సారి ఏకీభవిస్తాయి, 12 గంటల్లో 11 సార్లు, 24 గంటల్లో <b>22 సార్లు</b> ఏకీభవిస్తాయి (రెండు ముల్లులు సరళరేఖలో వ్యతిరేకంగా ఉండటం కూడా 22 సార్లు, లంబంగా 44 సార్లు).</li>
-            <li>• <b>క్యాలెండర్ విషమ రోజులు (Odd Days):</b> సాధారణ సంవత్సరంలో 1 విషమ రోజు (52 వారాలు + 1 రోజు). లీపు సంవత్సరంలో 2 విషమ రోజులు. 100 సంవత్సరాల్లో 5, 200 ఏళ్లలో 3, 300 ఏళ్లలో 1, 400 ఏళ్లలో <b>0 విషమ రోజులు</b>.</li>
-            <li>• <b>సిలాజిజమ్ (Syllogism - Either-Or నిబంధనలు):</b> రెండు ముగింపులలో ఒకే అంశాలు (Subject, Predicate) ఉండాలి, ఒకటి సకారాత్మకం (Positive) మరియు రెండవది నకారాత్మకం (Negative) అయి ఉండాలి, రెండూ వ్యక్తిగతంగా తప్పు (Individually False) కావాలి.</li>
+            <li>• <b>మూడు పైపులు కలిపి:</b> $\frac{abc}{ab + bc + ca}$ గంటలు.</li>
+            <li>• <b>విడతలవారీగా పని (Alternating Turns):</b> మార్చి మార్చి తెరిస్తే 2 గంటల సైకిల్ పని $= \frac{1}{A} + \frac{1}{B}$.</li>
+            <li>• <b>LCM ఎఫిషియెన్సీ మెథడ్:</b> తొట్టె మొత్తం సామర్థ్యం $= LCM(\text{ఇచ్చిన కాలాలు})$. సామర్థ్యం $= \frac{\text{మొత్తం యూనిట్లు}}{\text{కాలం}}$. పట్టే కాలం $= \frac{\text{మొత్తం యూనిట్లు}}{\text{నికర సామర్థ్యం}}$.</li>
+            <li>• <b>లీకేజీ సమయం ఫార్ములా:</b> $\text{లీక్ ఖాళీ చేసే కాలం} = \frac{\text{సాధారణ కాలం} \times \text{ఆలస్య కాలం}}{\text{ఆలస్య కాలం} - \text{సాధారణ కాలం}}$. (ఉదా: 8 గం బదులు 10 గం పడితే: $\frac{8 \times 10}{10-8} = 40$ గంటలు).</li>
+            <li>• <b>తొట్టె కెపాసిటీ:</b> ప్రవాహ రేటు (L/min) $\times$ నింపే మొత్తం కాలం (నిమిషాల్లో).</li>
+          </ul>
+        </div>
+
+        <!-- Ch 6: Averages -->
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
+              <span>📊 6. సగటులు & సరాసరి (Averages)</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>ప్రాథమిక సగటు:</b> $\text{Average} = \frac{\Sigma x}{n}$ | $\text{మొత్తం} = \text{సగటు} \times n$.</li>
+            <li>• <b>సగటు మార్పుల షార్ట్‌కట్:</b> కొత్త సగటు $= \text{పాత సగటు} \pm \frac{\text{మారిన నికర విలువ}}{\text{మొత్తం సభ్యులు}}$.</li>
+            <li>• <b>భారిత సగటు (Weighted Average):</b> $\text{Average} = \frac{n_1 A_1 + n_2 A_2}{n_1 + n_2}$.</li>
+            <li>• <b>వరుస సంఖ్యలు & అంకశ్రేఢి (AP):</b> సగటు $= \text{మధ్య సంఖ్య} = \frac{\text{మొదటి పదం} + \text{చివరి పదం}}{2}$. (ఉదా: 7 నుండి 70 వరకు 7 గుణిజాల సగటు $= \frac{7+70}{2} = 38.5$).</li>
+            <li>• <b>సగటు వేగం (హార్మోనిక్ మీన్):</b> సమాన దూరం ప్రయాణించినప్పుడు: $\text{Average Speed} = \frac{2xy}{x+y}$. (20 km/h తో వెళ్లి 30 km/h తో వస్తే $= \frac{2 \times 20 \times 30}{50} = 24$ km/h).</li>
+            <li>• <b>రీప్లేస్‌మెంట్ నిబంధన:</b> కొత్త వ్యక్తి బరువు $= \text{వెళ్లిన వ్యక్తి బరువు} + (\text{మొత్తం సంఖ్య} \times \text{సగటు మార్పు})$.</li>
+            <li>• <b>గోల్డెన్ రూల్స్:</b> విచలనాల మొత్తం $\Sigma(x_i - \bar{x}) = 0$. మొదటి $n$ బేసి సంఖ్యల సగటు $= n$; సరి సంఖ్యల సగటు $= n+1$; సహజ సంఖ్యల సగటు $= \frac{n+1}{2}$.</li>
+          </ul>
+        </div>
+
+        <!-- Ch 7: Simple & Compound Interest -->
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
+              <span>💵 7. బారువడ్డీ & చక్రవడ్డీ (SI & CI)</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>బారువడ్డీ (SI):</b> $SI = \frac{P \times T \times R}{100}$ | $Amount = P + SI = P[1 + \frac{TR}{100}]$. మొదటి సంవత్సరానికి $SI = CI$.</li>
+            <li>• <b>చక్రవడ్డీ (CI):</b> $Amount = P[1 + \frac{R}{100}]^T$ | $CI = Amount - P$.</li>
+            <li>• <b>2 సంవత్సరాలకు CI & SI ల మధ్య తేడా:</b> $\text{Difference } (D) = P \times \left(\frac{R}{100}\right)^2$.</li>
+            <li>• <b>3 సంవత్సరాలకు CI & SI ల మధ్య తేడా:</b> $D_3 = P \left(\frac{R}{100}\right)^2 \times \left[\frac{300 + R}{100}\right]$.</li>
+            <li>• <b>సొమ్ము రెట్టింపు అయ్యే షార్ట్‌కట్ (SI లో):</b> $R \times T = (N - 1) \times 100$. (2 రెట్లకు: $RT = 100$; 3 రెట్లకు: $RT = 200$).</li>
+            <li>• <b>అర్ధ-వార్షిక & త్రైమాసిక వడ్డీ:</b>
+              <br>• అర్ధ-వార్షికం: రేటు $= R/2$, కాలం $= 2T \to A = P[1 + \frac{R}{200}]^{2T}$.
+              <br>• త్రైమాసికం: రేటు $= R/4$, కాలం $= 4T \to A = P[1 + \frac{R}{400}]^{4T}$.
+            </li>
+            <li>• <b>రూల్ ఆఫ్ 72 & చక్రవడ్డీ గుణశ్రేఢి:</b> CI లో సొమ్ము రెట్టింపు కావడానికి కాలం $\approx \frac{72}{R}$. CI లో సొమ్ము $T$ ఏళ్లలో 2 రెట్లు అయితే, $n \times T$ ఏళ్లలో $2^n$ రెట్లు అవుతుంది!</li>
+            <li>• <b>తరుగుదల (Depreciation):</b> విలువ $= P(1 - \frac{r}{100})^n$.</li>
+          </ul>
+        </div>
+
+        <!-- Ch 8: Ratio, Proportion & Partnership -->
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
+              <span>🤝 8. నిష్పత్తి, అనుపాతం & భాగస్వామ్యం</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>అనుపాతం నిబంధన:</b> $a : b :: c : d \Rightarrow a \times d = b \times c$ (అంత్యముల లబ్ధం = మధ్యమముల లబ్ధం).</li>
+            <li>• <b>అనుపాత రకాలు:</b>
+              <br>• చతుర్థ అనుపాతం (Fourth Proportional): $x = \frac{b \times c}{a}$.
+              <br>• తృతీయ అనుపాతం (Third Proportional): $x = \frac{b^2}{a}$.
+              <br>• మధ్యమ అనుపాతం (Mean Proportional): $x = \sqrt{a \times b}$.
+            </li>
+            <li>• <b>వర్గ, ఘన & సంయుక్త నిష్పత్తులు:</b> వర్గ నిష్పత్తి $= a^2 : b^2$ | వర్గమూల నిష్పత్తి $= \sqrt{a} : \sqrt{b}$ | ఘన నిష్పత్తి $= a^3 : b^3$ | సంయుక్త నిష్పత్తి (Compound Ratio) $= (a \times c) : (b \times d)$.</li>
+            <li>• <b>విలోమ నిష్పత్తి:</b> $a : b$ విలోమం $= \frac{1}{a} : \frac{1}{b} = b : a$. మూడు రాశుల విలోమం $= bc : ac : ab$.</li>
+            <li>• <b>N-మెథడ్ బ్రిడ్జింగ్ ($A:B:C$ కనుగొనడం):</b> $A:B = 2:3, B:C = 4:5 \Rightarrow A:B:C = (2\times 4) : (3\times 4) : (3\times 5) = 8:12:15$.</li>
+            <li>• <b>భాగస్వామ్య లాభాల పంపకం:</b> లాభాల నిష్పత్తి $= (\text{పెట్టుబడి}_1 \times \text{కాలం}_1) : (\text{పెట్టుబడి}_2 \times \text{కాలం}_2)$. కాలాలు సమానమైతే లాభాలు కేవలం పెట్టుబడుల నిష్పత్తిలోనే పంచబడతాయి.</li>
+          </ul>
+        </div>
+
+        <!-- Vol 2 Core 1: Numbers, LCM/HCF, Percentages & Profit/Loss -->
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
+              <span>🔢 9. సంఖ్యా వ్యవస్థ, శాతాలు & లాభనష్టాల ట్రిక్స్</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>భాజనీయతా సూత్రాలు:</b>
+              <br>• 3 & 9: అంకెల మొత్తం భాగించబడాలి.
+              <br>• 4: చివరి 2 అంకెలు; 8: చివరి 3 అంకెలు భాగించబడాలి.
+              <br>• 11: (బేసి స్థానాల మొత్తం) - (సరి స్థానాల మొత్తం) $= 0$ లేదా 11 గుణిజం.
+            </li>
+            <li>• <b>ఒకట్ల స్థానంలోని అంకె (Unit Digit Cyclicity):</b> 0, 1, 5, 6 ఘాతం ఏదైనా మారదు. 2, 3, 7, 8 ల సైక్లిసిటీ $= 4$ (ఘాతాన్ని 4 తో భాగించి శేషం తీసుకోవాలి).</li>
+            <li>• <b>క.సా.గు & గ.సా.భా:</b> సంఖ్యల లబ్ధం $= LCM \times HCF$. భిన్నాల $LCM = \frac{\text{లవాల } LCM}{\text{హారాల } HCF}$. గంటలు కలిసి మోగే సమయం $= LCM(\text{విరామాలు})$.</li>
+            <li>• <b>భిన్నం $\leftrightarrow$ శాతం టేబుల్:</b> $1/2=50\%, 1/3=33.33\%, 1/4=25\%, 1/5=20\%, 1/6=16.66\%, 1/7=14.28\%, 1/8=12.5\%, 1/9=11.11\%, 1/12=8.33\%, 1/16=6.25\%$.</li>
+            <li>• <b>వరుస శాతాల మార్పు:</b> నికర శాతం $= [a + b + \frac{ab}{100}]\%$.</li>
+            <li>• <b>ఒకే ధరకు అమ్మి లాభం, నష్టం ఒకటే అయితే:</b> ఎల్లప్పుడూ నికర నష్టమే వస్తుంది: $\text{నష్టం }\% = \frac{x^2}{100}\%$.</li>
+            <li>• <b>మోసపూరిత వ్యాపారి (Dishonest Dealer):</b> $\text{లాభం }\% = \frac{\text{లోపం}}{\text{సరైన విలువ} - \text{లోపం}} \times 100$. (1000 గ్రా బదులు 900 గ్రా ఇస్తే $= \frac{100}{900} \times 100 = 11\frac{1}{9}\%$).</li>
+          </ul>
+        </div>
+
+        <!-- Vol 2 Core 2: Reasoning, Clocks, Calendar, Syllogism & DI -->
+        <div class="topic-card bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-base font-bold text-cyan-400 flex items-center gap-2">
+              <span>🧠 10. లాజికల్ రీజనింగ్ & దత్తాంశ విశ్లేషణ (DI)</span>
+            </h3>
+            <label class="flex items-center space-x-1.5 text-xs text-slate-400 cursor-pointer">
+              <input type="checkbox" class="study-check rounded border-slate-700 text-amber-500" onchange="updateProgress()">
+              <span>చదివాను</span>
+            </label>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• <b>ఆల్ఫాబెట్ మెమరీ & వ్యతిరేక అక్షరాలు:</b>
+              <br>• 5 గుణిజాలు: <b>EJOTY</b> (5, 10, 15, 20, 25).
+              <br>• 3 గుణిజాలు: <b>CFI-LORUX</b> (3, 6, 9, 12, 15, 18, 21, 24).
+              <br>• వ్యతిరేక అక్షరాల స్థానాల మొత్తం ఎల్లప్పుడూ <b>27</b>! (A-Z, B-Y, C-X, D-W, E-V, F-U, G-T, H-S, I-R, J-Q, K-P, L-O, M-N).
+            </li>
+            <li>• <b>రక్త సంబంధాలు:</b> పురుషుడు $[+]$, స్త్రీ $[-]$, దంపతులు $\Leftrightarrow$, తోబుట్టువులు $-$, తరాల మార్పు $|$. ఫొటో సమస్యల్లో "నా (My)" పదం నుండి వెనక్కి విడదీయాలి.</li>
+            <li>• <b>దిశలు & నీడలు:</b> సూర్యోదయం వేళ నీడ పడమరన; సూర్యాస్తమయం వేళ తూర్పున; మధ్యాహ్నం 12 గంటలకు నీడ ఉండదు. కనిష్ట దూరం $= \sqrt{\Delta x^2 + \Delta y^2}$.</li>
+            <li>• <b>గడియారాలు (Clocks):</b> కోణం $\theta = |30H - 5.5M|$. 24 గంటల్లో ముల్లులు 22 సార్లు ఏకీభవిస్తాయి, 22 సార్లు సరళరేఖలో వ్యతిరేకంగా ఉంటాయి, 44 సార్లు లంబంగా ఉంటాయి.</li>
+            <li>• <b>క్యాలెండర్ (Calendar):</b> సాధారణ ఏడాది 1 విషమ రోజు, లీపు ఏడాది 2 విషమ రోజులు. 400 ఏళ్లకు 0 విషమ రోజులు. శతాబ్దపు చివరి రోజు మంగళ, గురు, శనివారాలు కాజాలవు.</li>
+            <li>• <b>దత్తాంశ విశ్లేషణ (DI):</b> పై చార్ట్ లో $360^\circ = 100\% \to 1\% = 3.6^\circ, 1^\circ = \frac{1}{3.6}\%$. బేస్ 10% & 1% కాలిక్యులేషన్ పద్ధతి వాడాలి.</li>
           </ul>
         </div>
       </div>
