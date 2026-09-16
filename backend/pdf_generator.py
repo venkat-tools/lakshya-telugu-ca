@@ -13,7 +13,29 @@ from db import get_articles, get_quiz_by_date, get_one_liners_by_date, get_avail
 PDF_CACHE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "pdf_cache"))
 os.makedirs(PDF_CACHE_DIR, exist_ok=True)
 
-EDGE_EXE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+def get_browser_executable():
+    import shutil
+    candidates = [
+        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+        r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        "/usr/bin/google-chrome",
+        "/usr/bin/google-chrome-stable",
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser",
+        "/usr/lib/chromium/chromium",
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    for name in ["msedge", "google-chrome", "google-chrome-stable", "chromium", "chromium-browser"]:
+        found = shutil.which(name)
+        if found:
+            return found
+    return None
+
+EDGE_EXE = get_browser_executable() or r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 
 OFFICIAL_TELUGU_EPAPERS = [
     {
@@ -57,6 +79,34 @@ OFFICIAL_TELUGU_EPAPERS = [
         "url": "https://epaper.vaartha.com",
         "description": "జాతీయ, అంతర్జాతీయ మరియు రాష్ట్ర ముఖ్యాంశాలు",
         "tag": "Daily Telugu Newspaper"
+    },
+    {
+        "name": "సూర్య (Suryaa E-Paper)",
+        "icon": "📰",
+        "url": "https://epaper.suryaa.com",
+        "description": "ఆంధ్రప్రదేశ్ & తెలంగాణ దినపత్రిక",
+        "tag": "Daily Edition"
+    },
+    {
+        "name": "మన తెలంగాణ (Mana Telangana)",
+        "icon": "📰",
+        "url": "https://epaper.manatelangana.news",
+        "description": "తెలంగాణ సమగ్ర వార్తలు & జిల్లా ఎడిషన్లు",
+        "tag": "TS News"
+    },
+    {
+        "name": "ది హిందూ (The Hindu E-Paper)",
+        "icon": "🗞️",
+        "url": "https://epaper.thehindu.com",
+        "description": "UPSC & సివిల్ సర్వీసెస్ ఎగ్జామ్స్ స్టాండర్డ్ నేషనల్ న్యూస్",
+        "tag": "UPSC & Civil Services"
+    },
+    {
+        "name": "ఇండియన్ ఎక్స్‌ప్రెస్ (The Indian Express)",
+        "icon": "🗞️",
+        "url": "https://epaper.indianexpress.com",
+        "description": "ఎక్స్‌ప్లైన్డ్ (Explained) & కాంపిటీటివ్ ఎడిటోరియల్స్",
+        "tag": "National & Editorial"
     }
 ]
 
@@ -406,35 +456,44 @@ def generate_epaper_pdf(date=None, force_refresh=False):
 
     pdf_filename = f"Lakshya_Telugu_EPaper_{date}.pdf"
     out_pdf_path = os.path.join(PDF_CACHE_DIR, pdf_filename)
+    static_pdf_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "pdfs", pdf_filename)
+    fallback_today = os.path.join(os.path.dirname(__file__), "..", "frontend", "pdfs", "daily_epaper_today.pdf")
 
-    # Return cached PDF if already exists and refresh not forced
+    # 1. Return cached PDF if already exists and refresh not forced
     if os.path.exists(out_pdf_path) and not force_refresh and os.path.getsize(out_pdf_path) > 1000:
         return out_pdf_path
 
-    # Generate HTML file
-    html_content = render_epaper_html(date=date)
-    temp_html_path = os.path.join(PDF_CACHE_DIR, f"temp_epaper_{date}.html")
-    with open(temp_html_path, "w", encoding="utf-8") as f:
-        f.write(html_content)
+    # 2. Return pre-generated static PDF from frontend/pdfs if available
+    if os.path.exists(static_pdf_path) and os.path.getsize(static_pdf_path) > 1000:
+        return static_pdf_path
 
-    # Convert to PDF via headless Edge
-    file_uri = f"file:///{temp_html_path.replace(os.sep, '/')}"
-    cmd = f'"{EDGE_EXE}" --headless --disable-gpu --no-pdf-header-footer --print-to-pdf="{out_pdf_path}" "{file_uri}"'
-    
-    try:
-        subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
-    except Exception as e:
-        print(f"PDF generation error: {e}")
+    # 3. Generate HTML and convert to PDF via headless browser if executable is found
+    browser_exe = get_browser_executable()
+    if browser_exe:
+        html_content = render_epaper_html(date=date)
+        temp_html_path = os.path.join(PDF_CACHE_DIR, f"temp_epaper_{date}.html")
+        try:
+            with open(temp_html_path, "w", encoding="utf-8") as f:
+                f.write(html_content)
 
-    # Clean temp html
-    try:
-        if os.path.exists(temp_html_path):
-            os.remove(temp_html_path)
-    except Exception:
-        pass
+            file_uri = f"file:///{temp_html_path.replace(os.sep, '/')}"
+            cmd = f'"{browser_exe}" --headless --disable-gpu --no-pdf-header-footer --print-to-pdf="{out_pdf_path}" "{file_uri}"'
+            subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
+        except Exception as e:
+            print(f"PDF generation error: {e}")
+        finally:
+            if os.path.exists(temp_html_path):
+                try:
+                    os.remove(temp_html_path)
+                except Exception:
+                    pass
 
     if os.path.exists(out_pdf_path) and os.path.getsize(out_pdf_path) > 1000:
         return out_pdf_path
+
+    # 4. Fallback to today's static pre-compiled PDF
+    if os.path.exists(fallback_today) and os.path.getsize(fallback_today) > 1000:
+        return fallback_today
 
     return None
 

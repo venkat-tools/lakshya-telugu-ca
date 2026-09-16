@@ -98,20 +98,20 @@ def start_bot_polling():
                         f"నమస్కారం {user_name}! 🙏\n\n"
                         f"🎯 <b>లక్ష్య తెలుగు డైలీ కరెంట్ అఫైర్స్ & ఈ-పేపర్ బోట్</b>కు స్వాగతం!\n"
                         f"(APPSC, TSPSC, UPSC, SSC, Banking Special)\n\n"
-                        f"📋 <b>కమాండ్స్:</b>\n"
-                        f"👉 <b>/syllabus</b> లేదా <b>/material</b> - APPSC గ్రూప్ 1 & 2 సమగ్ర సిలబస్, షార్ట్‌కట్ ఫార్ములాలు & మాస్టర్ గైడ్ 📚\n"
+                        f"📋 <b>ముఖ్యమైన కమాండ్స్:</b>\n"
+                        f"👉 <b>/epaper</b> లేదా <b>/pdf</b> - నేటి పూర్తి తెలుగు ఈ-పేపర్ PDF డౌన్‌లోడ్ లింక్ & ఫైల్ 📥\n"
+                        f"👉 <b>/papers</b> లేదా <b>/newspapers</b> - ఈనాడు, సాక్షి, ఆంధ్రజ్యోతి అధికారిక ఈ-పేపర్స్ PDF లింక్స్ 🗞️\n"
+                        f"👉 <b>/today</b> - నేటి 56 ఆర్టికల్స్ ముఖ్యాంశాలు 📰\n"
+                        f"👉 <b>/quiz</b> - నేటి 5 ప్రాక్టీస్ క్విజ్ పోల్స్ (MCQs) 📝\n"
+                        f"👉 <b>/oneliners</b> - ఒక వరుస ముఖ్యాంశాలు (Quick Revision) ⚡\n"
+                        f"👉 <b>/syllabus</b> లేదా <b>/material</b> - APPSC గ్రూప్ 1 & 2 సమగ్ర సిలబస్ & 6 పుస్తకాలు (PDF) 📚\n"
                         f"👉 <b>/history</b> - AP చరిత్ర & గ్రూప్స్ 1, 2, 3 గ్రాండ్ టెస్ట్ 🏛️\n"
                         f"👉 <b>/schemes</b> - సంక్షేమ పథకాలు 2026 (సూపర్ సిక్స్ & 6 గ్యారెంటీలు) 🌾\n"
                         f"👉 <b>/mains</b> - గ్రూప్ 1 & 2 మెయిన్స్ మోడల్ సమాధానాలు ✍️\n"
                         f"👉 <b>/group2</b> లేదా <b>/mock</b> - APPSC గ్రూప్-2 గ్రాండ్ టెస్ట్ (150 Qs) & PYQs 🎯\n"
                         f"👉 <b>/map</b> - మ్యాప్ పాయింటింగ్ అట్లాస్ (AP, India, World) 🗺️\n"
-                        f"👉 <b>/epaper</b> లేదా <b>/pdf</b> - నేటి పూర్తి తెలుగు ఈ-పేపర్ PDF (డౌన్‌లోడ్)\n"
-                        f"👉 <b>/papers</b> - ఈనాడు, సాక్షి, ఆంధ్రజ్యోతి అధికారిక ఈ-పేపర్స్ లింక్స్\n"
-                        f"👉 <b>/today</b> - నేటి 56 ఆర్టికల్స్ ముఖ్యాంశాలు\n"
-                        f"👉 <b>/quiz</b> - నేటి 5 ప్రాక్టీస్ క్విజ్ పోల్స్ (MCQs)\n"
-                        f"👉 <b>/oneliners</b> - ఒక వరుస ముఖ్యాంశాలు (Quick Revision)\n"
-                        f"👉 <b>/mobile</b> - మొబైల్ యాప్ లింక్ (4G/5G TinyURL)\n"
-                        f"👉 <b>/all</b> - నేటి మొత్తం డైజెస్ట్ + క్విజ్ + ఈ-పేపర్ PDF పొందండి\n"
+                        f"👉 <b>/mobile</b> - మొబైల్ యాప్ లింక్ 📱\n"
+                        f"👉 <b>/all</b> - నేటి మొత్తం డైజెస్ట్ + క్విజ్ + ఈ-పేపర్ PDF 🚀\n"
                     )
                     send_telegram_message(welcome, token=token, chat_id=chat_id)
 
@@ -277,15 +277,26 @@ def start_bot_polling():
                             chat_id=chat_id
                         )
 
-                elif text == "/epaper" or text == "/pdf":
+                elif text in ["/epaper", "/pdf", "/paper", "/newspaper"]:
                     from telegram_bot import send_daily_epaper_pdf, send_epapers_directory
-                    send_telegram_message(f"⏳ <b>{today_date} నాటి తెలుగు ఈ-పేపర్ PDF సిద్ధం చేయబడుతోంది...</b>\nదయచేసి ఒక్క క్షణం వేచి ఉండండి.", token=token, chat_id=chat_id)
+                    send_telegram_message(
+                        f"📰 <b>{today_date} నాటి తెలుగు ఈ-పేపర్ ఎడిషన్ (PDF)</b>\n"
+                        f"───────────────────────\n\n"
+                        f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్ లింక్ (1-Click Download):</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/api/epaper/pdf?date={today_date}\n\n"
+                        f"📖 <b>ఆన్‌లైన్ డిజిటల్ ఈ-పేపర్ (HD పేపర్ మోడ్):</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/epaper?date={today_date}\n\n"
+                        f"🗞️ <b>ఈనాడు, సాక్షి, ఆంధ్రజ్యోతి అధికారిక ఈ-పేపర్స్:</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/epapers_directory\n\n"
+                        f"⏳ <i>దయచేసి ఒక్క క్షణం వేచి ఉండండి, పూర్తి PDF ఫైల్ కూడా పంపుతున్నాము...</i>",
+                        token=token, chat_id=chat_id
+                    )
                     send_daily_epaper_pdf(date=today_date, token=token, chat_id=chat_id)
-                    send_epapers_directory(token=token, chat_id=chat_id)
+                    send_epapers_directory(date=today_date, token=token, chat_id=chat_id)
 
-                elif text == "/papers":
+                elif text in ["/papers", "/newspapers", "/epapers", "/directory"]:
                     from telegram_bot import send_epapers_directory
-                    send_epapers_directory(token=token, chat_id=chat_id)
+                    send_epapers_directory(date=today_date, token=token, chat_id=chat_id)
 
                 elif text == "/mobile":
                     mobile_msg = (
@@ -307,7 +318,8 @@ def start_bot_polling():
                         if a.get("exam_relevance"):
                             s_er = html.escape(a["exam_relevance"])
                             resp += f"<i>🎯 {s_er}</i>\n"
-                    resp += f"\n🌐 <b>మొత్తం {len(articles)} ఆర్టికల్స్ మొబైల్ లో చదవండి:</b> https://lakshya-telugu-ca.onrender.com"
+                    resp += f"\n📥 <b>నేటి ఈ-పేపర్ PDF డౌన్‌లోడ్:</b> https://lakshya-telugu-ca.onrender.com/api/epaper/pdf?date={today_date}\n"
+                    resp += f"🌐 <b>మొత్తం {len(articles)} ఆర్టికల్స్ మొబైల్ లో చదవండి:</b> https://lakshya-telugu-ca.onrender.com"
                     send_telegram_message(resp, token=token, chat_id=chat_id)
 
                 elif text == "/quiz":

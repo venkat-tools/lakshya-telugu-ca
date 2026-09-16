@@ -128,10 +128,6 @@ def send_daily_epaper_pdf(date=None, token=None, chat_id=None):
         dates = get_available_dates()
         date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
 
-    pdf_path = generate_epaper_pdf(date=date)
-    if not pdf_path:
-        return {"success": False, "error": f"{date} ఈ-పేపర్ PDF జనరేట్ చేయడం సాధ్యపడలేదు."}
-
     caption = (
         f"📰 <b>లక్ష్య డైలీ తెలుగు ఈ-పేపర్ ఎడిషన్ (PDF)</b>\n"
         f"📅 <b>తేదీ: {date}</b>\n\n"
@@ -139,10 +135,27 @@ def send_daily_epaper_pdf(date=None, token=None, chat_id=None):
         f"• ఈనాడు, సాక్షి, నమస్తే తెలంగాణ 56 ఆర్టికల్స్ సమగ్ర విశ్లేషణ\n"
         f"• ఒక వరుస ముఖ్యాంశాలు (Quick Revision One-Liners)\n"
         f"• వివరణలతో కూడిన 5 ప్రాక్టీస్ MCQs ప్రశ్నలు\n\n"
-        f"🎯 <i>APPSC • TSPSC • UPSC • SSC విజేతల ప్రత్యేక ఎడిషన్</i>\n"
-        f"🌐 <b>లైవ్ యాప్:</b> https://lakshya-telugu-ca.onrender.com"
+        f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్ లింక్:</b>\n"
+        f"👉 https://lakshya-telugu-ca.onrender.com/api/epaper/pdf?date={date}\n"
+        f"🌐 <b>ఆన్‌లైన్ డిజిటల్ ఈ-పేపర్:</b>\n"
+        f"👉 https://lakshya-telugu-ca.onrender.com/epaper?date={date}\n\n"
+        f"🎯 <i>APPSC • TSPSC • UPSC • SSC విజేతల ప్రత్యేక ఎడిషన్</i>"
     )
-    return send_telegram_document(
+
+    pdf_path = generate_epaper_pdf(date=date)
+    if not pdf_path or not os.path.exists(pdf_path):
+        fallback_msg = (
+            f"📰 <b>లక్ష్య డైలీ తెలుగు ఈ-పేపర్ ఎడిషన్ (PDF) - {date}</b>\n\n"
+            f"📥 <b>నేటి PDF డౌన్‌లోడ్ లింక్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/api/epaper/pdf?date={date}\n\n"
+            f"📖 <b>ఆన్‌లైన్ రీడర్ (HD పేపర్ మోడ్):</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/epaper?date={date}\n\n"
+            f"🗞️ <b>ఈనాడు, సాక్షి అధికారిక ఈ-పేపర్స్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/epapers_directory"
+        )
+        return send_telegram_message(fallback_msg, token=token, chat_id=chat_id)
+
+    res = send_telegram_document(
         file_path=pdf_path,
         caption=caption,
         filename=f"Lakshya_Telugu_EPaper_{date}.pdf",
@@ -150,19 +163,46 @@ def send_daily_epaper_pdf(date=None, token=None, chat_id=None):
         chat_id=chat_id
     )
 
-def send_epapers_directory(token=None, chat_id=None):
+    if not res.get("success"):
+        # Send fallback with clickable direct download link if document sending encounters an issue
+        fallback_msg = (
+            f"📰 <b>లక్ష్య డైలీ తెలుగు ఈ-పేపర్ ఎడిషన్ (PDF) - {date}</b>\n\n"
+            f"📥 <b>నేటి PDF డౌన్‌లోడ్ లింక్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/api/epaper/pdf?date={date}\n\n"
+            f"📖 <b>ఆన్‌లైన్ రీడర్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/epaper?date={date}"
+        )
+        send_telegram_message(fallback_msg, token=token, chat_id=chat_id)
+
+    return res
+
+def send_epapers_directory(date=None, token=None, chat_id=None):
     """Send official Telugu E-Papers directory links to Telegram"""
     from pdf_generator import OFFICIAL_TELUGU_EPAPERS
+    if not date:
+        dates = get_available_dates()
+        date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
+
     msg = (
-        f"🗞️ <b>ప్రముఖ తెలుగు దినపత్రికల అధికారిక ఈ-పేపర్స్ (Official E-Papers):</b>\n"
-        f"───────────────────────\n"
-        f"మీరు నేరుగా ఈ క్రింది లింక్‌ల ద్వారా జిల్లాల వారీగా అధికారిక PDF ఈ-పేపర్స్ చదువుకోవచ్చు:\n\n"
+        f"🗞️ <b>డైలీ తెలుగు ఈ-న్యూస్‌పేపర్స్ & PDF డౌన్‌లోడ్ హబ్</b>\n"
+        f"📅 <b>తేదీ: {date}</b>\n"
+        f"───────────────────────\n\n"
+        f"📥 <b>1. లక్ష్య డైలీ కరెంట్ అఫైర్స్ ఈ-పేపర్ PDF:</b>\n"
+        f"• 56+ పోటీ పరీక్షల వార్తలు, ఒక వరుస ముఖ్యాంశాలు & 5 క్విజ్ ప్రశ్నలు\n"
+        f"👉 <b>డైరెక్ట్ PDF డౌన్‌లోడ్:</b>\n"
+        f"https://lakshya-telugu-ca.onrender.com/api/epaper/pdf?date={date}\n"
+        f"👉 <b>ఆన్‌లైన్ డిజిటల్ ఈ-పేపర్ రీడర్:</b>\n"
+        f"https://lakshya-telugu-ca.onrender.com/epaper?date={date}\n\n"
+        f"📰 <b>2. ప్రముఖ దినపత్రికల అధికారిక PDF ఈ-పేపర్స్ (జిల్లాల వారీగా):</b>\n"
     )
     for ep in OFFICIAL_TELUGU_EPAPERS:
-        msg += f"👉 <b><a href='{ep['url']}'>{ep['name']}</a></b>\n"
-        msg += f"   <i>{ep['description']}</i>\n\n"
+        msg += f"• <b>{ep['name']}</b>\n  🔗 {ep['url']}\n  <i>({ep['description']})</i>\n\n"
 
-    msg += "📥 <i>లక్ష్య డైలీ తెలుగు కంపైల్డ్ ఈ-పేపర్ PDF కోసం <b>/epaper</b> లేదా <b>/pdf</b> అని టైప్ చేయండి!</i>"
+    msg += (
+        f"🌐 <b>వెబ్‌సైట్‌లో అన్ని ఈ-పేపర్స్ డైరెక్టరీ:</b>\n"
+        f"👉 https://lakshya-telugu-ca.onrender.com/epapers_directory\n\n"
+        f"💡 <i>చిట్కా: పూర్తి PDF డాక్యుమెంట్ మీ టెలిగ్రామ్‌లోనే పొందడానికి <b>/epaper</b> లేదా <b>/pdf</b> అని టైప్ చేయండి!</i>"
+    )
     return send_telegram_message(msg, token=token, chat_id=chat_id)
 
 def broadcast_daily_digest(date=None, token=None, chat_id=None):
@@ -214,6 +254,12 @@ def broadcast_daily_digest(date=None, token=None, chat_id=None):
         for idx, ol in enumerate(one_liners[:6], 1):
             s_point = html.escape(ol.get("point", ""))
             msg += f"• {s_point}\n"
+
+    # Daily E-Papers & PDF links
+    msg += f"\n\n📰 <b>నేటి డైలీ తెలుగు ఈ-పేపర్ PDF & న్యూస్‌పేపర్స్ లింక్స్:</b>\n"
+    msg += f"📥 <b>డైలీ కరెంట్ అఫైర్స్ E-Paper PDF డౌన్‌లోడ్:</b>\n👉 https://lakshya-telugu-ca.onrender.com/api/epaper/pdf?date={date}\n"
+    msg += f"📖 <b>ఆన్‌లైన్ ఈ-పేపర్ రీడర్:</b>\n👉 https://lakshya-telugu-ca.onrender.com/epaper?date={date}\n"
+    msg += f"🗞️ <b>ఈనాడు, సాక్షి, ఆంధ్రజ్యోతి అధికారిక E-Papers:</b>\n👉 https://lakshya-telugu-ca.onrender.com/epapers_directory\n"
 
     msg += f"\n🌐 <b>లైవ్ వెబ్ యాప్ (24/7):</b> https://lakshya-telugu-ca.onrender.com\n"
     msg += f"📱 <b>మొబైల్ యాక్సెస్:</b> https://tinyurl.com/lakshya-telugu-2026"

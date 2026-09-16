@@ -359,7 +359,11 @@ def api_epaper_pdf():
     
     pdf_path = generate_epaper_pdf(date=date)
     if not pdf_path or not os.path.exists(pdf_path):
-        return jsonify({"success": False, "error": "PDF జనరేట్ చేయడం సాధ్యపడలేదు."}), 500
+        fallback_today = os.path.join(FRONTEND_DIR, "pdfs", "daily_epaper_today.pdf")
+        if os.path.exists(fallback_today):
+            pdf_path = fallback_today
+        else:
+            return jsonify({"success": False, "error": "PDF జనరేట్ చేయడం సాధ్యపడలేదు."}), 500
     
     return send_from_directory(
         os.path.dirname(pdf_path),
@@ -367,6 +371,12 @@ def api_epaper_pdf():
         as_attachment=True,
         download_name=f"Lakshya_Telugu_EPaper_{date}.pdf"
     )
+
+@app.route("/epapers_directory", methods=["GET"])
+@app.route("/epapers", methods=["GET"])
+def epapers_directory_view():
+    from epapers_directory import render_epapers_directory_html
+    return render_epapers_directory_html()
 
 @app.route("/api/epaper/links", methods=["GET"])
 def api_epaper_links():
