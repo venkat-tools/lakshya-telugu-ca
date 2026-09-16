@@ -295,6 +295,90 @@ def render_appsc_syllabus_html():
       </div>
     </div>
 
+    <!-- Original Textbooks Download Hub (All 720 Pages Uncut) -->
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-700/50 p-4 rounded-2xl mb-6 shadow-md no-print">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-3 border-b border-indigo-800/40 pb-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">📚</span>
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              పూర్తి ఒరిజినల్ టెక్స్ట్‌బుక్స్ PDF డౌన్‌లోడ్ హబ్ (All 720 Pages Uncut)
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">100% Original PDFs</span>
+            </h3>
+            <p class="text-xs text-slate-400">వెబ్ పోర్టల్ సారాంశంతో పాటు, మీరు అప్‌లోడ్ చేసిన మొత్తం 6 ఒరిజినల్ పుస్తకాలను నేరుగా డౌన్‌లోడ్ చేసుకోండి:</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+        <a href="/pdfs/rc_reddy_disaster_management_geography_notes.pdf" download class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700 transition group">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📕</span>
+            <div>
+              <p class="font-bold text-slate-200 group-hover:text-blue-400">RC రెడ్డి జాగ్రఫీ & విపత్తు నిర్వహణ</p>
+              <p class="text-[11px] text-slate-400">రామన్ రాజు క్లాస్ నోట్స్ • 310 పేజీలు (6.5 MB)</p>
+            </div>
+          </div>
+          <span class="bg-blue-600/30 text-blue-300 font-bold px-2 py-1 rounded text-[11px] border border-blue-500/40 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/pdfs/ekam_ias_ap_geography_textbook.pdf" download class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700 transition group">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📘</span>
+            <div>
+              <p class="font-bold text-slate-200 group-hover:text-blue-400">Ekam IAS ఏపీ & భారత జాగ్రఫీ</p>
+              <p class="text-[11px] text-slate-400">26 జిల్లాలు, నదులు, ప్రాజెక్టులు • 112 పేజీలు (4.2 MB)</p>
+            </div>
+          </div>
+          <span class="bg-blue-600/30 text-blue-300 font-bold px-2 py-1 rounded text-[11px] border border-blue-500/40 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/pdfs/appsc_mental_ability_master_book.pdf" download class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700 transition group">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📙</span>
+            <div>
+              <p class="font-bold text-slate-200 group-hover:text-blue-400">మెంటల్ ఎబిలిటీ & ఆప్టిట్యూడ్ మాస్టర్ బుక్</p>
+              <p class="text-[11px] text-slate-400">సమగ్ర సిలబస్ & స్టెప్-బై-స్టెప్ • 228 పేజీలు (7.6 MB)</p>
+            </div>
+          </div>
+          <span class="bg-blue-600/30 text-blue-300 font-bold px-2 py-1 rounded text-[11px] border border-blue-500/40 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/pdfs/quantitative_aptitude_120_shortcuts.pdf" download class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700 transition group">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📗</span>
+            <div>
+              <p class="font-bold text-slate-200 group-hover:text-blue-400">క్వాంటిటేటివ్ ఆప్టిట్యూడ్ షార్ట్‌కట్స్</p>
+              <p class="text-[11px] text-slate-400">120+ వేగవంతమైన ఫార్ములాలు • 34 పేజీలు (0.5 MB)</p>
+            </div>
+          </div>
+          <span class="bg-blue-600/30 text-blue-300 font-bold px-2 py-1 rounded text-[11px] border border-blue-500/40 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/pdfs/ap_industrial_policies_4_official_go.pdf" download class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700 transition group">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📒</span>
+            <div>
+              <p class="font-bold text-slate-200 group-hover:text-blue-400">ఆంధ్రప్రదేశ్ నూతన పాలసీలు 4.0</p>
+              <p class="text-[11px] text-slate-400">అధికారిక గెజిట్ & రాయితీలు • 21 పేజీలు (0.5 MB)</p>
+            </div>
+          </div>
+          <span class="bg-blue-600/30 text-blue-300 font-bold px-2 py-1 rounded text-[11px] border border-blue-500/40 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/pdfs/indian_financial_markets_guide.pdf" download class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700 transition group">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📓</span>
+            <div>
+              <p class="font-bold text-slate-200 group-hover:text-blue-400">భారతీయ ఆర్థిక మార్కెట్ల గైడ్</p>
+              <p class="text-[11px] text-slate-400">T-Bills, CP, CD, మనీ మార్కెట్ • 6 పేజీలు (0.5 MB)</p>
+            </div>
+          </div>
+          <span class="bg-blue-600/30 text-blue-300 font-bold px-2 py-1 rounded text-[11px] border border-blue-500/40 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+      </div>
+    </div>
+
     <!-- Search & Preparation Tracker -->
     <div class="bg-slate-800/90 border border-slate-700/80 p-4 rounded-2xl mb-6 shadow-sm flex flex-wrap items-center justify-between gap-4 no-print">
       <div class="flex items-center space-x-3 w-full md:w-auto">
