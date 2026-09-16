@@ -14,7 +14,7 @@ Exhaustive, encyclopedic coverage extracted from official textbooks & handbooks:
 """
 
 def render_appsc_syllabus_html():
-    return """<!DOCTYPE html>
+    return r"""<!DOCTYPE html>
 <html lang="te">
 <head>
   <meta charset="UTF-8">
@@ -148,7 +148,7 @@ def render_appsc_syllabus_html():
     </div>
 
     <!-- ==================== TAB 1: HISTORY (భారత & ఆంధ్రప్రదేశ్ సమగ్ర చరిత్ర) ==================== -->
-    <section id="content-history" class="tab-content space-y-6">
+    <section id="content-history" class="tab-content space-y-6" style="display: block !important;">
       <div class="bg-gradient-to-r from-amber-950 via-slate-800 to-slate-900 border border-amber-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-amber-900/60 text-amber-300 px-3 py-1 rounded-full border border-amber-700/50">APPSC Group 1 & 2 • 30 మార్కులు</span>
@@ -392,7 +392,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 2: GEOGRAPHY (Ekam IAS 112-Page + RC Reddy 222-Page Notes) ==================== -->
-    <section id="content-geo" class="tab-content space-y-6 hidden">
+    <section id="content-geo" class="tab-content space-y-6" style="display: none !important;">
       <div class="bg-gradient-to-r from-blue-950 via-slate-800 to-slate-900 border border-blue-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-blue-900/60 text-blue-300 px-3 py-1 rounded-full border border-blue-700/50">Ekam IAS 112 పేజీల టెక్స్ట్‌బుక్ + RC రెడ్డి 222 పేజీల నోట్స్</span>
@@ -567,7 +567,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 3: DISASTER MANAGEMENT (RC REDDY NOTES) ==================== -->
-    <section id="content-disaster" class="tab-content space-y-6 hidden">
+    <section id="content-disaster" class="tab-content space-y-6" style="display: none !important;">
       <div class="bg-gradient-to-r from-red-950 via-slate-800 to-slate-900 border border-red-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-red-900/60 text-red-300 px-3 py-1 rounded-full border border-red-700/50">RC రెడ్డి IAS స్టడీ సర్కిల్ • రామన్ రాజు క్లాస్ నోట్స్</span>
@@ -795,7 +795,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 4: AP POLICIES 4.0 (2024-2029) ==================== -->
-    <section id="content-policies" class="tab-content space-y-6 hidden">
+    <section id="content-policies" class="tab-content space-y-6" style="display: none !important;">
       <div class="bg-gradient-to-r from-emerald-950 via-slate-800 to-slate-900 border border-emerald-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-emerald-900/60 text-emerald-300 px-3 py-1 rounded-full border border-emerald-700/50">ఆంధ్రప్రదేశ్ ప్రభుత్వం • 2024–2029 అధికారిక జీవోలు</span>
@@ -913,7 +913,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 5: MENTAL ABILITY & APTITUDE ==================== -->
-    <section id="content-aptitude" class="tab-content space-y-6 hidden">
+    <section id="content-aptitude" class="tab-content space-y-6" style="display: none !important;">
       <div class="bg-gradient-to-r from-cyan-950 via-slate-800 to-slate-900 border border-cyan-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-cyan-900/60 text-cyan-300 px-3 py-1 rounded-full border border-cyan-700/50">228 పేజీల సమగ్ర పాఠ్య పుస్తకం • 120+ షార్ట్‌కట్ ఫార్ములాలు</span>
@@ -1041,7 +1041,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 6: POLITY & CONSTITUTION ==================== -->
-    <section id="content-polity" class="tab-content space-y-6 hidden">
+    <section id="content-polity" class="tab-content space-y-6" style="display: none !important;">
       <div class="bg-gradient-to-r from-purple-950 via-slate-800 to-slate-900 border border-purple-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-purple-900/60 text-purple-300 px-3 py-1 rounded-full border border-purple-700/50">APPSC Group 1 & 2 • 30 మార్కులు</span>
@@ -1114,7 +1114,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 7: ECONOMY & FINANCIAL MARKETS ==================== -->
-    <section id="content-economy" class="tab-content space-y-6 hidden">
+    <section id="content-economy" class="tab-content space-y-6" style="display: none !important;">
       <div class="bg-gradient-to-r from-yellow-950 via-slate-800 to-slate-900 border border-yellow-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-yellow-900/60 text-yellow-300 px-3 py-1 rounded-full border border-yellow-700/50">Ekam IAS సమగ్ర ఆర్థిక మార్కెట్ల గైడ్ (6 పేజీలు)</span>
@@ -1186,7 +1186,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 8: SOLVED APPSC PYQS HUB ==================== -->
-    <section id="content-pyqs" class="tab-content space-y-6 hidden">
+    <section id="content-pyqs" class="tab-content space-y-6" style="display: none !important;">
       <div class="bg-gradient-to-r from-amber-950 via-slate-800 to-slate-900 border border-amber-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-amber-900/60 text-amber-300 px-3 py-1 rounded-full border border-amber-700/50">APPSC అధికారిక మునుపటి ప్రశ్నలు (PYQs)</span>
@@ -1296,7 +1296,7 @@ def render_appsc_syllabus_html():
     </section>
 
     <!-- ==================== TAB 9: MAINS & ETHICS GUIDE ==================== -->
-    <section id="content-mains" class="tab-content space-y-6 hidden">
+    <section id="content-mains" class="tab-content space-y-6" style="display: none !important;">
       <div class="bg-gradient-to-r from-pink-950 via-slate-800 to-slate-900 border border-pink-800/40 p-6 rounded-2xl shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
           <span class="text-xs font-bold uppercase tracking-wider bg-pink-900/60 text-pink-300 px-3 py-1 rounded-full border border-pink-700/50">APPSC Group 1 Mains & Interview Special</span>
@@ -1341,48 +1341,58 @@ def render_appsc_syllabus_html():
   </footer>
 
   <script>
-    lucide.createIcons();
+    // Bulletproof Global Tab Switcher
+    window.switchTab = function(tabId) {
+      try {
+        console.log('Switching to tab:', tabId);
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(el => {
+          el.style.setProperty('display', 'none', 'important');
+        });
 
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-blue-600', 'text-white');
-        btn.classList.add('bg-slate-800', 'text-slate-300');
-      });
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+          btn.classList.remove('bg-blue-600', 'text-white', 'shadow-lg');
+          btn.classList.add('bg-slate-800', 'text-slate-300');
+        });
 
-      const activeContent = document.getElementById('content-' + tabId);
-      const activeBtn = document.getElementById('tab-' + tabId);
+        const activeContent = document.getElementById('content-' + tabId);
+        const activeBtn = document.getElementById('tab-' + tabId);
 
-      if (activeContent) activeContent.classList.remove('hidden');
-      if (activeBtn) {
-        activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
-        activeBtn.classList.add('bg-blue-600', 'text-white');
+        if (activeContent) {
+          activeContent.style.setProperty('display', 'block', 'important');
+        } else {
+          console.error('Section not found: content-' + tabId);
+        }
+
+        if (activeBtn) {
+          activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
+          activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
+          activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        console.error('Error switching tab:', err);
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    };
 
     function updateProgress() {
-      const checkboxes = document.querySelectorAll('.study-check');
-      const total = checkboxes.length;
-      let checkedCount = 0;
-      checkboxes.forEach((cb, idx) => {
-        if (cb.checked) checkedCount++;
-        localStorage.setItem('appsc_full_topic_' + idx, cb.checked);
-      });
-      const pct = total > 0 ? Math.round((checkedCount / total) * 100) : 0;
-      document.getElementById('progressBar').style.width = pct + '%';
-      document.getElementById('progressText').innerText = `మీరు అధ్యయనం చేసిన అధ్యాయాలు: ${checkedCount} / ${total} (${pct}% పూర్తి)`;
+      try {
+        const checkboxes = document.querySelectorAll('.study-check');
+        const total = checkboxes.length;
+        let checkedCount = 0;
+        checkboxes.forEach((cb, idx) => {
+          if (cb.checked) checkedCount++;
+          localStorage.setItem('appsc_full_topic_' + idx, cb.checked);
+        });
+        const pct = total > 0 ? Math.round((checkedCount / total) * 100) : 0;
+        const pBar = document.getElementById('progressBar');
+        const pText = document.getElementById('progressText');
+        if (pBar) pBar.style.width = pct + '%';
+        if (pText) pText.innerText = `మీరు అధ్యయనం చేసిన అధ్యాయాలు: ${checkedCount} / ${total} (${pct}% పూర్తి)`;
+      } catch(e) {}
     }
-
-    // Load saved checklist progress
-    window.addEventListener('DOMContentLoaded', () => {
-      const checkboxes = document.querySelectorAll('.study-check');
-      checkboxes.forEach((cb, idx) => {
-        const saved = localStorage.getItem('appsc_full_topic_' + idx);
-        if (saved === 'true') cb.checked = true;
-      });
-      updateProgress();
-    });
 
     // Real-time Search Filter across all topic cards
     function filterTopics() {
@@ -1423,6 +1433,30 @@ def render_appsc_syllabus_html():
       const text = encodeURIComponent("🎯 *లక్ష్య APPSC గ్రూప్ 1 & 2 సమగ్ర డిజిటల్ టెక్స్ట్‌బుక్ పోర్టల్!*\nభారత & ఏపీ సమగ్ర చరిత్ర, భూగోళశాస్త్రం (26 జిల్లాలు), విపత్తు నిర్వహణ, ఏపీ విధానాలు 4.0 & 228 పేజీల మెంటల్ ఎబిలిటీ:\n👉 https://lakshya-telugu-ca.onrender.com/appsc_syllabus");
       window.open('https://api.whatsapp.com/send?text=' + text, '_blank');
     }
+
+    // Safe Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+          lucide.createIcons();
+        }
+      } catch (err) {
+        console.warn('Lucide icons warning:', err);
+      }
+
+      // Restore checklist
+      try {
+        const checkboxes = document.querySelectorAll('.study-check');
+        checkboxes.forEach((cb, idx) => {
+          const saved = localStorage.getItem('appsc_full_topic_' + idx);
+          if (saved === 'true') cb.checked = true;
+        });
+        updateProgress();
+      } catch (err) {}
+
+      // Default active tab
+      window.switchTab('history');
+    });
   </script>
 </body>
 </html>
