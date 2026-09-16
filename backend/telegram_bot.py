@@ -168,6 +168,69 @@ def send_telegram_document(file_path, caption="", filename=None, token=None, cha
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+
+def send_telegram_audio(audio_path, caption="", title="డైలీ కరెంట్ అఫైర్స్ ఆడియో బులెటిన్", performer="లక్ష్య స్టడీ టీమ్", token=None, chat_id=None):
+    """Send native audio/podcast file to Telegram (sendAudio)"""
+    config = load_config()
+    token = token or config.get("bot_token")
+    chat_id = chat_id or config.get("chat_id")
+
+    if not token or not chat_id:
+        return {"success": False, "error": "Bot Token లేదా Chat ID కాన్ఫిగర్ చేయలేదు."}
+
+    if not os.path.exists(audio_path):
+        return {"success": False, "error": f"ఆడియో ఫైల్ కనుగొనబడలేదు: {audio_path}"}
+
+    url = f"https://api.telegram.org/bot{token}/sendAudio"
+    upload_name = os.path.basename(audio_path)
+
+    try:
+        with open(audio_path, "rb") as f:
+            files = {"audio": (upload_name, f, "audio/mpeg")}
+            data = {
+                "chat_id": chat_id,
+                "caption": caption[:1024],
+                "parse_mode": "HTML",
+                "title": title,
+                "performer": performer
+            }
+            res = requests.post(url, data=data, files=files, timeout=60)
+            res_data = res.json()
+            if res_data.get("ok"):
+                return {"success": True, "result": res_data}
+            return {"success": False, "error": res_data.get("description", "టెలిగ్రామ్ ఆడియో ఎర్రర్")}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def send_daily_bulletin_audio(date=None, token=None, chat_id=None):
+    """Generate and send today's Telugu Exam Audio Podcast Bulletin to Telegram"""
+    from tts import generate_daily_bulletin_audio
+    if not date:
+        dates = get_available_dates()
+        date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
+
+    audio_path = generate_daily_bulletin_audio(date=date)
+    if not audio_path or not os.path.exists(audio_path):
+        return {"success": False, "error": "ఆడియో బులెటిన్ జనరేట్ చేయడం సాధ్యపడలేదు."}
+
+    caption = (
+        f"🎙️ <b>లక్ష్య డైలీ కరెంట్ అఫైర్స్ ఆడియో పాడ్‌కాస్ట్ బులెటిన్</b>\n"
+        f"📅 <b>తేదీ: {date}</b>\n"
+        f"───────────────────────\n"
+        f"🎧 5 నిమిషాల సమగ్ర ముఖ్యాంశాలు, వన్‌లైనర్స్ & పరీక్ష విశ్లేషణ.\n"
+        f"🚗 ప్రయాణాల్లో, పనుల్లో ఉన్నప్పుడు వినడానికి అత్యంత అనుకూలం!\n\n"
+        f"📥 పూర్తి PDF: https://lakshya-telugu-ca.onrender.com/api/epaper/pdf?date={date}"
+    )
+
+    return send_telegram_audio(
+        audio_path=audio_path,
+        caption=caption,
+        title=f"లక్ష్య కరెంట్ అఫైర్స్ బులెటిన్ ({date})",
+        performer="లక్ష్య స్టడీ అకాడమీ",
+        token=token,
+        chat_id=chat_id
+    )
+
 def send_telegram_quiz_poll(question, options, correct_index, explanation="", token=None, chat_id=None):
     """Send native Telegram Quiz Poll"""
     config = load_config()

@@ -448,6 +448,33 @@ def api_magazine_pdf():
         mimetype="application/pdf"
     )
 
+
+@app.route("/api/audio/daily_bulletin", methods=["GET"])
+def api_audio_daily_bulletin():
+    from tts import generate_daily_bulletin_audio
+    date = request.args.get("date")
+    audio_path = generate_daily_bulletin_audio(date=date)
+    if not audio_path or not os.path.exists(audio_path):
+        return jsonify({"success": False, "error": "ఆడియో బులెటిన్ అందుబాటులో లేదు."}), 404
+    return send_from_directory(
+        os.path.dirname(audio_path),
+        os.path.basename(audio_path),
+        mimetype="audio/mpeg"
+    )
+
+@app.route("/api/telegram/send_bulletin_audio", methods=["POST", "GET"])
+def api_telegram_send_audio():
+    from telegram_bot import send_daily_bulletin_audio
+    try:
+        data = request.get_json(silent=True) or {}
+    except Exception:
+        data = {}
+    date = request.args.get("date") or data.get("date")
+    token = request.args.get("bot_token") or data.get("bot_token")
+    chat_id = request.args.get("chat_id") or data.get("chat_id")
+    res = send_daily_bulletin_audio(date=date, token=token, chat_id=chat_id)
+    return jsonify(res)
+
 @app.route("/epapers_directory", methods=["GET"])
 @app.route("/epapers", methods=["GET"])
 def epapers_directory_view():
@@ -928,6 +955,93 @@ def subject_tests_view():
     from subject_tests_view import render_subject_tests_html
     subj = request.args.get("subject", "history")
     resp = make_response(render_subject_tests_html(subj))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
+
+
+# ----------------- Solved PYQs Master Hub Endpoints -----------------
+@app.route("/api/pyqs_hub", methods=["GET"])
+def api_pyqs_hub():
+    from pyqs_master_data import get_all_pyq_papers, get_all_pyq_questions
+    return jsonify({
+        "success": True,
+        "papers": get_all_pyq_papers(),
+        "total_questions": len(get_all_pyq_questions()),
+        "questions": get_all_pyq_questions()
+    })
+
+@app.route("/api/pyqs_hub/<paper_id>", methods=["GET"])
+def api_pyqs_paper(paper_id):
+    from pyqs_master_data import get_pyq_paper
+    p = get_pyq_paper(paper_id)
+    if not p:
+        return jsonify({"success": False, "error": f"{paper_id} పేపర్ లభించలేదు."}), 404
+    return jsonify({
+        "success": True,
+        "paper": p
+    })
+
+@app.route("/pyqs_hub", methods=["GET"])
+def pyqs_hub_view():
+    from flask import make_response
+    from pyqs_view import render_pyqs_hub_html
+    paper = request.args.get("paper", "all")
+    resp = make_response(render_pyqs_hub_html(paper))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
+
+# ----------------- Rapid Revision Flashcards Deck Endpoints -----------------
+@app.route("/api/flashcards_deck", methods=["GET"])
+def api_flashcards_deck():
+    from flashcards_data import get_all_flashcards, get_flashcard_categories
+    cat = request.args.get("cat", "all")
+    from flashcards_data import get_flashcards_by_category
+    cards = get_flashcards_by_category(cat)
+    return jsonify({
+        "success": True,
+        "total": len(cards),
+        "categories": get_flashcard_categories(),
+        "cards": cards
+    })
+
+@app.route("/flashcards_deck", methods=["GET"])
+def flashcards_deck_view():
+    from flask import make_response
+    from flashcards_view import render_flashcards_deck_html
+    cat = request.args.get("cat", "all")
+    resp = make_response(render_flashcards_deck_html(cat))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
+
+# ----------------- Districts Master Guide Endpoints -----------------
+@app.route("/api/districts_guide", methods=["GET"])
+def api_districts_guide():
+    from districts_master_data import get_all_districts, get_ap_districts, get_ts_districts
+    state = request.args.get("state", "all")
+    if state == "ap":
+        data = get_ap_districts()
+    elif state == "ts":
+        data = get_ts_districts()
+    else:
+        data = get_all_districts()
+    return jsonify({
+        "success": True,
+        "total": len(data),
+        "districts": data
+    })
+
+@app.route("/districts_guide", methods=["GET"])
+def districts_guide_view():
+    from flask import make_response
+    from districts_view import render_districts_guide_html
+    state = request.args.get("state", "all")
+    resp = make_response(render_districts_guide_html(state))
     resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     resp.headers["Pragma"] = "no-cache"
     resp.headers["Expires"] = "0"

@@ -238,6 +238,15 @@ def render_appsc_syllabus_html():
       <a href="/subject_tests" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-indigo-400 shadow-sm">
         <span>📝 150 చాప్టర్ టెస్ట్స్ (CBT)</span>
       </a>
+      <a href="/pyqs_hub" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-emerald-400 shadow-sm">
+        <span>📜 సాల్వ్డ్ PYQs హబ్</span>
+      </a>
+      <a href="/flashcards_deck" class="px-3.5 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-violet-400 shadow-sm">
+        <span>🗂️ 300+ 3D ఫ్లాష్‌కార్డ్స్</span>
+      </a>
+      <a href="/districts_guide" class="px-3.5 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-teal-400 shadow-sm">
+        <span>🗺️ AP & TS జిల్లా దర్శిని</span>
+      </a>
       <a href="/mains_answer_bank" class="px-3.5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-purple-400 shadow-sm">
         <span>✍️ మెయిన్స్ మోడల్ ఆన్సర్స్</span>
       </a>
@@ -417,6 +426,28 @@ def render_appsc_syllabus_html():
             </div>
           </div>
           <span class="bg-emerald-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-emerald-400 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/pdfs/appsc_tspsc_solved_pyqs_master.pdf" download="appsc_tspsc_solved_pyqs_master.pdf" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-blue-950/70 to-slate-900 hover:from-blue-900/80 hover:to-slate-800 border border-blue-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📜</span>
+            <div>
+              <p class="font-black text-blue-300 group-hover:text-blue-200">APPSC & TSPSC సాల్వ్డ్ PYQs (2017-2024)</p>
+              <p class="text-[11px] text-blue-200">అధికారిక కీ & సమగ్ర విశ్లేషణ • (2.1 MB)</p>
+            </div>
+          </div>
+          <span class="bg-blue-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-blue-400 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/pdfs/ap_ts_districts_master_handbook.pdf" download="ap_ts_districts_master_handbook.pdf" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-teal-950/70 to-slate-900 hover:from-teal-900/80 hover:to-slate-800 border border-teal-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">🗺️</span>
+            <div>
+              <p class="font-black text-teal-300 group-hover:text-teal-200">AP 26 & TS జిల్లా దర్శిని సమగ్ర గైడ్ (PDF)</p>
+              <p class="text-[11px] text-teal-200">నదులు, ప్రాజెక్టులు, ఖనిజాలు, చరిత్ర • (3.2 MB)</p>
+            </div>
+          </div>
+          <span class="bg-teal-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-teal-400 shrink-0">డౌన్‌లోడ్ 📥</span>
         </a>
       </div>
     </div>

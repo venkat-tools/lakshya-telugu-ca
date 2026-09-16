@@ -8,7 +8,7 @@ import time
 import requests
 import sys
 from datetime import datetime
-from telegram_bot import load_config, broadcast_daily_digest, send_telegram_message, send_telegram_quiz_poll, add_subscriber, send_monthly_magazine_telegram, load_channels, add_channel, remove_channel
+from telegram_bot import load_config, broadcast_daily_digest, send_telegram_message, send_telegram_quiz_poll, add_subscriber, send_monthly_magazine_telegram, load_channels, add_channel, remove_channel, send_daily_bulletin_audio
 from db import get_articles, get_quiz_by_date, get_one_liners_by_date, get_available_dates
 
 if sys.platform == "win32":
@@ -115,6 +115,7 @@ def start_bot_polling():
                         f"👉 <b>/mobile</b> - మొబైల్ యాప్ లింక్ 📱\n"
                         f"👉 <b>/all</b> - నేటి మొత్తం డైజెస్ట్ + క్విజ్ + ఈ-పేపర్ PDF 🚀\n\
 👉 <b>/monthly</b> - సెప్టెంబర్ 2026 మాస పత్రిక PDF (34 పేజీలు) 📘\n\
+👉 <b>/audio</b> లేదా <b>/podcast</b> - నేటి 5-నిమిషాల కరెంట్ అఫైర్స్ ఆడియో బులెటిన్ (MP3) 🎙️\n\
 👉 <b>/tests</b> - 150 చాప్టర్ ప్రాక్టీస్ MCQs (చరిత్ర, భౌగోళికం, సమాజం, ఆప్టిట్యూడ్) 📝\n\
 👉 <b>/channels</b> - కనెక్ట్ అయిన టెలిగ్రామ్ ఛానల్స్ & గ్రూప్స్ జాబితా 📢\n\
 👉 <b>/setchannel @channel_name</b> - కొత్త ఛానల్‌ను బ్రోడ్‌కాస్ట్‌కు లింక్ చేయండి 🔗\n"
@@ -369,7 +370,11 @@ def start_bot_polling():
                     resp += f"\n🌐 <b>పూర్తి ముఖ్యాంశాల కోసం క్లిక్ చేయండి:</b> https://lakshya-telugu-ca.onrender.com"
                     send_telegram_message(resp, token=token, chat_id=chat_id)
 
-                                elif text == "/monthly" or text == "/magazine":
+                                                elif text == "/audio" or text == "/podcast":
+                    send_telegram_message("🎙️ <b>నేటి 5 నిమిషాల కరెంట్ అఫైర్స్ ఆడియో పాడ్‌కాస్ట్ బులెటిన్ సిద్ధం చేయబడుతోంది... క్షణాల్లో మీ టెలిగ్రామ్‌కు వస్తుంది!</b>", token=token, chat_id=chat_id)
+                    send_daily_bulletin_audio(date=today_date, token=token, chat_id=chat_id)
+
+                elif text == "/monthly" or text == "/magazine":
                     send_telegram_message("📘 <b>సెప్టెంబర్ 2026 మాస పత్రిక PDF సిద్ధం చేయబడుతోంది... క్షణాల్లో మీ టెలిగ్రామ్‌కు వస్తుంది!</b>", token=token, chat_id=chat_id)
                     send_monthly_magazine_telegram(month="2026-09", token=token, chat_id=chat_id)
 

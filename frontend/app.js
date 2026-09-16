@@ -936,6 +936,37 @@ function setupTelegramHandlers() {
   });
 }
 
+// Send Daily Audio Bulletin to Telegram
+async function sendBulletinAudioToTelegram() {
+  const btn = document.getElementById("tgAudioSendBtn");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="animate-spin inline-block mr-1">⏳</span> పంపుతోంది...`;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/api/telegram/send_bulletin_audio`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date: state.currentDate })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast("ఆడియో బులెటిన్ టెలిగ్రామ్‌కు విజయవంతంగా చేరింది! 🎙️");
+    } else {
+      showToast("టెలిగ్రామ్ పంపడంలో లోపం: " + (data.error || "విఫలమైంది"), true);
+    }
+  } catch (e) {
+    showToast("సర్వర్ ఎర్రర్ ఏర్పడింది.", true);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i data-lucide="send" class="w-4 h-4 inline mr-1"></i><span>టెలిగ్రామ్ MP3</span>`;
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+}
+window.sendBulletinAudioToTelegram = sendBulletinAudioToTelegram;
+
 // ==================== TELUGU E-PAPERS & PDF HUB ====================
 function initEpaperModal() {
   const modal = document.getElementById("epaperModal");
