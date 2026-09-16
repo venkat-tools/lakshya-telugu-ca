@@ -506,6 +506,52 @@ def render_appsc_syllabus_html():
           </div>
           <span class="bg-indigo-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-indigo-400 shrink-0">డౌన్‌లోడ్ 📥</span>
         </a>
+
+        <!-- 4 Next-Gen Examination Master Compendiums -->
+        <a href="/polity_articles" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-amber-950/70 to-slate-900 hover:from-amber-900/80 hover:to-slate-800 border border-amber-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">🏛️</span>
+            <div>
+              <p class="font-black text-amber-300 group-hover:text-amber-200">భారత రాజ్యాంగ ఆర్టికల్స్ (1-395) మాస్టర్ గైడ్ (PDF)</p>
+              <p class="text-[11px] text-amber-200">ఆర్టికల్ 1-395 సమగ్ర వివరణ, ఫాస్ట్ సెర్చ్, MCQs • (2.5 MB)</p>
+            </div>
+          </div>
+          <span class="bg-amber-500 text-slate-950 font-black px-2.5 py-1 rounded text-[11px] border border-amber-300 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/science_tech_hub" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-cyan-950/70 to-slate-900 hover:from-cyan-900/80 hover:to-slate-800 border border-cyan-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">🛰️</span>
+            <div>
+              <p class="font-black text-cyan-300 group-hover:text-cyan-200">సైన్స్, టెక్నాలజీ & రక్షణ 2025–2026 మాస్టర్ (PDF)</p>
+              <p class="text-[11px] text-cyan-200">గగన్‌యాన్, అగ్ని-5 MIRV, AI మిషన్, క్వాంటం, BioE3 • (2.8 MB)</p>
+            </div>
+          </div>
+          <span class="bg-cyan-500 text-slate-950 font-black px-2.5 py-1 rounded text-[11px] border border-cyan-300 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/environment_hub" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-emerald-950/70 to-slate-900 hover:from-emerald-900/80 hover:to-slate-800 border border-emerald-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">🌍</span>
+            <div>
+              <p class="font-black text-emerald-300 group-hover:text-emerald-200">పర్యావరణం, జీవవైవిధ్యం & క్లైమేట్ చేంజ్ (PDF)</p>
+              <p class="text-[11px] text-emerald-200">COP29, 85 రామ్‌సార్ సైట్లు, టైగర్ (3,682), చీతా, చట్టాలు • (2.5 MB)</p>
+            </div>
+          </div>
+          <span class="bg-emerald-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-emerald-400 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/central_schemes" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-rose-950/70 to-slate-900 hover:from-rose-900/80 hover:to-slate-800 border border-rose-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">💰</span>
+            <div>
+              <p class="font-black text-rose-300 group-hover:text-rose-200">కేంద్ర ప్రభుత్వ ఫ్లాగ్‌షిప్ పథకాలు 2026 (PDF)</p>
+              <p class="text-[11px] text-rose-200">పీఎం సూర్య ఘర్, ఆయుష్మాన్ 70+, విశ్వకర్మ, లఖ్‌పతీ దీదీ • (2.5 MB)</p>
+            </div>
+          </div>
+          <span class="bg-rose-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-rose-400 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
       </div>
     </div>
 

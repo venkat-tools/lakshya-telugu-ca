@@ -1251,6 +1251,75 @@ def schemes_matrix_view():
     resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     return resp
 
+
+# ----------------- Indian Polity Articles (1-395) Fast-Search Directory Endpoints -----------------
+@app.route("/api/polity_articles", methods=["GET"])
+def api_polity_articles():
+    from polity_articles_data import get_polity_articles_data
+    return jsonify({
+        "success": True,
+        "data": get_polity_articles_data()
+    })
+
+@app.route("/polity_articles", methods=["GET"])
+def polity_articles_view():
+    from flask import make_response
+    from polity_articles_view import render_polity_articles_html
+    resp = make_response(render_polity_articles_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Science, Technology & Defense 2025-2026 Mega Revision Hub Endpoints -----------------
+@app.route("/api/science_tech", methods=["GET"])
+def api_science_tech():
+    from science_tech_data import get_science_tech_data
+    return jsonify({
+        "success": True,
+        "data": get_science_tech_data()
+    })
+
+@app.route("/science_tech_hub", methods=["GET"])
+def science_tech_hub_view():
+    from flask import make_response
+    from science_tech_view import render_science_tech_html
+    resp = make_response(render_science_tech_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Environment, Biodiversity & Climate Change Master Hub Endpoints -----------------
+@app.route("/api/environment", methods=["GET"])
+def api_environment():
+    from environment_data import get_environment_data
+    return jsonify({
+        "success": True,
+        "data": get_environment_data()
+    })
+
+@app.route("/environment_hub", methods=["GET"])
+def environment_hub_view():
+    from flask import make_response
+    from environment_view import render_environment_html
+    resp = make_response(render_environment_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Central Government Flagship Schemes 2026 Master Handbook Endpoints -----------------
+@app.route("/api/central_schemes", methods=["GET"])
+def api_central_schemes():
+    from central_schemes_data import get_central_schemes_data
+    return jsonify({
+        "success": True,
+        "data": get_central_schemes_data()
+    })
+
+@app.route("/central_schemes", methods=["GET"])
+def central_schemes_view():
+    from flask import make_response
+    from central_schemes_view import render_central_schemes_html
+    resp = make_response(render_central_schemes_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
 if __name__ == "__main__":
     print("==================================================================")
     print("🚀 తెలుగు పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ డ్యాష్‌బోర్డ్ ప్రారంభమైంది!")
