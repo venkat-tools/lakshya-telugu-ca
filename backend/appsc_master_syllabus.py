@@ -259,6 +259,18 @@ def render_appsc_syllabus_html():
       <a href="/daily_live_test" class="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black flex items-center gap-1.5 shrink-0 transition border border-amber-300 shadow-sm">
         <span>🏆 లైవ్ CBT టెస్ట్ (-0.33)</span>
       </a>
+      <a href="/ap_bifurcation_guide" class="px-3.5 py-2 rounded-lg bg-sky-700 hover:bg-sky-600 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-sky-500 shadow-sm">
+        <span>📜 AP పునర్విభజన చట్టం 2014</span>
+      </a>
+      <a href="/amendments_judgments" class="px-3.5 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-indigo-500 shadow-sm">
+        <span>⚖️ సవరణలు & SC తీర్పులు</span>
+      </a>
+      <a href="/weekly_digest" class="px-3.5 py-2 rounded-lg bg-blue-700 hover:bg-blue-600 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-blue-500 shadow-sm">
+        <span>🗓️ వీక్లీ మెగా రివిజన్</span>
+      </a>
+      <a href="/schemes_matrix" class="px-3.5 py-2 rounded-lg bg-teal-700 hover:bg-teal-600 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-teal-500 shadow-sm">
+        <span>🌾 పథకాల మేట్రిక్స్</span>
+      </a>
       <a href="/mains_answer_bank" class="px-3.5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-purple-400 shadow-sm">
         <span>✍️ మెయిన్స్ మోడల్ ఆన్సర్స్</span>
       </a>
@@ -471,6 +483,28 @@ def render_appsc_syllabus_html():
             </div>
           </div>
           <span class="bg-emerald-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-emerald-400 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/pdfs/ap_reorganisation_act_master_guide.pdf" download="ap_reorganisation_act_master_guide.pdf" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-sky-950/70 to-slate-900 hover:from-sky-900/80 hover:to-slate-800 border border-sky-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📜</span>
+            <div>
+              <p class="font-black text-sky-300 group-hover:text-sky-200">AP పునర్విభజన చట్టం 2014 మాస్టర్ గైడ్ (PDF)</p>
+              <p class="text-[11px] text-sky-200">108 సెక్షన్లు, 12 భాగాలు, 13 షెడ్యూల్స్, పోలవరం • (2.0 MB)</p>
+            </div>
+          </div>
+          <span class="bg-sky-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-sky-400 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/pdfs/constitution_amendments_judgments_guide.pdf" download="constitution_amendments_judgments_guide.pdf" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-indigo-950/70 to-slate-900 hover:from-indigo-900/80 hover:to-slate-800 border border-indigo-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">⚖️</span>
+            <div>
+              <p class="font-black text-indigo-300 group-hover:text-indigo-200">రాజ్యాంగ సవరణలు (1-106) & SC తీర్పులు (PDF)</p>
+              <p class="text-[11px] text-indigo-200">1 నుండి 106 సవరణలు, 20 ల్యాండ్‌మార్క్ తీర్పులు • (1.8 MB)</p>
+            </div>
+          </div>
+          <span class="bg-indigo-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-indigo-400 shrink-0">డౌన్‌లోడ్ 📥</span>
         </a>
       </div>
     </div>

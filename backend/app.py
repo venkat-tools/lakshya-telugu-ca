@@ -1183,6 +1183,74 @@ def appsc_syllabus_view():
     resp.headers["Expires"] = "0"
     return resp
 
+# ----------------- AP Reorganisation Act 2014 Master Guide Endpoints -----------------
+@app.route("/api/ap_bifurcation", methods=["GET"])
+def api_ap_bifurcation():
+    from ap_bifurcation_data import get_bifurcation_data
+    return jsonify({
+        "success": True,
+        "data": get_bifurcation_data()
+    })
+
+@app.route("/ap_bifurcation_guide", methods=["GET"])
+def ap_bifurcation_guide_view():
+    from flask import make_response
+    from ap_bifurcation_view import render_ap_bifurcation_html
+    resp = make_response(render_ap_bifurcation_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Constitutional Amendments & SC Judgments Hub Endpoints -----------------
+@app.route("/api/amendments_judgments", methods=["GET"])
+def api_amendments_judgments():
+    from amendments_judgments_data import get_amendments_judgments_data
+    return jsonify({
+        "success": True,
+        "data": get_amendments_judgments_data()
+    })
+
+@app.route("/amendments_judgments", methods=["GET"])
+def amendments_judgments_view():
+    from flask import make_response
+    from amendments_judgments_view import render_amendments_judgments_html
+    resp = make_response(render_amendments_judgments_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Sunday Weekly Current Affairs Digest & Mega Test Endpoints -----------------
+@app.route("/api/weekly_digest/data", methods=["GET"])
+def api_weekly_digest_data():
+    from weekly_compiler import get_weekly_digest_data
+    return jsonify({
+        "success": True,
+        "data": get_weekly_digest_data()
+    })
+
+@app.route("/weekly_digest", methods=["GET"])
+def weekly_digest_view():
+    from flask import make_response
+    from weekly_digest_view import render_weekly_digest_html
+    resp = make_response(render_weekly_digest_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- AP & TS Schemes Comparison & Eligibility Matrix Endpoints -----------------
+@app.route("/api/schemes_matrix", methods=["GET"])
+def api_schemes_matrix():
+    from schemes_matrix_data import get_schemes_matrix_data
+    return jsonify({
+        "success": True,
+        "schemes": get_schemes_matrix_data()
+    })
+
+@app.route("/schemes_matrix", methods=["GET"])
+def schemes_matrix_view():
+    from flask import make_response
+    from schemes_matrix_view import render_schemes_matrix_html
+    resp = make_response(render_schemes_matrix_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
 if __name__ == "__main__":
     print("==================================================================")
     print("🚀 తెలుగు పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ డ్యాష్‌బోర్డ్ ప్రారంభమైంది!")
