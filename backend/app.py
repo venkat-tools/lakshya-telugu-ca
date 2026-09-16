@@ -1047,6 +1047,131 @@ def districts_guide_view():
     resp.headers["Expires"] = "0"
     return resp
 
+# ----------------- AP & TS Budget & Economic Survey 2026 Endpoints -----------------
+@app.route("/api/budget_economy", methods=["GET"])
+def api_budget_economy():
+    from budget_economy_data import get_budget_economy_data
+    return jsonify({
+        "success": True,
+        "data": get_budget_economy_data()
+    })
+
+@app.route("/budget_economy_guide", methods=["GET"])
+def budget_economy_guide_view():
+    from flask import make_response
+    from budget_economy_view import render_budget_economy_html
+    state = request.args.get("state", "all")
+    resp = make_response(render_budget_economy_html(state))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Daily Telugu Editorial Analysis Endpoints -----------------
+@app.route("/api/editorials", methods=["GET"])
+def api_editorials():
+    from editorials_data import get_all_editorials
+    paper = request.args.get("paper", "all")
+    all_ed = get_all_editorials()
+    if paper != "all":
+        all_ed = [e for e in all_ed if paper.lower() in e["newspaper"].lower()]
+    return jsonify({
+        "success": True,
+        "total": len(all_ed),
+        "editorials": all_ed
+    })
+
+@app.route("/editorials_hub", methods=["GET"])
+def editorials_hub_view():
+    from flask import make_response
+    from editorials_view import render_editorials_hub_html
+    paper = request.args.get("paper", "all")
+    resp = make_response(render_editorials_hub_html(paper))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Telugu AI Exam Doubt Solver Endpoints -----------------
+@app.route("/api/doubt_solver/ask", methods=["POST"])
+def api_doubt_solver_ask():
+    from doubt_solver import solve_exam_doubt
+    body = request.get_json() or {}
+    query = body.get("query", "").strip()
+    if not query:
+        return jsonify({"success": False, "error": "సందేహం ఖాళీగా ఉండకూడదు"}), 400
+    answer = solve_exam_doubt(query)
+    return jsonify({
+        "success": True,
+        "answer": answer
+    })
+
+@app.route("/api/doubt_solver/suggested", methods=["GET"])
+def api_doubt_solver_suggested():
+    from doubt_solver import get_suggested_doubts
+    return jsonify({
+        "success": True,
+        "suggestions": get_suggested_doubts()
+    })
+
+@app.route("/doubt_solver", methods=["GET"])
+def doubt_solver_view():
+    from flask import make_response
+    from doubt_solver_view import render_doubt_solver_html
+    resp = make_response(render_doubt_solver_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Live Daily Mock Test & State Leaderboard Endpoints -----------------
+@app.route("/api/live_test/today", methods=["GET"])
+def api_live_test_today():
+    from daily_live_test_data import get_live_test_questions
+    qs = get_live_test_questions()
+    # Strip answers from client test payload
+    safe_qs = []
+    for q in qs:
+        safe_qs.append({
+            "id": q["id"],
+            "question": q["question"],
+            "options": q["options"],
+            "subject": q.get("subject", "General Studies")
+        })
+    return jsonify({
+        "success": True,
+        "total": len(safe_qs),
+        "time_minutes": 15,
+        "negative_marking": 0.33,
+        "questions": safe_qs
+    })
+
+@app.route("/api/live_test/submit", methods=["POST"])
+def api_live_test_submit():
+    from leaderboard_db import evaluate_and_submit_test
+    body = request.get_json() or {}
+    name = body.get("name", "పోటీ పరీక్షార్థి")
+    district = body.get("district", "ఆంధ్రప్రదేశ్")
+    target_exam = body.get("target_exam", "APPSC Group 2")
+    answers = body.get("answers", {})
+    time_spent = body.get("time_spent", "15:00")
+
+    result = evaluate_and_submit_test(name, district, target_exam, answers, time_spent)
+    return jsonify(result)
+
+@app.route("/api/live_test/leaderboard", methods=["GET"])
+def api_live_test_leaderboard():
+    from leaderboard_db import get_top_leaderboard_entries
+    limit = int(request.args.get("limit", 50))
+    board = get_top_leaderboard_entries(limit)
+    return jsonify({
+        "success": True,
+        "total": len(board),
+        "leaderboard": board
+    })
+
+@app.route("/daily_live_test", methods=["GET"])
+def daily_live_test_view():
+    from flask import make_response
+    from daily_live_test_view import render_daily_live_test_html
+    resp = make_response(render_daily_live_test_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
 @app.route("/appsc_syllabus", methods=["GET"])
 @app.route("/syllabus", methods=["GET"])
 def appsc_syllabus_view():

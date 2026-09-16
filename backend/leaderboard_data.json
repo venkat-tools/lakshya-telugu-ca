@@ -1,0 +1,93 @@
+[
+  {
+    "id": "bm_01",
+    "name": "సురేష్ కుమార్ రెడ్డి",
+    "district": "తిరుపతి",
+    "target_exam": "APPSC Group 2",
+    "attempted": 20,
+    "correct": 19,
+    "wrong": 1,
+    "net_score": 18.67,
+    "accuracy": 95.0,
+    "time_spent": "10:15",
+    "date": "2026-09-16"
+  },
+  {
+    "id": "bm_02",
+    "name": "కె. భవ్యశ్రీ",
+    "district": "విశాఖపట్నం",
+    "target_exam": "APPSC Group 1",
+    "attempted": 20,
+    "correct": 18,
+    "wrong": 2,
+    "net_score": 17.34,
+    "accuracy": 90.0,
+    "time_spent": "11:04",
+    "date": "2026-09-16"
+  },
+  {
+    "id": "bm_03",
+    "name": "ఎం. నరేష్ గౌడ్",
+    "district": "హైదరాబాద్",
+    "target_exam": "TSPSC Group 2",
+    "attempted": 19,
+    "correct": 17,
+    "wrong": 2,
+    "net_score": 16.34,
+    "accuracy": 89.5,
+    "time_spent": "12:20",
+    "date": "2026-09-16"
+  },
+  {
+    "id": "bm_04",
+    "name": "పి. లావణ్య",
+    "district": "గుంటూరు",
+    "target_exam": "APPSC Group 2",
+    "attempted": 19,
+    "correct": 16,
+    "wrong": 3,
+    "net_score": 15.01,
+    "accuracy": 84.2,
+    "time_spent": "12:55",
+    "date": "2026-09-16"
+  },
+  {
+    "id": "bm_05",
+    "name": "వి. సాయి కృష్ణ",
+    "district": "వరంగల్",
+    "target_exam": "TSPSC Group 1",
+    "attempted": 18,
+    "correct": 15,
+    "wrong": 3,
+    "net_score": 14.01,
+    "accuracy": 83.3,
+    "time_spent": "13:40",
+    "date": "2026-09-16"
+  },
+  {
+    "id": "bm_06",
+    "name": "డి. రాధాకృష్ణ",
+    "district": "కృష్ణా",
+    "target_exam": "పోలీస్ SI",
+    "attempted": 20,
+    "correct": 15,
+    "wrong": 5,
+    "net_score": 13.35,
+    "accuracy": 75.0,
+    "time_spent": "14:10",
+    "date": "2026-09-16"
+  },
+  {
+    "id": "live_750af484",
+    "name": "టెస్ట్ యూజర్",
+    "district": "విజయవాడ",
+    "target_exam": "APPSC Group 2",
+    "attempted": 2,
+    "correct": 2,
+    "wrong": 0,
+    "net_score": 2.0,
+    "accuracy": 100.0,
+    "time_spent": "5:30",
+    "date": "2026-09-16"
+  }
+]

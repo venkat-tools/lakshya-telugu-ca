@@ -117,6 +117,10 @@ def start_bot_polling():
 👉 <b>/monthly</b> - సెప్టెంబర్ 2026 మాస పత్రిక PDF (34 పేజీలు) 📘\n\
 👉 <b>/audio</b> లేదా <b>/podcast</b> - నేటి 5-నిమిషాల కరెంట్ అఫైర్స్ ఆడియో బులెటిన్ (MP3) 🎙️\n\
 👉 <b>/tests</b> - 150 చాప్టర్ ప్రాక్టీస్ MCQs (చరిత్ర, భౌగోళికం, సమాజం, ఆప్టిట్యూడ్) 📝\n\
+👉 <b>/budget</b> - AP & TS ఎకనామిక్ సర్వే & బడ్జెట్ 2026 మాస్టర్ గైడ్ & PDF 📊\n\
+👉 <b>/editorial</b> - డైలీ తెలుగు ఎడిటోరియల్ విశ్లేషణ (ఈనాడు, సాక్షి, ది హిందూ) 📰\n\
+👉 <b>/ask [ప్రశ్న]</b> - తెలుగు AI ఎగ్జామ్ డౌట్ సాల్వర్ (ఉదా: /ask ఆర్టికల్ 32) 🤖\n\
+👉 <b>/live_test</b> - డైలీ లైవ్ టైమ్డ్ మాక్ టెస్ట్ & స్టేట్ లీడర్‌బోర్డ్ 🏆\n\
 👉 <b>/channels</b> - కనెక్ట్ అయిన టెలిగ్రామ్ ఛానల్స్ & గ్రూప్స్ జాబితా 📢\n\
 👉 <b>/setchannel @channel_name</b> - కొత్త ఛానల్‌ను బ్రోడ్‌కాస్ట్‌కు లింక్ చేయండి 🔗\n"
                     )
@@ -422,6 +426,67 @@ def start_bot_polling():
 
                 elif text == "/all":
                     broadcast_daily_digest(date=today_date, token=token, chat_id=chat_id)
+
+                elif text == "/budget" or text == "/survey":
+                    b_msg = (
+                        "📊 <b>AP & TS ఎకనామిక్ సర్వే & బడ్జెట్ 2026 మాస్టర్ గైడ్ & PDF</b>\n"
+                        "───────────────────────\n\n"
+                        "🏛️ <b>ఆంధ్రప్రదేశ్ బడ్జెట్ 2024-25:</b> ₹2,94,421 కోట్లు (ద్రవ్య లోటు: 3.41%)\n"
+                        "• తలసరి ఆదాయం: ₹2,42,479 (జాతీయ సగటు కంటే ₹56,625 అధికం)\n"
+                        "• సూపర్ సిక్స్: తల్లికి వందనం (₹15,000), దీపం-2 (3 సిలిండర్లు), అన్నదాత సుఖీభవ (₹20,000)\n\n"
+                        "🏛️ <b>తెలంగాణ బడ్జెట్ 2024-25:</b> ₹2,75,891 కోట్లు\n"
+                        "• తలసరి ఆదాయం: ₹3,47,299 (దేశంలో అగ్రస్థానం, 86.9% ఎక్కువ)\n"
+                        "• 6 గ్యారెంటీలు: మహాలక్ష్మి, రైతు భరోసా (₹15,000), గృహజ్యోతి (200u)\n\n"
+                        "📥 <b>మాస్టర్ PDF డౌన్‌లోడ్ చేసుకోండి:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/pdfs/ap_ts_budget_economic_survey_master.pdf\n\n"
+                        "🌐 <b>వెబ్ గైడ్:</b> https://lakshya-telugu-ca.onrender.com/budget_economy_guide"
+                    )
+                    send_telegram_message(b_msg, token=token, chat_id=chat_id)
+
+                elif text == "/editorial" or text == "/editorials":
+                    ed_msg = (
+                        "📰 <b>డైలీ తెలుగు ఎడిటోరియల్ పరీక్షా విశ్లేషణ</b>\n"
+                        "───────────────────────\n\n"
+                        "1️⃣ <b>ఈనాడు:</b> జమిలి ఎన్నికల ప్రస్థానం - సమాఖ్య స్ఫూర్తి & ఆర్టికల్ 83, 172, 356\n"
+                        "2️⃣ <b>సాక్షి:</b> పోలవరం ప్రాజెక్టు - ₹12,157 కోట్ల నిధులు & 41.15 మీటర్ల కాంటూర్\n"
+                        "3️⃣ <b>ది హిందూ:</b> ద్రవ్యోల్బణం & వృద్ధి సమతౌల్యం - ఆర్బీఐ ఎంపీసీ (MPC) రేట్లు\n\n"
+                        "💡 <i>ప్రిలిమ్స్ ఫ్యాక్ట్స్, మెయిన్స్ పాయింట్లు మరియు మోడల్ ప్రశ్నలతో వెబ్‌సైట్‌లో చదవండి:</i>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/editorials_hub"
+                    )
+                    send_telegram_message(ed_msg, token=token, chat_id=chat_id)
+
+                elif text.startswith("/ask"):
+                    q_parts = text.split(maxsplit=1)
+                    if len(q_parts) < 2 or not q_parts[1].strip():
+                        send_telegram_message("🤖 <b>తెలుగు AI ఎగ్జామ్ డౌట్ సాల్వర్</b>\nదయచేసి మీ సందేహాన్ని టైప్ చేయండి.\nఉదాహరణ: <code>/ask ఆర్టికల్ 32 ప్రాముఖ్యత ఏమిటి?</code>", token=token, chat_id=chat_id)
+                    else:
+                        from doubt_solver import solve_exam_doubt
+                        query = q_parts[1].strip()
+                        ans = solve_exam_doubt(query)
+                        pointers = "\n".join([f"• {p}" for p in ans.get("exam_pointers", [])[:3]])
+                        reply_msg = (
+                            f"🤖 <b>AI ఎగ్జామ్ నోట్: {ans['title']}</b>\n"
+                            f"📂 <i>{ans['subject']}</i>\n"
+                            f"───────────────────────\n\n"
+                            f"🎯 <b>నిర్వచనం & సారాంశం:</b>\n{ans['definition']}\n\n"
+                            f"💡 <b>పరీక్ష పాయింట్లు:</b>\n{pointers}\n\n"
+                            f"🌟 <b>ర్యాంకర్స్ టిప్:</b> {ans['tip']}\n\n"
+                            f"🌐 <i>మరిన్ని సందేహాల కోసం: https://lakshya-telugu-ca.onrender.com/doubt_solver</i>"
+                        )
+                        send_telegram_message(reply_msg, token=token, chat_id=chat_id)
+
+                elif text == "/live_test" or text == "/test_live":
+                    lt_msg = (
+                        "🏆 <b>లైవ్ డైలీ మాక్ టెస్ట్ (20 MCQs - 15 నిమిషాలు)</b>\n"
+                        "───────────────────────\n\n"
+                        "⚠️ <b>నిబంధనలు:</b>\n"
+                        "• సమయం: 15 నిమిషాలు\n"
+                        "• మార్కులు: సరైన ప్రశ్నకు +1.0 | తప్పు ప్రశ్నకు -0.33\n"
+                        "• తక్షణమే రాష్ట్ర స్థాయి ర్యాంకింగ్ & లీడర్‌బోర్డ్ స్కోర్‌కార్డ్!\n\n"
+                        "👉 <b>ఇప్పుడే లైవ్ టెస్ట్ రాయండి:</b>\n"
+                        "https://lakshya-telugu-ca.onrender.com/daily_live_test"
+                    )
+                    send_telegram_message(lt_msg, token=token, chat_id=chat_id)
 
         except KeyboardInterrupt:
             print("\nబోట్ ఆపివేయబడింది.")

@@ -247,6 +247,18 @@ def render_appsc_syllabus_html():
       <a href="/districts_guide" class="px-3.5 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-teal-400 shadow-sm">
         <span>🗺️ AP & TS జిల్లా దర్శిని</span>
       </a>
+      <a href="/budget_economy_guide" class="px-3.5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-emerald-500 shadow-sm">
+        <span>📊 బడ్జెట్ & సర్వే 2026</span>
+      </a>
+      <a href="/editorials_hub" class="px-3.5 py-2 rounded-lg bg-rose-700 hover:bg-rose-600 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-rose-500 shadow-sm">
+        <span>📰 డైలీ ఎడిటోరియల్స్</span>
+      </a>
+      <a href="/doubt_solver" class="px-3.5 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-indigo-500 shadow-sm">
+        <span>🤖 AI డౌట్ సాల్వర్</span>
+      </a>
+      <a href="/daily_live_test" class="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black flex items-center gap-1.5 shrink-0 transition border border-amber-300 shadow-sm">
+        <span>🏆 లైవ్ CBT టెస్ట్ (-0.33)</span>
+      </a>
       <a href="/mains_answer_bank" class="px-3.5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-black flex items-center gap-1.5 shrink-0 transition border border-purple-400 shadow-sm">
         <span>✍️ మెయిన్స్ మోడల్ ఆన్సర్స్</span>
       </a>
@@ -448,6 +460,17 @@ def render_appsc_syllabus_html():
             </div>
           </div>
           <span class="bg-teal-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-teal-400 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <a href="/pdfs/ap_ts_budget_economic_survey_master.pdf" download="ap_ts_budget_economic_survey_master.pdf" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-emerald-950/70 to-slate-900 hover:from-emerald-900/80 hover:to-slate-800 border border-emerald-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📊</span>
+            <div>
+              <p class="font-black text-emerald-300 group-hover:text-emerald-200">AP & TS ఎకనామిక్ సర్వే & బడ్జెట్ 2026 మాస్టర్ గైడ్ (PDF)</p>
+              <p class="text-[11px] text-emerald-200">GSDP, సూపర్ సిక్స్, 6 గ్యారెంటీలు, ప్రాజెక్టులు • (2.8 MB)</p>
+            </div>
+          </div>
+          <span class="bg-emerald-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-emerald-400 shrink-0">డౌన్‌లోడ్ 📥</span>
         </a>
       </div>
     </div>
