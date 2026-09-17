@@ -108,9 +108,17 @@ PRONUNCIATION_MAP = [
     (r'\bUCC\b', 'ఉమ్మడి పౌరస్మృతి'),
     (r'₹\s*([0-9,]+)\s*కోట్ల', r'\1 కోట్ల రూపాయల'),
     (r'₹\s*([0-9,]+)\s*కోట్లు', r'\1 కోట్ల రూపాయలు'),
+    (r'₹\s*([0-9,]+)\s*లక్షల', r'\1 లక్షల రూపాయల'),
+    (r'₹\s*([0-9,]+)\s*లక్షలు', r'\1 లక్షల రూపాయలు'),
+    (r'₹\s*([0-9,]+)\s*వేల', r'\1 వేల రూపాయల'),
+    (r'₹\s*([0-9,]+)\s*వేలు', r'\1 వేల రూపాయలు'),
     (r'₹\s*([0-9,]+)', r'\1 రూపాయలు'),
     (r'రూ\.\s*([0-9,]+)\s*కోట్ల', r'\1 కోట్ల రూపాయల'),
     (r'రూ\.\s*([0-9,]+)\s*కోట్లు', r'\1 కోట్ల రూపాయలు'),
+    (r'రూ\.\s*([0-9,]+)\s*లక్షల', r'\1 లక్షల రూపాయల'),
+    (r'రూ\.\s*([0-9,]+)\s*లక్షలు', r'\1 లక్షల రూపాయలు'),
+    (r'రూ\.\s*([0-9,]+)\s*వేల', r'\1 వేల రూపాయల'),
+    (r'రూ\.\s*([0-9,]+)\s*వేలు', r'\1 వేల రూపాయలు'),
     (r'రూ\.\s*([0-9,]+)', r'\1 రూపాయలు'),
     (r'([0-9,]+)\s*రూపాయలు\s*కోట్ల', r'\1 కోట్ల రూపాయల'),
     (r'([0-9,]+)\s*రూపాయలు\s*కు', r'\1 రూపాయలకు'),
@@ -118,7 +126,22 @@ PRONUNCIATION_MAP = [
     (r'&', ' మరియు '),
     (r'\bvs\.?\b|\bv\.\b', ' వర్సెస్ '),
     (r'\bకి\.మీ\.?\b|\bkm\b', ' కిలోమీటర్లు '),
-    (r'\bనం\.?\b|\bNo\.?\b', ' నంబర్ ')
+    (r'(?<![ఁ-౿])(?:No\.?|నం\.)\s*(?=[0-9])', ' నెంబర్ '),
+    (r'\bLive\s+Updates?\b', 'తాజా సమాచారం'),
+    (r'\bBreaking\s+News\b', 'తాజా వార్త'),
+    (r'\bWeather\s+Update\b', 'వాతావరణ నివేదిక'),
+    (r'\bRelease\s+Date\b', 'విడుదల తేదీ'),
+    (r'\bViral\s+Video\b', 'వైరల్ వీడియో'),
+    (r'\bGoogle\b', 'గూగుల్'),
+    (r'\bAmit\s+Shah\b', 'అమిత్ షా'),
+    (r'\bNarendra\s+Modi\b', 'నరేంద్ర మోదీ'),
+    (r'\bChandrababu\b', 'చంద్రబాబు'),
+    (r'\bEPFO\b', 'ఈపీఎఫ్ఓ'),
+    (r'\bCWC\b', 'సీడబ్ల్యూసీ'),
+    (r'\bFIDE\b', 'ఫిడే'),
+    (r'\bAB-PMJAY\b|\bPM-JAY\b|\bPMJAY\b', 'పీఎంజేవై'),
+    (r'\bEPS\b', 'ఈపీఎస్'),
+    (r'\bEDLI\b', 'ఈడీఎల్ఐ')
 ]
 
 def clean_text_for_speech(text):
@@ -131,8 +154,28 @@ def clean_text_for_speech(text):
     text = re.sub(r'<[^>]+>', '', text)
     # Remove URLs
     text = re.sub(r'https?:\/\/\S+', '', text)
+    # Strip newspaper tags like [ఈనాడు], [సాక్షి], [BBC], [టీవీ9], etc.
+    text = re.sub(r'\[\s*(?:ఈనాడు|సాక్షి|నమస్తే|వన్|టీవీ9|ఏబీపీ|ఏషియానెట్|BBC)[^\]]*\]\s*', '', text)
+    text = re.sub(r'^(?:ఈనాడు|సాక్షి|నమస్తే తెలంగాణ|ది హిందూ|టీవీ9|ఏబీపీ|ఆంధ్రజ్యోతి)\s*[-:–|]?\s*', '', text)
     # Remove markdown symbols and brackets
     text = re.sub(r'[*_#`~\[\]\(\)\{\}]', ' ', text)
+    
+    # Mission hyphen to space: చంద్రయాన్-4 -> చంద్రయాన్ 4
+    text = re.sub(r'(చంద్రయాన్|సూర్యయాన్|శుక్రయాన్|మంగళయాన్|అగ్ని|పృథ్వీ|పీఎస్ఎల్వీ|జీఎస్ఎల్వీ|ఎల్వీఎం|ఇన్సాట్)\s*[-–]\s*([0-9A-Za-z]+)', r'\1 \2', text)
+    # Year ranges: 2024-29 -> 2024 నుండి 2029 వరకు
+    def _repl_year(m):
+        y1, y2 = m.group(1), m.group(2)
+        if len(y2) == 2:
+            y2 = y1[:2] + y2
+        return f'{y1} నుండి {y2} వరకు '
+    text = re.sub(r'\b(20[0-9]{2})\s*[-–]\s*([0-9]{2,4})', _repl_year, text)
+    # Deduplicate Telugu + English acronym duplicates
+    text = re.sub(r'ఈపీఎఫ్ఓ\s*\(\s*EPFO\s*\)|ఈపీఎఫ్ఓ\s+EPFO', 'ఈపీఎఫ్ఓ', text, flags=re.IGNORECASE)
+    text = re.sub(r'ఇస్రో\s*\(\s*ISRO\s*\)|ఇస్రో\s+ISRO', 'ఇస్రో', text, flags=re.IGNORECASE)
+    text = re.sub(r'డీఆర్డీవో\s*\(\s*DRDO\s*\)|డీఆర్డీవో\s+DRDO', 'డీఆర్డీవో', text, flags=re.IGNORECASE)
+    text = re.sub(r'ఆర్బీఐ\s*\(\s*RBI\s*\)|ఆర్బీఐ\s+RBI', 'ఆర్బీఐ', text, flags=re.IGNORECASE)
+    text = re.sub(r'జీఎస్టీ\s*\(\s*GST\s*\)|జీఎస్టీ\s+GST', 'జీఎస్టీ', text, flags=re.IGNORECASE)
+    text = re.sub(r'అమిత్ షా\s+Amit\s+Shah', 'అమిత్ షా', text, flags=re.IGNORECASE)
     
     # Apply phonetic pronunciation mapping for natural Telugu output
     for pattern, repl in PRONUNCIATION_MAP:
@@ -141,9 +184,11 @@ def clean_text_for_speech(text):
     # Replace colons and semicolons with natural breathing pauses
     text = re.sub(r'\s*[:;]\s*', '... ', text)
     # Replace hyphens with commas for natural flow
-    text = re.sub(r'\s*-\s*', ', ', text)
+    text = re.sub(r'\s*[-–]\s*', ', ', text)
     # Normalize multiple dots into single ellipsis
     text = re.sub(r'\.{2,}', '... ', text)
+    # Clean excessive exclamation/question marks
+    text = re.sub(r'[!\?]+', '.', text)
     # Clean whitespace
     text = re.sub(r'\s+', ' ', text).strip()
     return text
@@ -243,11 +288,11 @@ def build_conversational_bulletin_script(date, articles, one_liners):
     """
     Builds a human news anchor podcast script with natural cadence,
     conversational transitions, breathing pauses, and sign-offs.
-    Eliminates robotic numbered lists ('వార్త 1...', 'వార్త 2...').
+    Eliminates robotic numbered lists and filters out non-exam clickbait/crime/gossip.
     """
     intro = (
-        "నమస్కారం అండి! లక్ష్య డైలీ తెలుగు కరెంట్ అఫైర్స్ ఆడియో పాడ్‌కాస్ట్‌కు స్వాగతం... "
-        "పోటీ పరీక్షల ప్రత్యేకం... ఈనాటి ముఖ్యమైన వార్తా విశేషాలు ఇప్పుడు విశ్లేషణాత్మకంగా పరిశీలిద్దాం.\n\n"
+        "నమస్కారం! లక్ష్య డైలీ తెలుగు కరెంట్ అఫైర్స్ ఆడియో సమాచారానికి స్వాగతం... "
+        "పోటీ పరీక్షల ప్రత్యేకం... ఈనాటి ముఖ్యమైన జాతీయ, అంతర్జాతీయ మరియు తెలుగు రాష్ట్రాల వర్తమాన అంశాలను సమగ్రంగా పరిశీలిద్దాం.\n\n"
     )
 
     transitions_map = {
@@ -270,10 +315,29 @@ def build_conversational_bulletin_script(date, articles, one_liners):
         "చివరిగా మరో ముఖ్యమైన అంశాన్ని చూస్తే... "
     ]
 
+    JUNK_KEYWORDS = [
+        'వైరల్', 'వీడియో', 'viral', 'video', 'మంటగలిచిన', 'ఈడ్చుకెళ్లిన',
+        'బాబోయ్', 'ఫిదా', 'ఆకాశంలో ఒక తార', 'దుల్కర్', 'సల్మాన్', 'మలయాళ',
+        'రిలీజ్', 'సినిమా', 'ట్రైలర్', 'శోభిత', 'చైతన్య', 'ధూళిపాళ్ల',
+        'వీధికుక్క', 'అడవి కుక్క', 'నాన్నకు', 'దారుణానికి', 'ఆస్తమా', 'మృతి',
+        'ఉరిశిక్ష', 'జాబ్ ఇట్టా', 'అస్సలాము', 'సీరియల్‌లా', 'హత్య', 'ఆత్మహత్య',
+        'ఎపిసోడ్‌', 'దొంగతనం'
+    ]
+
+    filtered_articles = []
+    for a in articles:
+        combined = (a.get("title", "") + " " + a.get("summary", "")).lower()
+        if any(junk in combined for junk in JUNK_KEYWORDS):
+            continue
+        filtered_articles.append(a)
+
+    if not filtered_articles:
+        filtered_articles = articles[:6]
+
     used_categories = set()
     body_parts = []
 
-    for idx, a in enumerate(articles[:6]):
+    for idx, a in enumerate(filtered_articles[:6]):
         t = clean_text_for_speech(a.get("title", ""))
         s = clean_text_for_speech(a.get("summary", ""))
         
@@ -304,6 +368,16 @@ def build_conversational_bulletin_script(date, articles, one_liners):
 
     one_liners_script = ""
     if one_liners:
+        filtered_ols = []
+        for ol in one_liners:
+            pt_raw = ol.get("point", "")
+            if any(junk in pt_raw.lower() for junk in JUNK_KEYWORDS):
+                continue
+            filtered_ols.append(ol)
+
+        if not filtered_ols:
+            filtered_ols = one_liners[:5]
+
         one_liners_script = "ఇక పోటీ పరీక్షల శీఘ్ర పునశ్చరణ కోసం, నేటి వన్-లైనర్స్ క్విక్ రౌండప్ గమనిద్దాం...\n\n"
         ol_pfx = [
             "మొదటి అంశం... ",
@@ -313,8 +387,11 @@ def build_conversational_bulletin_script(date, articles, one_liners):
             "అలాగే... ",
             "చివరి పాయింట్... "
         ]
-        for i, ol in enumerate(one_liners[:5]):
+        for i, ol in enumerate(filtered_ols[:6]):
             pt = clean_text_for_speech(ol.get("point", ""))
+            pt = re.sub(r'^(?:ఈనాడు|సాక్షి|నమస్తే తెలంగాణ|ది హిందూ|టీవీ9|ఏబీపీ|ఆంధ్రజ్యోతి)\s*[-:–|]?\s*', '', pt)
+            if not pt:
+                continue
             p = ol_pfx[i] if i < len(ol_pfx) else "అలాగే... "
             one_liners_script += f"{p}{pt}.\n\n"
 
@@ -404,6 +481,12 @@ def generate_syllabus_audio_track(track_id, voice="mohan", force_refresh=False):
     frontend_file = os.path.join(frontend_audio_dir, f"{tid}_{voice_key}.mp3")
 
     if not force_refresh and os.path.exists(cache_file) and os.path.getsize(cache_file) > 10000:
+        if not os.path.exists(frontend_file):
+            try:
+                import shutil
+                shutil.copyfile(cache_file, frontend_file)
+            except Exception:
+                pass
         return cache_file
 
     script = track.get("script", "")

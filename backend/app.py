@@ -457,11 +457,13 @@ def api_audio_daily_bulletin():
     audio_path = generate_daily_bulletin_audio(date=date, voice=voice)
     if not audio_path or not os.path.exists(audio_path):
         return jsonify({"success": False, "error": "ఆడియో బులెటిన్ అందుబాటులో లేదు."}), 404
-    return send_from_directory(
+    resp = send_from_directory(
         os.path.dirname(audio_path),
         os.path.basename(audio_path),
         mimetype="audio/mpeg"
     )
+    resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return resp
 
 @app.route("/api/telegram/send_bulletin_audio", methods=["POST", "GET"])
 def api_telegram_send_audio():
@@ -493,11 +495,13 @@ def api_audio_syllabus_track(track_id):
     audio_path = generate_syllabus_audio_track(track_id, voice=voice)
     if not audio_path or not os.path.exists(audio_path):
         return jsonify({"success": False, "error": "ఆడియో ట్రాక్ అందుబాటులో లేదు."}), 404
-    return send_from_directory(
+    resp = send_from_directory(
         os.path.dirname(audio_path),
         os.path.basename(audio_path),
         mimetype="audio/mpeg"
     )
+    resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return resp
 
 @app.route("/epapers_directory", methods=["GET"])
 @app.route("/epapers", methods=["GET"])
