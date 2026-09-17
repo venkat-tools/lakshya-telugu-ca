@@ -1,11 +1,13 @@
 {
-  "name": "లక్ష్య డైలీ కరెంట్ అఫైర్స్ (Telugu Current Affairs)",
-  "short_name": "లక్ష్య CA",
-  "description": "APPSC, TSPSC, UPSC పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ & ప్రాక్టీస్ క్విజ్",
+  "name": "లక్ష్య APPSC / TSPSC కరెంట్ అఫైర్స్ & మెయిన్స్ మాస్టర్ హబ్",
+  "short_name": "లక్ష్య 2026",
+  "description": "APPSC Group-1, Group-2, TSPSC & UPSC పోటీ పరీక్షల సమగ్ర స్టడీ పోర్టల్, డైలీ కరెంట్ అఫైర్స్, మాక్ టెస్టులు & ఈ-బుక్స్",
   "start_url": "/",
+  "id": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#1e40af",
+  "background_color": "#070d1e",
+  "theme_color": "#0f172a",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -19,6 +21,28 @@
       "sizes": "192x192 512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "గ్రూప్-2 పేపర్-2 మాక్ టెస్ట్",
+      "url": "/group2_paper2_master",
+      "description": "150 మార్కుల సమగ్ర మాక్ టెస్ట్"
+    },
+    {
+      "name": "సుప్రీంకోర్టు 30 తీర్పులు",
+      "url": "/sc_judgments_hub",
+      "description": "1950-2026 ల్యాండ్‌మార్క్ తీర్పులు"
+    },
+    {
+      "name": "మ్యాప్ పాయింటింగ్ అట్లాస్",
+      "url": "/map_pointing_atlas",
+      "description": "AP, భారతదేశం, ప్రపంచ అట్లాస్"
+    },
+    {
+      "name": "స్టాటిక్ జీకే పాకెట్‌బుక్",
+      "url": "/static_gk_pocketbook",
+      "description": "హై-స్పీడ్ రివిజన్"
     }
   ]
 }

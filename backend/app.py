@@ -1174,6 +1174,7 @@ def daily_live_test_view():
 
 @app.route("/appsc_syllabus", methods=["GET"])
 @app.route("/syllabus", methods=["GET"])
+@app.route("/appsc_master_portal", methods=["GET"])
 def appsc_syllabus_view():
     from flask import make_response
     from appsc_master_syllabus import render_appsc_syllabus_html
@@ -1386,6 +1387,132 @@ def mental_ability_hub_view():
     from flask import make_response
     from mental_ability_view import render_mental_ability_html
     resp = make_response(render_mental_ability_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Audio Revision Player & Podcast Hub Endpoints -----------------
+@app.route("/api/audio_revision", methods=["GET"])
+def api_audio_revision():
+    from audio_revision_data import get_all_audio_tracks
+    return jsonify({
+        "success": True,
+        "data": get_all_audio_tracks()
+    })
+
+@app.route("/audio_revision", methods=["GET"])
+def audio_revision_view():
+    from flask import make_response
+    from audio_revision_view import render_audio_revision_html
+    resp = make_response(render_audio_revision_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Mains Descriptive Answer Writing & Evaluation Portal Endpoints -----------------
+@app.route("/api/mains_descriptive", methods=["GET"])
+def api_mains_descriptive():
+    from mains_descriptive_data import get_all_mains_questions
+    return jsonify({
+        "success": True,
+        "data": get_all_mains_questions()
+    })
+
+@app.route("/mains_descriptive_portal", methods=["GET"])
+def mains_descriptive_portal_view():
+    from flask import make_response
+    from mains_descriptive_view import render_mains_descriptive_html
+    resp = make_response(render_mains_descriptive_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Student Performance Analytics & Weakness Diagnoser Endpoints -----------------
+@app.route("/api/student_analytics", methods=["GET"])
+def api_student_analytics():
+    from student_analytics_data import get_student_analytics_benchmarks, get_demo_student_profile
+    return jsonify({
+        "success": True,
+        "benchmarks": get_student_analytics_benchmarks(),
+        "demo_profile": get_demo_student_profile()
+    })
+
+@app.route("/student_analytics", methods=["GET"])
+def student_analytics_view():
+    from flask import make_response
+    from student_analytics_view import render_student_analytics_html
+    resp = make_response(render_student_analytics_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Static GK Super-Fast Pocketbook Endpoints -----------------
+@app.route("/api/static_gk", methods=["GET"])
+def api_static_gk():
+    from static_gk_data import get_all_static_gk_categories
+    return jsonify({
+        "success": True,
+        "data": get_all_static_gk_categories()
+    })
+
+@app.route("/static_gk_pocketbook", methods=["GET"])
+def static_gk_pocketbook_view():
+    from flask import make_response
+    from static_gk_view import render_static_gk_html
+    resp = make_response(render_static_gk_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Supreme Court 30 Landmark Judgments Endpoints -----------------
+@app.route("/api/sc_judgments", methods=["GET"])
+def api_sc_judgments():
+    from sc_judgments_data import get_all_landmark_judgments
+    return jsonify({
+        "success": True,
+        "data": get_all_landmark_judgments()
+    })
+
+@app.route("/sc_judgments_hub", methods=["GET"])
+def sc_judgments_hub_view():
+    from flask import make_response
+    from sc_judgments_view import render_sc_judgments_html
+    resp = make_response(render_sc_judgments_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- APPSC Group-2 Paper-2 Mega Mains Portal Endpoints -----------------
+@app.route("/api/group2_paper2", methods=["GET"])
+def api_group2_paper2():
+    from group2_paper2_data import get_paper2_syllabus, get_paper2_notes, get_paper2_mock_questions
+    return jsonify({
+        "success": True,
+        "syllabus": get_paper2_syllabus(),
+        "notes": get_paper2_notes(),
+        "questions": get_paper2_mock_questions()
+    })
+
+@app.route("/group2_paper2_master", methods=["GET"])
+def group2_paper2_master_view():
+    from flask import make_response
+    from group2_paper2_view import render_group2_paper2_html
+    resp = make_response(render_group2_paper2_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- PWA Manifest & Service Worker Endpoints -----------------
+@app.route("/manifest.json", methods=["GET"])
+def pwa_manifest():
+    return send_from_directory(FRONTEND_DIR, "manifest.json", mimetype="application/manifest+json")
+
+@app.route("/service-worker.js", methods=["GET"])
+def pwa_service_worker():
+    from flask import make_response
+    resp = make_response(send_from_directory(FRONTEND_DIR, "service-worker.js", mimetype="application/javascript"))
+    resp.headers["Service-Worker-Allowed"] = "/"
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+@app.route("/sw.js", methods=["GET"])
+def pwa_sw():
+    from flask import make_response
+    resp = make_response(send_from_directory(FRONTEND_DIR, "sw.js", mimetype="application/javascript"))
+    resp.headers["Service-Worker-Allowed"] = "/"
     resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     return resp
 
