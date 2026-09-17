@@ -9,3 +9,7 @@ backend/audio_cache/
 push_to_github.bat
 
 scratch/
+
+# Telegram config containing bot token
+backend/telegram_config.json
+telegram_config.json
