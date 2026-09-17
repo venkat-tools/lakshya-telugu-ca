@@ -451,9 +451,21 @@ def api_magazine_pdf():
 
 @app.route("/api/audio/daily_bulletin", methods=["GET"])
 def api_audio_daily_bulletin():
+    voice = (request.args.get("voice") or "mohan").lower().strip()
+    frontend_audio_dir = os.path.join(FRONTEND_DIR, "audio")
+    static_file = os.path.join(frontend_audio_dir, f"daily_bulletin_{voice}.mp3")
+    if os.path.exists(static_file) and os.path.getsize(static_file) > 10000:
+        resp = send_from_directory(
+            frontend_audio_dir,
+            f"daily_bulletin_{voice}.mp3",
+            mimetype="audio/mpeg"
+        )
+        resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+        resp.headers["Accept-Ranges"] = "bytes"
+        return resp
+
     from tts import generate_daily_bulletin_audio
     date = request.args.get("date")
-    voice = request.args.get("voice", "mohan")
     audio_path = generate_daily_bulletin_audio(date=date, voice=voice)
     if not audio_path or not os.path.exists(audio_path):
         return jsonify({"success": False, "error": "ఆడియో బులెటిన్ అందుబాటులో లేదు."}), 404
@@ -463,6 +475,7 @@ def api_audio_daily_bulletin():
         mimetype="audio/mpeg"
     )
     resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+    resp.headers["Accept-Ranges"] = "bytes"
     return resp
 
 @app.route("/api/telegram/send_bulletin_audio", methods=["POST", "GET"])
@@ -490,8 +503,20 @@ def api_audio_tracks():
 
 @app.route("/api/audio/track/<track_id>", methods=["GET"])
 def api_audio_syllabus_track(track_id):
+    voice = (request.args.get("voice") or "mohan").lower().strip()
+    frontend_audio_dir = os.path.join(FRONTEND_DIR, "audio")
+    static_file = os.path.join(frontend_audio_dir, f"{track_id}_{voice}.mp3")
+    if os.path.exists(static_file) and os.path.getsize(static_file) > 10000:
+        resp = send_from_directory(
+            frontend_audio_dir,
+            f"{track_id}_{voice}.mp3",
+            mimetype="audio/mpeg"
+        )
+        resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+        resp.headers["Accept-Ranges"] = "bytes"
+        return resp
+
     from tts import generate_syllabus_audio_track
-    voice = request.args.get("voice", "mohan")
     audio_path = generate_syllabus_audio_track(track_id, voice=voice)
     if not audio_path or not os.path.exists(audio_path):
         return jsonify({"success": False, "error": "ఆడియో ట్రాక్ అందుబాటులో లేదు."}), 404
@@ -501,6 +526,7 @@ def api_audio_syllabus_track(track_id):
         mimetype="audio/mpeg"
     )
     resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+    resp.headers["Accept-Ranges"] = "bytes"
     return resp
 
 @app.route("/epapers_directory", methods=["GET"])

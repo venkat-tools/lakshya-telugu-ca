@@ -680,9 +680,9 @@
 
       <!-- Custom Interactive Audio Controls Deck -->
       <div class="pt-3 flex flex-col gap-3 relative z-10">
-        <!-- Hidden Standard Audio Element -->
-        <audio id="dailyBulletinAudio" preload="metadata" class="hidden">
-          <source id="bulletinAudioSrc" src="/api/audio/daily_bulletin?voice=mohan" type="audio/mpeg">
+        <!-- Hidden Standard Audio Element with Direct Static Source -->
+        <audio id="dailyBulletinAudio" preload="auto" class="hidden" src="/audio/daily_bulletin_mohan.mp3">
+          <source id="bulletinAudioSrc" src="/audio/daily_bulletin_mohan.mp3" type="audio/mpeg">
         </audio>
 
         <!-- Progress Scrubber Row -->
@@ -728,7 +728,7 @@
 
           <!-- Download & Share Buttons -->
           <div class="flex items-center gap-2">
-            <a id="bulletinDownloadBtn" href="/api/audio/daily_bulletin?voice=mohan" download="Lakshya_Audio_Lesson.mp3" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-sm border border-indigo-400/50" title="ఆడియోను MP3గా డౌన్‌లోడ్ చేసుకోండి">
+            <a id="bulletinDownloadBtn" href="/audio/daily_bulletin_mohan.mp3" download="Lakshya_Telugu_Audio_Bulletin.mp3" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-sm border border-indigo-400/50" title="ఆడియోను MP3గా డౌన్‌లోడ్ చేసుకోండి">
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
               <span>MP3 డౌన్‌లోడ్</span>
             </a>

@@ -989,47 +989,47 @@ const SYLLABUS_TRACKS_META = {
   daily_bulletin: {
     title: "నేటి పరీక్షా ముఖ్యాంశాలు (Native Telugu Audio)",
     badge: "డైలీ కరెంట్ అఫైర్స్",
-    url: (voice) => `${API_BASE}/api/audio/daily_bulletin?voice=${voice}&date=${state.currentDate || ''}`
+    url: (voice) => `/audio/daily_bulletin_${voice}.mp3`
   },
   track_history: {
     title: "భారతీయ చరిత్ర – ప్రాచీన, మధ్యయుగ & ఆధునిక జాతీయోద్యమం",
     badge: "భారతీయ చరిత్ర",
-    url: (voice) => `${API_BASE}/api/audio/track/track_history?voice=${voice}`
+    url: (voice) => `/audio/track_history_${voice}.mp3`
   },
   track_geography: {
     title: "భారత & ఏపీ భౌగోళిక శాస్త్రం – నైసర్గిక స్వరూపం, నదులు & 26 జిల్లాలు",
     badge: "భౌగోళిక శాస్త్రం",
-    url: (voice) => `${API_BASE}/api/audio/track/track_geography?voice=${voice}`
+    url: (voice) => `/audio/track_geography_${voice}.mp3`
   },
   track_society: {
     title: "భారతీయ సమాజం – సామాజిక నిర్మాణం, కుల వ్యవస్థ & సంక్షేమ చట్టాలు",
     badge: "భారతీయ సమాజం",
-    url: (voice) => `${API_BASE}/api/audio/track/track_society?voice=${voice}`
+    url: (voice) => `/audio/track_society_${voice}.mp3`
   },
   track_polity: {
     title: "భారత రాజ్యాంగం – టాప్ 50 ఆర్టికల్స్, ప్రాథమిక హక్కులు & సవరణలు",
     badge: "రాజ్యాంగం & పాలిటీ",
-    url: (voice) => `${API_BASE}/api/audio/track/track_polity?voice=${voice}`
+    url: (voice) => `/audio/track_polity_${voice}.mp3`
   },
   track_economy: {
     title: "భారత & ఏపీ ఆర్థిక వ్యవస్థ – బడ్జెట్, సూపర్ సిక్స్ & సంక్షేమ పథకాలు",
     badge: "ఎకానమీ & పథకాలు",
-    url: (voice) => `${API_BASE}/api/audio/track/track_economy?voice=${voice}`
+    url: (voice) => `/audio/track_economy_${voice}.mp3`
   },
   track_science: {
     title: "సైన్స్ & టెక్నాలజీ – ఇస్రో 2026 మిషన్లు, నిసార్ & ఇండియా AI మిషన్",
     badge: "సైన్స్ & టెక్నాలజీ",
-    url: (voice) => `${API_BASE}/api/audio/track/track_science?voice=${voice}`
+    url: (voice) => `/audio/track_science_${voice}.mp3`
   },
   track_aptitude: {
     title: "120 ఆప్టిట్యూడ్ షార్ట్‌కట్ సూత్రాలు – సూపర్ ఫాస్ట్ కాలిక్యులేషన్స్",
     badge: "మెంటల్ ఎబిలిటీ",
-    url: (voice) => `${API_BASE}/api/audio/track/track_aptitude?voice=${voice}`
+    url: (voice) => `/audio/track_aptitude_${voice}.mp3`
   },
   track_ap_history: {
     title: "ఆధునిక ఆంధ్రప్రదేశ్ చరిత్ర & 2014 పునర్విభజన చట్టం పూర్తి సారాంశం",
     badge: "ఏపీ చరిత్ర",
-    url: (voice) => `${API_BASE}/api/audio/track/track_ap_history?voice=${voice}`
+    url: (voice) => `/audio/track_ap_history_${voice}.mp3`
   }
 };
 
@@ -1047,6 +1047,10 @@ function initAudioDeckListeners() {
   const totDuration = document.getElementById("audioTotalDuration");
 
   if (!audio) return;
+
+  if (!audio.src || audio.src === "" || audio.src.endsWith("/") || audio.src === window.location.href) {
+    audio.src = `/audio/daily_bulletin_${currentAudioVoice}.mp3`;
+  }
 
   audio.addEventListener("timeupdate", () => {
     if (audio.duration) {
@@ -1075,6 +1079,11 @@ function initAudioDeckListeners() {
   audio.addEventListener("ended", () => {
     updatePlayPauseUI(false);
     if (scrubber) scrubber.value = 100;
+  });
+
+  audio.addEventListener("error", () => {
+    console.warn("Audio element error occurred.");
+    updatePlayPauseUI(false);
   });
 
   if (scrubber) {
@@ -1114,8 +1123,28 @@ function updatePlayPauseUI(isPlaying) {
 function toggleAudioPlay() {
   const audio = document.getElementById("dailyBulletinAudio");
   if (!audio) return;
+  
+  if (!audio.src || audio.src === "" || audio.src.endsWith("/") || audio.src === window.location.href) {
+    const meta = SYLLABUS_TRACKS_META[currentAudioTrack] || SYLLABUS_TRACKS_META["daily_bulletin"];
+    audio.src = meta.url(currentAudioVoice);
+    audio.load();
+  }
+
   if (audio.paused) {
-    audio.play().then(() => updatePlayPauseUI(true)).catch((e) => console.log("Audio play blocked:", e));
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => updatePlayPauseUI(true))
+        .catch((e) => {
+          console.log("Audio play deferred or blocked:", e);
+          // Try reloading and playing
+          audio.load();
+          audio.play().then(() => updatePlayPauseUI(true)).catch((err) => {
+            console.error("Playback retry failed:", err);
+            updatePlayPauseUI(false);
+          });
+        });
+    }
   } else {
     audio.pause();
     updatePlayPauseUI(false);
