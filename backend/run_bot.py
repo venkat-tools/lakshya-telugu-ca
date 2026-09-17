@@ -130,7 +130,11 @@ def start_bot_polling():
 👉 <b>/articles</b> - భారత రాజ్యాంగ ఆర్టికల్స్ (1-395) మాస్టర్ డైరెక్టరీ & PDF 🏛️\n\
 👉 <b>/scitech</b> - సైన్స్, టెక్నాలజీ & రక్షణ రంగం 2025–2026 మెగా హబ్ & PDF 🛰️\n\
 👉 <b>/environment</b> - పర్యావరణం, జీవవైవిధ్యం & క్లైమేట్ చేంజ్ హ్యాండ్‌బుక్ & PDF 🌍\n\
-👉 <b>/centralschemes</b> - కేంద్ర ప్రభుత్వ పథకాలు 2026 (పీఎం సూర్య ఘర్, ఆయుష్మాన్ 70+) 💰\n\"
+👉 <b>/centralschemes</b> - కేంద్ర ప్రభుత్వ పథకాలు 2026 (పీఎం సూర్య ఘర్, ఆయుష్మాన్ 70+) 💰\n\
+👉 <b>/society</b> - భారతీయ సమాజం (30 మార్కులు) సమగ్ర మాస్టర్ హబ్ & PDF 👥\n\
+👉 <b>/planner</b> - 60 రోజుల స్మార్ట్ డైలీ స్టడీ ప్లానర్ & సిలబస్ ట్రాకర్ 📅\n\
+👉 <b>/pyqs</b> - APPSC & TSPSC గత ప్రశ్నల (PYQs) డీప్ ఎక్స్‌ప్లోరర్ & కటాఫ్స్ 🔍\n\
+👉 <b>/aptitude</b> - మెంటల్ ఎబిలిటీ & ఆప్టిట్యూడ్ షార్ట్‌కట్స్ ప్రాక్టీస్ ఇంజిన్ 🧮\n\"
                     )
                     send_telegram_message(welcome, token=token, chat_id=chat_id)
 
@@ -650,6 +654,66 @@ def start_bot_polling():
                         "👉 https://lakshya-telugu-ca.onrender.com/central_schemes"
                     )
                     send_telegram_message(cs_msg, token=token, chat_id=chat_id)
+
+                elif text == "/society" or text == "/indiansociety":
+                    soc_msg = (
+                        "👥 <b>భారతీయ సమాజం (Indian Society - 30 మార్కులు) సమగ్ర మాస్టర్ హబ్</b>\n"
+                        "───────────────────────\n\n"
+                        "📚 <b>3 యూనిట్ల సిలబస్ ముఖ్యాంశాలు:</b>\n"
+                        "1. <b>సామాజిక నిర్మాణం:</b> కుటుంబం, వివాహం, బంధుత్వం, కులం (సంస్కృతీకరణ), 75 PVTGs తెగలు, మహిళల హోదా\n"
+                        "2. <b>సామాజిక సమస్యలు:</b> కులతత్వం, మతతత్వం, పేదరికం (టెండూల్కర్, MPI), బాలకార్మికులు, గృహహింస, POCSO\n"
+                        "3. <b>సంక్షేమ చట్టాలు:</b> రాజ్యాంగ రక్షణలు (15, 16, 17, 330, 338), SC/ST అట్రాసిటీల చట్టం, PESA 1996, FRA 2006, RPwD 2016, PM-JANMAN\n\n"
+                        "📥 <b>మాస్టర్ PDF డౌన్‌లోడ్ చేసుకోండి:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/pdfs/indian_society_master_compendium.pdf\n\n"
+                        "🌐 <b>వెబ్ హబ్ & 20 ప్రాక్టీస్ MCQs:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/indian_society_hub"
+                    )
+                    send_telegram_message(soc_msg, token=token, chat_id=chat_id)
+
+                elif text == "/planner" or text == "/study_planner":
+                    pln_msg = (
+                        "📅 <b>60 రోజుల స్మార్ట్ డైలీ స్టడీ ప్లానర్ & సిలబస్ ట్రాకర్ (2026)</b>\n"
+                        "───────────────────────\n\n"
+                        "🎯 <b>9 వారాల మైక్రో-షెడ్యూల్:</b>\n"
+                        "• వారం 1-2 (D1–12): భారత & ఆంధ్రప్రదేశ్ చరిత్ర\n"
+                        "• వారం 3-4 (D13–24): భౌగోళికం (26 జిల్లాలు), విపత్తులు & పర్యావరణం\n"
+                        "• వారం 5-6 (D25–36): భారతీయ సమాజం & సంక్షేమ చట్టాలు\n"
+                        "• వారం 7-8 (D37–48): మెంటల్ ఎబిలిటీ, లాజిక్ & 120 షార్ట్‌కట్స్\n"
+                        "• వారం 9 (D49–60): కరెంట్ అఫైర్స్ రివిజన్ & గ్రాండ్ మాక్ టెస్టులు\n\n"
+                        "🌐 <b>మీ రోజువారీ ప్రోగ్రెస్ ట్రాక్ చేయండి:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/study_planner"
+                    )
+                    send_telegram_message(pln_msg, token=token, chat_id=chat_id)
+
+                elif text == "/pyqs" or text == "/pyqs_explorer":
+                    pyq_msg = (
+                        "🔍 <b>APPSC & TSPSC గత ప్రశ్నల (PYQs) డీప్ ఎక్స్‌ప్లోరర్ & అనలిటిక్స్</b>\n"
+                        "───────────────────────\n\n"
+                        "📊 <b>విశ్లేషణ & ఫిల్టర్లు:</b>\n"
+                        "• 2024 గ్రూప్-2 ప్రిలిమ్స్, 2019 స్క్రీనింగ్, TSPSC గ్రూప్-1, పోలీస్ SI పేపర్లు\n"
+                        "• సబ్జెక్ట్-వైజ్, పరీక్ష-వైజ్ మరియు ఇయర్-వైజ్ ఫిల్టర్లు\n"
+                        "• అధికారిక కటాఫ్ విశ్లేషణ (-0.33 నెగెటివ్ మార్కింగ్ స్ట్రాటజీ)\n\n"
+                        "🌐 <b>ఇంటరాక్టివ్ ఎక్స్‌ప్లోరర్‌లో ప్రాక్టీస్ చేయండి:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/pyqs_explorer"
+                    )
+                    send_telegram_message(pyq_msg, token=token, chat_id=chat_id)
+
+                elif text == "/aptitude" or text == "/shortcuts":
+                    apt_msg = (
+                        "🧮 <b>మెంటల్ ఎబిలిటీ & ఆప్టిట్యూడ్ షార్ట్‌కట్ ప్రాక్టీస్ ఇంజిన్</b>\n"
+                        "───────────────────────\n\n"
+                        "⚡ <b>స్పీడ్ మ్యాథ్స్ & రీజనింగ్ ఫార్ములా డెక్:</b>\n"
+                        "• గడియారాలు (θ = |30H - 11/2 M|), క్యాలెండర్లు (ఆడ్ డేస్ ట్రిక్)\n"
+                        "• పని-కాలం (LCM ఎఫిషియన్సీ), రైళ్లు & వేగం (5/18 మార్పిడి)\n"
+                        "• శాతాలు, లాభనష్టాలు & క్రాస్ అలగేషన్ రూల్\n"
+                        "• సాంప్రదాయ పద్ధతి vs ఎగ్జామ్ షార్ట్‌కట్ పద్ధతి పోలికలు\n\n"
+                        "📥 <b>120 షార్ట్‌కట్స్ PDF డౌన్‌లోడ్ చేసుకోండి:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/pdfs/quantitative_aptitude_120_shortcuts.pdf\n\n"
+                        "🌐 <b>ఇంటరాక్టివ్ హబ్‌లో ప్రాక్టీస్ చేయండి:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/mental_ability_hub"
+                    )
+                    send_telegram_message(apt_msg, token=token, chat_id=chat_id)
+
 
 
         except KeyboardInterrupt:

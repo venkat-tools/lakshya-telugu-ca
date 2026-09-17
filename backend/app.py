@@ -1320,6 +1320,75 @@ def central_schemes_view():
     resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     return resp
 
+
+# ----------------- Indian Society (30 Marks) Master Hub Endpoints -----------------
+@app.route("/api/indian_society", methods=["GET"])
+def api_indian_society():
+    from indian_society_data import get_indian_society_data
+    return jsonify({
+        "success": True,
+        "data": get_indian_society_data()
+    })
+
+@app.route("/indian_society_hub", methods=["GET"])
+def indian_society_hub_view():
+    from flask import make_response
+    from indian_society_view import render_indian_society_html
+    resp = make_response(render_indian_society_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- 60-Day Smart Daily Study Planner & Syllabus Tracker Endpoints -----------------
+@app.route("/api/study_planner", methods=["GET"])
+def api_study_planner():
+    from study_planner_data import get_study_planner_data
+    return jsonify({
+        "success": True,
+        "data": get_study_planner_data()
+    })
+
+@app.route("/study_planner", methods=["GET"])
+def study_planner_view():
+    from flask import make_response
+    from study_planner_view import render_study_planner_html
+    resp = make_response(render_study_planner_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- APPSC & TSPSC PYQs Deep Explorer & Analytics Endpoints -----------------
+@app.route("/api/pyqs_explorer", methods=["GET"])
+def api_pyqs_explorer():
+    from pyqs_explorer_data import get_pyqs_explorer_data
+    return jsonify({
+        "success": True,
+        "data": get_pyqs_explorer_data()
+    })
+
+@app.route("/pyqs_explorer", methods=["GET"])
+def pyqs_explorer_view():
+    from flask import make_response
+    from pyqs_explorer_view import render_pyqs_explorer_html
+    resp = make_response(render_pyqs_explorer_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Mental Ability & Aptitude Shortcuts Practice Engine Endpoints -----------------
+@app.route("/api/mental_ability_hub", methods=["GET"])
+def api_mental_ability_hub():
+    from mental_ability_data import get_mental_ability_data
+    return jsonify({
+        "success": True,
+        "data": get_mental_ability_data()
+    })
+
+@app.route("/mental_ability_hub", methods=["GET"])
+def mental_ability_hub_view():
+    from flask import make_response
+    from mental_ability_view import render_mental_ability_html
+    resp = make_response(render_mental_ability_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
 if __name__ == "__main__":
     print("==================================================================")
     print("🚀 తెలుగు పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ డ్యాష్‌బోర్డ్ ప్రారంభమైంది!")

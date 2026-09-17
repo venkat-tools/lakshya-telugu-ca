@@ -552,6 +552,31 @@ def render_appsc_syllabus_html():
           <span class="bg-rose-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-rose-400 shrink-0">డౌన్‌లోడ్ 📥</span>
         </a>
 
+        <!-- Indian Society (30 Marks) Master Compendium PDF Card -->
+        <a href="/indian_society_hub" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-purple-950/70 to-slate-900 hover:from-purple-900/80 hover:to-slate-800 border border-purple-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">👥</span>
+            <div>
+              <p class="font-black text-purple-300 group-hover:text-purple-200">భారతీయ సమాజం (Indian Society - 30 Marks) (PDF)</p>
+              <p class="text-[11px] text-purple-200">కుటుంబం, కులం, 75 PVTGs, మహిళలు, సంక్షేమ చట్టాలు, MCQs • (2.2 MB)</p>
+            </div>
+          </div>
+          <span class="bg-purple-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-purple-400 shrink-0">డౌన్‌లోడ్ 📥</span>
+        </a>
+
+        <!-- 60-Day Smart Daily Study Planner -->
+        <a href="/study_planner" class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-indigo-950/70 to-slate-900 hover:from-indigo-900/80 hover:to-slate-800 border border-indigo-500/50 transition group shadow-md">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-xl">📅</span>
+            <div>
+              <p class="font-black text-indigo-300 group-hover:text-indigo-200">60 రోజుల స్మార్ట్ డైలీ స్టడీ ప్లానర్ & సిలబస్ ట్రాకర్</p>
+              <p class="text-[11px] text-indigo-200">రోజువారీ మైక్రో-షెడ్యూల్, ప్రోగ్రెస్ ట్రాకింగ్ & డైలీ టెస్ట్స్</p>
+            </div>
+          </div>
+          <span class="bg-indigo-600 text-white font-black px-2.5 py-1 rounded text-[11px] border border-indigo-400 shrink-0">ఓపెన్ చేయండి 🚀</span>
+        </a>
+
+
       </div>
     </div>
 
