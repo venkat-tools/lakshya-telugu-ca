@@ -11,6 +11,7 @@ caching for lightning-fast playback, and robust fallback.
 import os
 import re
 import sys
+import html
 import asyncio
 import hashlib
 import urllib.request
@@ -37,6 +38,7 @@ DEFAULT_VOICE = "mohan"
 
 # Comprehensive phonetic normalization for Telugu exam terms & acronyms
 PRONUNCIATION_MAP = [
+    (r'&zwnj;|&nbsp;|&zwj;|&amp;|&quot;|&#39;|&lt;|&gt;', ' '),
     (r'\bAPPSC\b', 'ఏపీపీఎస్సీ'),
     (r'\bTSPSC\b', 'టీఎస్పీఎస్సీ'),
     (r'\bUPSC\b', 'యూపీఎస్సీ'),
@@ -63,8 +65,25 @@ PRONUNCIATION_MAP = [
     (r'\bNASA\b', 'నాసా'),
     (r'\bWHO\b', 'డబ్ల్యూహెచ్‌ఓ'),
     (r'\bIMF\b', 'ఐఎంఎఫ్'),
-    (r'\bUN\b', 'యూఎన్'),
-    (r'\bAI\b', 'ఏఐ'),
+    (r'\bUN\b', 'ఐక్యరాజ్య సమితి'),
+    (r'\bAI\b', 'కృత్రిమ మేధ'),
+    (r'\bCEC\b', 'సీఈసీ'),
+    (r'\bECs\b', 'ఎన్నికల కమిషనర్లు'),
+    (r'\bEC\b', 'ఈసీ'),
+    (r'\bADB\b', 'ఏడీబీ'),
+    (r'\bWorld Bank\b', 'వరల్డ్ బ్యాంక్'),
+    (r'\bSI\b', 'ఎస్సై'),
+    (r'\bDSP\b', 'డీఎస్పీ'),
+    (r'\bSP\b', 'ఎస్పీ'),
+    (r'\bCI\b', 'సీఐ'),
+    (r'\bPF\b', 'పీఎఫ్'),
+    (r'\bTTD\b', 'టీటీడీ'),
+    (r'\bTDP\b', 'టీడీపీ'),
+    (r'\bYSRCP\b', 'వైఎస్సార్సీపీ'),
+    (r'\bBJP\b', 'బీజేపీ'),
+    (r'\bBRS\b', 'బీఆర్ఎస్'),
+    (r'\bJSP\b', 'జనసేన'),
+    (r'\bTVK\b', 'టీవీకే'),
     (r'\bCBT\b', 'సీబీటీ'),
     (r'\bOMR\b', 'ఓఎంఆర్'),
     (r'\bPYQ\b', 'గత ప్రశ్నలు'),
@@ -72,28 +91,44 @@ PRONUNCIATION_MAP = [
     (r'\bGS\b', 'జనరల్ స్టడీస్'),
     (r'\bMCQ\b', 'ప్రశ్న'),
     (r'\bMCQs\b', 'ప్రశ్నలు'),
+    (r'₹\s*([0-9,]+)\s*కోట్ల', r'\1 కోట్ల రూపాయల'),
+    (r'₹\s*([0-9,]+)\s*కోట్లు', r'\1 కోట్ల రూపాయలు'),
     (r'₹\s*([0-9,]+)', r'\1 రూపాయలు'),
+    (r'రూ\.\s*([0-9,]+)\s*కోట్ల', r'\1 కోట్ల రూపాయల'),
+    (r'రూ\.\s*([0-9,]+)\s*కోట్లు', r'\1 కోట్ల రూపాయలు'),
+    (r'రూ\.\s*([0-9,]+)', r'\1 రూపాయలు'),
+    (r'([0-9,]+)\s*రూపాయలు\s*కోట్ల', r'\1 కోట్ల రూపాయల'),
+    (r'([0-9,]+)\s*రూపాయలు\s*కు', r'\1 రూపాయలకు'),
     (r'%', ' శాతం '),
     (r'&', ' మరియు '),
-    (r'\bకి\.మీ\.?\b', ' కిలోమీటర్లు '),
-    (r'\bనం\.?\b', ' నెంబర్ ')
+    (r'\bvs\.?\b|\bv\.\b', ' వర్సెస్ '),
+    (r'\bకి\.మీ\.?\b|\bkm\b', ' కిలోమీటర్లు '),
+    (r'\bనం\.?\b|\bNo\.?\b', ' నంబర్ ')
 ]
 
 def clean_text_for_speech(text):
-    """Clean markdown, tags and apply phonetic replacements"""
+    """Clean markdown, tags and apply phonetic replacements for natural Telugu human speech"""
     if not text:
         return ""
-    # Remove html tags
+    # Decode HTML entities
+    text = html.unescape(text)
+    # Remove HTML tags
     text = re.sub(r'<[^>]+>', '', text)
     # Remove URLs
     text = re.sub(r'https?:\/\/\S+', '', text)
-    # Remove markdown symbols
-    text = re.sub(r'[*_#`~]', '', text)
+    # Remove markdown symbols and brackets
+    text = re.sub(r'[*_#`~\[\]\(\)\{\}]', ' ', text)
     
     # Apply phonetic pronunciation mapping for natural Telugu output
     for pattern, repl in PRONUNCIATION_MAP:
         text = re.sub(pattern, repl, text, flags=re.IGNORECASE)
         
+    # Replace colons and semicolons with natural breathing pauses
+    text = re.sub(r'\s*[:;]\s*', '... ', text)
+    # Replace hyphens with commas for natural flow
+    text = re.sub(r'\s*-\s*', ', ', text)
+    # Normalize multiple dots into single ellipsis
+    text = re.sub(r'\.{2,}', '... ', text)
     # Clean whitespace
     text = re.sub(r'\s+', ' ', text).strip()
     return text
@@ -128,10 +163,10 @@ def _fetch_google_tts_fallback(text):
         print(f"Fallback TTS Error: {e}")
         return b""
 
-async def _synthesize_edge_tts(text, voice_id):
-    """Synthesize speech using edge-tts async API"""
+async def _synthesize_edge_tts(text, voice_id, rate="-5%", pitch="+0Hz"):
+    """Synthesize speech using edge-tts async API with natural human pacing"""
     import edge_tts
-    communicate = edge_tts.Communicate(text, voice_id, rate="-2%", pitch="+0Hz")
+    communicate = edge_tts.Communicate(text, voice_id, rate=rate, pitch=pitch)
     audio_data = bytearray()
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
@@ -189,18 +224,109 @@ def generate_telugu_audio(text, voice="mohan"):
 
     return b""
 
+def build_conversational_bulletin_script(date, articles, one_liners):
+    """
+    Builds a human news anchor podcast script with natural cadence,
+    conversational transitions, breathing pauses, and sign-offs.
+    Eliminates robotic numbered lists ('వార్త 1...', 'వార్త 2...').
+    """
+    intro = (
+        "నమస్కారం అండి! లక్ష్య డైలీ తెలుగు కరెంట్ అఫైర్స్ ఆడియో పాడ్‌కాస్ట్‌కు స్వాగతం... "
+        "పోటీ పరీక్షల ప్రత్యేకం... ఈనాటి ముఖ్యమైన వార్తా విశేషాలు ఇప్పుడు విశ్లేషణాత్మకంగా పరిశీలిద్దాం.\n\n"
+    )
+
+    transitions_map = {
+        "regional": "ఇక తెలుగు రాష్ట్రాల విషయానికి వస్తే... ",
+        "national": "అలాగే జాతీయ పరిణామాలను గమనిస్తే... ",
+        "international": "ఇక అంతర్జాతీయ ముఖ్యాంశాల్లోకి వెళితే... ",
+        "economy": "ఇక ఆర్థిక రంగానికి సంబంధించిన సమాచారాన్ని పరిశీలిస్తే... ",
+        "science": "సైన్స్ మరియు టెక్నాలజీ విభాగంలో మరో కీలక పరిణామం... ",
+        "sports": "క్రీడా రంగానికి సంబంధించిన విశేషాల్లోకి వెళితే... ",
+        "environment": "పర్యావరణం మరియు భౌగోళిక అంశాలను చూస్తే... ",
+        "polity": "రాజ్యాంగం మరియు పాలనాపరమైన పరిణామాలను పరిశీలిస్తే... "
+    }
+
+    general_transitions = [
+        "మొదటిగా నేటి అత్యంత ప్రధానమైన పరీక్షాంశాన్ని పరిశీలిస్తే... ",
+        "ఇక మరో ముఖ్యమైన పరిణామం... ",
+        "అలాగే పోటీ పరీక్షల కోణంలో కీలకమైన మరో అంశం... ",
+        "మరో ముఖ్య సమాచారాన్ని గమనిస్తే... ",
+        "ఇక తదుపరి ప్రధాన విశేషం... ",
+        "చివరిగా మరో ముఖ్యమైన అంశాన్ని చూస్తే... "
+    ]
+
+    used_categories = set()
+    body_parts = []
+
+    for idx, a in enumerate(articles[:6]):
+        t = clean_text_for_speech(a.get("title", ""))
+        s = clean_text_for_speech(a.get("summary", ""))
+        
+        # Avoid repeating title verbatim if summary starts with title
+        if t and s.startswith(t[:25]):
+            s = s[len(t):].strip(" .:-")
+
+        # Trim summary gently at natural sentence ending
+        if len(s) > 160:
+            p_idx = max(s[:160].rfind("."), s[:160].rfind("!"), s[:160].rfind("?"))
+            if p_idx > 60:
+                s = s[:p_idx + 1]
+            else:
+                s = s[:160].rsplit(" ", 1)[0] + "..."
+
+        cat = (a.get("category") or "").lower()
+        if idx == 0:
+            prefix = "మొదటిగా నేటి అత్యంత ప్రధానమైన అంశాన్ని పరిశీలిస్తే... "
+        elif cat in transitions_map and cat not in used_categories:
+            prefix = transitions_map[cat]
+            used_categories.add(cat)
+        elif idx < len(general_transitions):
+            prefix = general_transitions[idx]
+        else:
+            prefix = "ఇక తదుపరి అంశం... "
+
+        body_parts.append(f"{prefix}{t}... {s}\n\n")
+
+    one_liners_script = ""
+    if one_liners:
+        one_liners_script = "ఇక పోటీ పరీక్షల శీఘ్ర పునశ్చరణ కోసం, నేటి వన్-లైనర్స్ క్విక్ రౌండప్ గమనిద్దాం...\n\n"
+        ol_pfx = [
+            "మొదటి అంశం... ",
+            "రెండవది... ",
+            "మూడవ అంశం... ",
+            "నాల్గవ పరిణామం... ",
+            "అలాగే... ",
+            "చివరి పాయింట్... "
+        ]
+        for i, ol in enumerate(one_liners[:5]):
+            pt = clean_text_for_speech(ol.get("point", ""))
+            p = ol_pfx[i] if i < len(ol_pfx) else "అలాగే... "
+            one_liners_script += f"{p}{pt}.\n\n"
+
+    outro = (
+        "మిత్రులారా... ఇవి ఈనాటి అత్యంత ముఖ్యమైన కరెంట్ అఫైర్స్ విశేషాలు... "
+        "పూర్తి ఈ-పేపర్ పీడీఎఫ్, సిలబస్ గైడ్ మరియు ప్రాక్టీస్ మాక్ టెస్టుల కోసం మన లక్ష్య పోర్టల్‌ను సందర్శించండి... "
+        "పోటీ పరీక్షలకు సిద్ధమవుతున్న ప్రతి ఒక్కరికీ ఆల్ ది వెరీ బెస్ట్... ధన్యవాదాలు, నమస్కారం!"
+    )
+
+    full_script = intro + "".join(body_parts) + one_liners_script + outro
+    return full_script
+
 def generate_daily_bulletin_audio(date=None, force_refresh=False, voice="mohan"):
     """
-    Generate a natural 3-5 minute spoken Telugu audio bulletin for the day's
+    Generate a natural 3-4 minute spoken Telugu audio bulletin for the day's
     top headlines, one-liners, and exam takeaways using human Neural AI voice.
     Saves to:
     - backend/audio_cache/daily_bulletin_{date}_{voice}.mp3
     - frontend/audio/daily_bulletin_today.mp3
+    - frontend/audio/daily_bulletin_{voice}.mp3
     """
     from db import get_articles, get_one_liners_by_date, get_available_dates
+    dates = get_available_dates()
+    latest_date = dates[0] if dates else "2026-09-16"
+
     if not date:
-        dates = get_available_dates()
-        date = dates[0] if dates else "2026-09-17"
+        date = latest_date
 
     voice_key = voice.lower().strip() if voice else DEFAULT_VOICE
     frontend_audio_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "audio")
@@ -214,30 +340,18 @@ def generate_daily_bulletin_audio(date=None, force_refresh=False, voice="mohan")
         return cache_mp3_path
 
     articles = get_articles(date=date)
+    # If no articles for given date, fallback to latest date with articles
+    if not articles and dates:
+        date = latest_date
+        articles = get_articles(date=date)
+        cache_mp3_path = os.path.join(CACHE_DIR, f"daily_bulletin_{date}_{voice_key}.mp3")
+        if not force_refresh and os.path.exists(cache_mp3_path) and os.path.getsize(cache_mp3_path) > 10000:
+            return cache_mp3_path
+
     one_liners = get_one_liners_by_date(date=date)
 
-    # Professional Telugu News Anchor Script
-    script = (
-        f"నమస్కారం మిత్రులారా. లక్ష్య డైలీ తెలుగు కరెంట్ అఫైర్స్ మరియు పోటీ పరీక్షల ప్రత్యేక ఆడియో బులెటిన్‌కు స్వాగతం. "
-        f"నేటి తేదీ: {date}. "
-        f"ముందుగా నేటి ప్రధాన పోటీ పరీక్షల ముఖ్యాంశాలు. "
-    )
-
-    for idx, a in enumerate(articles[:6], 1):
-        t = clean_text_for_speech(a.get("title", ""))
-        s = clean_text_for_speech(a.get("summary", ""))[:150]
-        script += f"వార్త {idx}: {t}. {s}. "
-
-    if one_liners:
-        script += "ఇక శీఘ్ర పునశ్చరణ కోసం ఒక వరుస ముఖ్యాంశాలు. "
-        for ol in one_liners[:6]:
-            pt = clean_text_for_speech(ol.get("point", ""))
-            script += f"{pt}. "
-
-    script += (
-        "నేటి పూర్తి ఈ-పేపర్ పీడీఎఫ్, సిలబస్ గైడ్, మాక్ టెస్టులు మరియు ఆన్‌లైన్ ప్రాక్టీస్ కోసం "
-        "లక్ష్య పోర్టల్ ను సందర్శించండి. ఆల్ ది బెస్ట్."
-    )
+    # Build human conversational podcast script
+    script = build_conversational_bulletin_script(date, articles, one_liners)
 
     # Generate MP3 via Neural Voice
     audio_bytes = generate_telugu_audio(script, voice=voice_key)
@@ -245,10 +359,11 @@ def generate_daily_bulletin_audio(date=None, force_refresh=False, voice="mohan")
         try:
             with open(cache_mp3_path, "wb") as f:
                 f.write(audio_bytes)
-            with open(today_mp3_path, "wb") as f:
-                f.write(audio_bytes)
             with open(voice_today_mp3_path, "wb") as f:
                 f.write(audio_bytes)
+            if voice_key == "mohan" or not os.path.exists(today_mp3_path):
+                with open(today_mp3_path, "wb") as f:
+                    f.write(audio_bytes)
         except Exception as e:
             print(f"Error saving bulletin audio: {e}")
         return cache_mp3_path
