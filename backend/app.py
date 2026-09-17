@@ -476,6 +476,29 @@ def api_telegram_send_audio():
     res = send_daily_bulletin_audio(date=date, token=token, chat_id=chat_id)
     return jsonify(res)
 
+@app.route("/api/audio/tracks", methods=["GET"])
+def api_audio_tracks():
+    from audio_revision_data import get_all_audio_tracks
+    tracks = get_all_audio_tracks()
+    compact = []
+    for t in tracks:
+        c = dict(t)
+        compact.append(c)
+    return jsonify({"success": True, "tracks": compact})
+
+@app.route("/api/audio/track/<track_id>", methods=["GET"])
+def api_audio_syllabus_track(track_id):
+    from tts import generate_syllabus_audio_track
+    voice = request.args.get("voice", "mohan")
+    audio_path = generate_syllabus_audio_track(track_id, voice=voice)
+    if not audio_path or not os.path.exists(audio_path):
+        return jsonify({"success": False, "error": "ఆడియో ట్రాక్ అందుబాటులో లేదు."}), 404
+    return send_from_directory(
+        os.path.dirname(audio_path),
+        os.path.basename(audio_path),
+        mimetype="audio/mpeg"
+    )
+
 @app.route("/epapers_directory", methods=["GET"])
 @app.route("/epapers", methods=["GET"])
 def epapers_directory_view():
@@ -1404,6 +1427,7 @@ def api_audio_revision():
     })
 
 @app.route("/audio_revision", methods=["GET"])
+@app.route("/audio_hub", methods=["GET"])
 def audio_revision_view():
     from flask import make_response
     from audio_revision_view import render_audio_revision_html

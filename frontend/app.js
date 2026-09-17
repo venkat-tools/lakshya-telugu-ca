@@ -980,39 +980,238 @@ async function sendBulletinAudioToTelegram() {
 }
 window.sendBulletinAudioToTelegram = sendBulletinAudioToTelegram;
 
-// Switch Bulletin Voice (Mohan Male vs Shruti Female Neural Human Voices)
-function setBulletinVoice(voice) {
+// ==================== ADVANCED TELUGU AUDIO LEARNING & PODCAST DECK ====================
+let currentAudioVoice = "mohan";
+let currentAudioTrack = "daily_bulletin";
+let currentAudioSpeed = 1.0;
+
+const SYLLABUS_TRACKS_META = {
+  daily_bulletin: {
+    title: "నేటి పరీక్షా ముఖ్యాంశాలు (Native Telugu Audio)",
+    badge: "డైలీ కరెంట్ అఫైర్స్",
+    url: (voice) => `${API_BASE}/api/audio/daily_bulletin?voice=${voice}&date=${state.currentDate || ''}`
+  },
+  track_history: {
+    title: "భారతీయ చరిత్ర – ప్రాచీన, మధ్యయుగ & ఆధునిక జాతీయోద్యమం",
+    badge: "భారతీయ చరిత్ర",
+    url: (voice) => `${API_BASE}/api/audio/track/track_history?voice=${voice}`
+  },
+  track_geography: {
+    title: "భారత & ఏపీ భౌగోళిక శాస్త్రం – నైసర్గిక స్వరూపం, నదులు & 26 జిల్లాలు",
+    badge: "భౌగోళిక శాస్త్రం",
+    url: (voice) => `${API_BASE}/api/audio/track/track_geography?voice=${voice}`
+  },
+  track_society: {
+    title: "భారతీయ సమాజం – సామాజిక నిర్మాణం, కుల వ్యవస్థ & సంక్షేమ చట్టాలు",
+    badge: "భారతీయ సమాజం",
+    url: (voice) => `${API_BASE}/api/audio/track/track_society?voice=${voice}`
+  },
+  track_polity: {
+    title: "భారత రాజ్యాంగం – టాప్ 50 ఆర్టికల్స్, ప్రాథమిక హక్కులు & సవరణలు",
+    badge: "రాజ్యాంగం & పాలిటీ",
+    url: (voice) => `${API_BASE}/api/audio/track/track_polity?voice=${voice}`
+  },
+  track_economy: {
+    title: "భారత & ఏపీ ఆర్థిక వ్యవస్థ – బడ్జెట్, సూపర్ సిక్స్ & సంక్షేమ పథకాలు",
+    badge: "ఎకానమీ & పథకాలు",
+    url: (voice) => `${API_BASE}/api/audio/track/track_economy?voice=${voice}`
+  },
+  track_science: {
+    title: "సైన్స్ & టెక్నాలజీ – ఇస్రో 2026 మిషన్లు, నిసార్ & ఇండియా AI మిషన్",
+    badge: "సైన్స్ & టెక్నాలజీ",
+    url: (voice) => `${API_BASE}/api/audio/track/track_science?voice=${voice}`
+  },
+  track_aptitude: {
+    title: "120 ఆప్టిట్యూడ్ షార్ట్‌కట్ సూత్రాలు – సూపర్ ఫాస్ట్ కాలిక్యులేషన్స్",
+    badge: "మెంటల్ ఎబిలిటీ",
+    url: (voice) => `${API_BASE}/api/audio/track/track_aptitude?voice=${voice}`
+  },
+  track_ap_history: {
+    title: "ఆధునిక ఆంధ్రప్రదేశ్ చరిత్ర & 2014 పునర్విభజన చట్టం పూర్తి సారాంశం",
+    badge: "ఏపీ చరిత్ర",
+    url: (voice) => `${API_BASE}/api/audio/track/track_ap_history?voice=${voice}`
+  }
+};
+
+function formatAudioTime(seconds) {
+  if (isNaN(seconds) || seconds < 0) return "00:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+function initAudioDeckListeners() {
   const audio = document.getElementById("dailyBulletinAudio");
+  const scrubber = document.getElementById("audioScrubber");
+  const curTime = document.getElementById("audioCurrentTime");
+  const totDuration = document.getElementById("audioTotalDuration");
+
+  if (!audio) return;
+
+  audio.addEventListener("timeupdate", () => {
+    if (audio.duration) {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      if (scrubber) scrubber.value = pct;
+      if (curTime) curTime.textContent = formatAudioTime(audio.currentTime);
+    }
+  });
+
+  audio.addEventListener("loadedmetadata", () => {
+    if (totDuration && audio.duration) {
+      totDuration.textContent = formatAudioTime(audio.duration);
+    }
+    if (scrubber) scrubber.value = 0;
+    if (curTime) curTime.textContent = "00:00";
+  });
+
+  audio.addEventListener("play", () => {
+    updatePlayPauseUI(true);
+  });
+
+  audio.addEventListener("pause", () => {
+    updatePlayPauseUI(false);
+  });
+
+  audio.addEventListener("ended", () => {
+    updatePlayPauseUI(false);
+    if (scrubber) scrubber.value = 100;
+  });
+
+  if (scrubber) {
+    scrubber.addEventListener("input", (e) => {
+      if (audio.duration) {
+        const seekTo = (e.target.value / 100) * audio.duration;
+        audio.currentTime = seekTo;
+        if (curTime) curTime.textContent = formatAudioTime(seekTo);
+      }
+    });
+  }
+}
+
+function updatePlayPauseUI(isPlaying) {
+  const btn = document.getElementById("audioPlayPauseBtn");
+  const icon = document.getElementById("audioPlayIcon");
+  const text = document.getElementById("audioPlayText");
+  if (!btn) return;
+  if (isPlaying) {
+    btn.className = "px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold flex items-center gap-2 transition shadow-md shadow-amber-500/20 active:scale-95";
+    if (text) text.textContent = "పాజ్ చేయండి";
+    if (icon) {
+      icon.setAttribute("data-lucide", "pause");
+      icon.className = "w-4 h-4 fill-white";
+    }
+  } else {
+    btn.className = "px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold flex items-center gap-2 transition shadow-md shadow-indigo-500/20 active:scale-95";
+    if (text) text.textContent = "ప్లే చేయండి";
+    if (icon) {
+      icon.setAttribute("data-lucide", "play");
+      icon.className = "w-4 h-4 fill-white";
+    }
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+function toggleAudioPlay() {
+  const audio = document.getElementById("dailyBulletinAudio");
+  if (!audio) return;
+  if (audio.paused) {
+    audio.play().then(() => updatePlayPauseUI(true)).catch((e) => console.log("Audio play blocked:", e));
+  } else {
+    audio.pause();
+    updatePlayPauseUI(false);
+  }
+}
+window.toggleAudioPlay = toggleAudioPlay;
+
+function seekAudio(seconds) {
+  const audio = document.getElementById("dailyBulletinAudio");
+  if (!audio) return;
+  audio.currentTime = Math.max(0, Math.min(audio.duration || 999999, audio.currentTime + seconds));
+  showToast(seconds > 0 ? `⏩ +${seconds} సెకన్లు ముందుకు` : `⏪ ${seconds} సెకన్లు వెనుకకు`);
+}
+window.seekAudio = seekAudio;
+
+function setAudioSpeed(speed) {
+  const audio = document.getElementById("dailyBulletinAudio");
+  currentAudioSpeed = speed;
+  if (audio) audio.playbackRate = speed;
+
+  document.querySelectorAll(".audio-speed-btn").forEach(btn => {
+    btn.className = "audio-speed-btn px-2 py-1 rounded-lg text-[10px] font-bold text-slate-300 hover:text-white transition";
+  });
+  const activeBtnId = (speed === 0.75) ? "speedBtn_075" : (speed === 1.0) ? "speedBtn_1" : (speed === 1.25) ? "speedBtn_125" : "speedBtn_15";
+  const activeBtn = document.getElementById(activeBtnId);
+  if (activeBtn) {
+    activeBtn.className = "audio-speed-btn active px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-600 text-white transition shadow-sm";
+  }
+  showToast(`⚡ ప్లేబ్యాక్ వేగం: ${speed}x`);
+}
+window.setAudioSpeed = setAudioSpeed;
+
+function selectAudioTrack(trackKey, autoPlay = true) {
+  currentAudioTrack = trackKey;
+  const meta = SYLLABUS_TRACKS_META[trackKey] || SYLLABUS_TRACKS_META["daily_bulletin"];
+  const audio = document.getElementById("dailyBulletinAudio");
+  const titleElem = document.getElementById("audioTrackTitle");
+  const badgeElem = document.getElementById("audioTrackBadge");
   const dlBtn = document.getElementById("bulletinDownloadBtn");
+
+  if (titleElem) titleElem.textContent = meta.title;
+  if (badgeElem) badgeElem.textContent = meta.badge;
+
+  // Update tabs active styling
+  document.querySelectorAll(".audio-track-tab").forEach(tab => {
+    tab.className = "audio-track-tab px-3 py-1 rounded-lg font-bold shrink-0 transition-all flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700";
+  });
+  const activeTab = document.getElementById(`trackBtn_${trackKey}`);
+  if (activeTab) {
+    activeTab.className = "audio-track-tab active px-3 py-1 rounded-lg font-bold shrink-0 transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm border border-indigo-400/40";
+  }
+
+  const newUrl = meta.url(currentAudioVoice);
+  if (dlBtn) {
+    dlBtn.href = newUrl;
+    dlBtn.download = `${trackKey}_${currentAudioVoice}.mp3`;
+  }
+
+  if (audio) {
+    const wasPlaying = !audio.paused || autoPlay;
+    audio.src = newUrl;
+    audio.load();
+    audio.playbackRate = currentAudioSpeed;
+    if (wasPlaying) {
+      audio.play().then(() => updatePlayPauseUI(true)).catch(() => {});
+    }
+  }
+  showToast(`🎧 సబ్జెక్ట్ మారింది: ${meta.badge}`);
+}
+window.selectAudioTrack = selectAudioTrack;
+
+function setAudioVoice(voice) {
+  currentAudioVoice = (voice === "shruti") ? "shruti" : "mohan";
   const btnMohan = document.getElementById("voiceBtnMohan");
   const btnShruti = document.getElementById("voiceBtnShruti");
 
-  const v = (voice === "shruti") ? "shruti" : "mohan";
-  const url = `${API_BASE}/api/audio/daily_bulletin?voice=${v}&date=${state.currentDate || ''}`;
-
   if (btnMohan && btnShruti) {
-    if (v === "mohan") {
-      btnMohan.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition-all flex items-center gap-1.5 shadow-sm";
-      btnShruti.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1.5";
+    if (currentAudioVoice === "mohan") {
+      btnMohan.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white transition-all flex items-center gap-1 shadow-sm";
+      btnShruti.className = "px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1";
     } else {
-      btnShruti.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-pink-600 text-white transition-all flex items-center gap-1.5 shadow-sm";
-      btnMohan.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1.5";
+      btnShruti.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-pink-600 text-white transition-all flex items-center gap-1 shadow-sm";
+      btnMohan.className = "px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1";
     }
   }
 
-  if (dlBtn) dlBtn.href = url;
-  if (audio) {
-    const wasPlaying = !audio.paused;
-    audio.src = url;
-    audio.load();
-    if (wasPlaying) {
-      audio.play().catch(() => {});
-    }
-    const voiceName = (v === "mohan") ? "మోహన్ (పురుష స్వరం)" : "శృతి (మహిళా స్వరం)";
-    showToast(`🎙️ ఆడియో వాయిస్ మారింది: ${voiceName}`);
-  }
+  // Reload current track with new voice
+  const audio = document.getElementById("dailyBulletinAudio");
+  const isPlaying = audio && !audio.paused;
+  selectAudioTrack(currentAudioTrack, isPlaying);
+
+  const voiceName = (currentAudioVoice === "mohan") ? "మోహన్ (పురుష స్వరం)" : "శృతి (మహిళా స్వరం)";
+  showToast(`🎙️ ఆడియో వాయిస్ మారింది: ${voiceName}`);
 }
-window.setBulletinVoice = setBulletinVoice;
+window.setAudioVoice = setAudioVoice;
+window.setBulletinVoice = setAudioVoice; // backward compatibility
 
 // ==================== TELUGU E-PAPERS & PDF HUB ====================
 function initEpaperModal() {
@@ -4732,6 +4931,15 @@ function initTabsHideFeature() {
     modulesContainer.classList.add("hidden");
     if (modulesTrayChevron) modulesTrayChevron.style.transform = "rotate(0deg)";
   }
+}
+
+// Auto-initialize Audio Deck Controls
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof initAudioDeckListeners === "function") initAudioDeckListeners();
+  });
+} else {
+  if (typeof initAudioDeckListeners === "function") initAudioDeckListeners();
 }
 
 

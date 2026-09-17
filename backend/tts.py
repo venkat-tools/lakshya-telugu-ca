@@ -91,6 +91,21 @@ PRONUNCIATION_MAP = [
     (r'\bGS\b', 'జనరల్ స్టడీస్'),
     (r'\bMCQ\b', 'ప్రశ్న'),
     (r'\bMCQs\b', 'ప్రశ్నలు'),
+    (r'\bBC\b|\bక్రీ\.పూ\.?\b', 'క్రీస్తు పూర్వం'),
+    (r'\bAD\b|\bక్రీ\.శ\.?\b', 'క్రీస్తు శకం'),
+    (r'\bINC\b', 'భారత జాతీయ కాంగ్రెస్'),
+    (r'\bkm²\b|\bsq km\b|\bsq\.km\b', 'చదరపు కిలోమీటర్లు'),
+    (r'\bkm/h\b|\bkmph\b', 'కిలోమీటర్లు ప్రతి గంటకు'),
+    (r'\bm/s\b', 'మీటర్లు ప్రతి సెకనుకు'),
+    (r'\bMPI\b', 'మల్టీడైమెన్షనల్ పావర్టీ ఇండెక్స్'),
+    (r'\bPM-JANMAN\b', 'పీఎం జనమన్'),
+    (r'\bLVM-3\b|\bLVM3\b', 'ఎల్వీఎం త్రీ'),
+    (r'\bMIRV\b', 'ఎంఐఆర్వీ'),
+    (r'\bINS\b', 'ఐఎన్ఎస్'),
+    (r'\bGPUs?\b', 'జీపీయూలు'),
+    (r'\bAI\b', 'కృత్రిమ మేధస్సు'),
+    (r'\bPOCSO\b', 'పోక్సో'),
+    (r'\bUCC\b', 'ఉమ్మడి పౌరస్మృతి'),
     (r'₹\s*([0-9,]+)\s*కోట్ల', r'\1 కోట్ల రూపాయల'),
     (r'₹\s*([0-9,]+)\s*కోట్లు', r'\1 కోట్ల రూపాయలు'),
     (r'₹\s*([0-9,]+)', r'\1 రూపాయలు'),
@@ -367,6 +382,45 @@ def generate_daily_bulletin_audio(date=None, force_refresh=False, voice="mohan")
         except Exception as e:
             print(f"Error saving bulletin audio: {e}")
         return cache_mp3_path
+
+    return None
+
+def generate_syllabus_audio_track(track_id, voice="mohan", force_refresh=False):
+    """
+    Generate or retrieve a high-yield Telugu audio revision track for competitive exam subjects.
+    Supports: Indian History, Geography, Indian Society, Polity, Economy, Science & Tech, Aptitude.
+    """
+    from audio_revision_data import get_track_by_id
+    track = get_track_by_id(track_id)
+    if not track:
+        return None
+
+    voice_key = voice.lower().strip() if voice else DEFAULT_VOICE
+    frontend_audio_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "audio")
+    os.makedirs(frontend_audio_dir, exist_ok=True)
+    
+    tid = track.get("id", track_id)
+    cache_file = os.path.join(CACHE_DIR, f"{tid}_{voice_key}.mp3")
+    frontend_file = os.path.join(frontend_audio_dir, f"{tid}_{voice_key}.mp3")
+
+    if not force_refresh and os.path.exists(cache_file) and os.path.getsize(cache_file) > 10000:
+        return cache_file
+
+    script = track.get("script", "")
+    if not script:
+        return None
+
+    # Synthesize via Neural Voice
+    audio_bytes = generate_telugu_audio(script, voice=voice_key)
+    if audio_bytes and len(audio_bytes) > 5000:
+        try:
+            with open(cache_file, "wb") as f:
+                f.write(audio_bytes)
+            with open(frontend_file, "wb") as f:
+                f.write(audio_bytes)
+        except Exception as e:
+            print(f"Error saving syllabus audio track {track_id}: {e}")
+        return cache_file
 
     return None
 
