@@ -980,6 +980,40 @@ async function sendBulletinAudioToTelegram() {
 }
 window.sendBulletinAudioToTelegram = sendBulletinAudioToTelegram;
 
+// Switch Bulletin Voice (Mohan Male vs Shruti Female Neural Human Voices)
+function setBulletinVoice(voice) {
+  const audio = document.getElementById("dailyBulletinAudio");
+  const dlBtn = document.getElementById("bulletinDownloadBtn");
+  const btnMohan = document.getElementById("voiceBtnMohan");
+  const btnShruti = document.getElementById("voiceBtnShruti");
+
+  const v = (voice === "shruti") ? "shruti" : "mohan";
+  const url = `${API_BASE}/api/audio/daily_bulletin?voice=${v}&date=${state.currentDate || ''}`;
+
+  if (btnMohan && btnShruti) {
+    if (v === "mohan") {
+      btnMohan.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition-all flex items-center gap-1.5 shadow-sm";
+      btnShruti.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1.5";
+    } else {
+      btnShruti.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-pink-600 text-white transition-all flex items-center gap-1.5 shadow-sm";
+      btnMohan.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1.5";
+    }
+  }
+
+  if (dlBtn) dlBtn.href = url;
+  if (audio) {
+    const wasPlaying = !audio.paused;
+    audio.src = url;
+    audio.load();
+    if (wasPlaying) {
+      audio.play().catch(() => {});
+    }
+    const voiceName = (v === "mohan") ? "మోహన్ (పురుష స్వరం)" : "శృతి (మహిళా స్వరం)";
+    showToast(`🎙️ ఆడియో వాయిస్ మారింది: ${voiceName}`);
+  }
+}
+window.setBulletinVoice = setBulletinVoice;
+
 // ==================== TELUGU E-PAPERS & PDF HUB ====================
 function initEpaperModal() {
   const modal = document.getElementById("epaperModal");

@@ -623,14 +623,26 @@
         </div>
       </div>
       
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto z-10">
-        <audio id="dailyBulletinAudio" controls class="h-10 rounded-lg shadow-inner bg-slate-800 border border-indigo-400/30 w-full sm:w-72">
-          <source src="/api/audio/daily_bulletin" type="audio/mpeg">
+      <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full lg:w-auto z-10">
+        <!-- Voice Choice Selector: Mohan (Male) vs Shruti (Female) -->
+        <div class="flex items-center bg-slate-800/90 border border-indigo-400/40 rounded-xl p-1 gap-1 shrink-0">
+          <button id="voiceBtnMohan" onclick="setBulletinVoice('mohan')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition-all flex items-center gap-1.5 shadow-sm" title="మోహన్ (సహజ పురుష స్వరం - స్పష్టమైన న్యూస్ యాంకర్)">
+            <span>👨 మోహన్</span>
+            <span class="text-[10px] opacity-80">(పురుష)</span>
+          </button>
+          <button id="voiceBtnShruti" onclick="setBulletinVoice('shruti')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1.5" title="శృతి (సహజ మహిళా స్వరం - క్లియర్ ప్రెజెంటర్)">
+            <span>👩 శృతి</span>
+            <span class="text-[10px] opacity-80">(మహిళా)</span>
+          </button>
+        </div>
+
+        <audio id="dailyBulletinAudio" controls class="h-10 rounded-lg shadow-inner bg-slate-800 border border-indigo-400/30 w-full sm:w-64">
+          <source id="bulletinAudioSrc" src="/api/audio/daily_bulletin?voice=mohan" type="audio/mpeg">
           మీ బ్రౌజర్ ఆడియో ప్లేయర్‌ను సపోర్ట్ చేయడం లేదు.
         </audio>
         
         <div class="flex items-center gap-2">
-          <a href="/api/audio/daily_bulletin" download="daily_bulletin_today.mp3" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-sm border border-indigo-400/50" title="ఆడియోను MP3గా డౌన్‌లోడ్ చేసుకోండి">
+          <a id="bulletinDownloadBtn" href="/api/audio/daily_bulletin?voice=mohan" download="daily_bulletin_today.mp3" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-sm border border-indigo-400/50" title="ఆడియోను MP3గా డౌన్‌లోడ్ చేసుకోండి">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>MP3</span>
           </a>

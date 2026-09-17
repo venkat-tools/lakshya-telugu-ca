@@ -453,7 +453,8 @@ def api_magazine_pdf():
 def api_audio_daily_bulletin():
     from tts import generate_daily_bulletin_audio
     date = request.args.get("date")
-    audio_path = generate_daily_bulletin_audio(date=date)
+    voice = request.args.get("voice", "mohan")
+    audio_path = generate_daily_bulletin_audio(date=date, voice=voice)
     if not audio_path or not os.path.exists(audio_path):
         return jsonify({"success": False, "error": "ఆడియో బులెటిన్ అందుబాటులో లేదు."}), 404
     return send_from_directory(
@@ -532,13 +533,15 @@ def api_mock_test_subject(subject):
 @app.route("/api/audio", methods=["GET"])
 def api_audio_text():
     text = request.args.get("text", "").strip()
+    voice = request.args.get("voice", "mohan")
     if not text:
         return jsonify({"error": "Text is required"}), 400
-    audio_bytes = generate_telugu_audio(text)
+    audio_bytes = generate_telugu_audio(text, voice=voice)
     return Response(audio_bytes, mimetype="audio/mpeg")
 
 @app.route("/api/audio/article/<int:article_id>", methods=["GET"])
 def api_audio_article(article_id):
+    voice = request.args.get("voice", "mohan")
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT title, summary FROM articles WHERE id = ?", (article_id,))
@@ -548,12 +551,13 @@ def api_audio_article(article_id):
         return jsonify({"error": "Article not found"}), 404
     
     text = f"{row['title']}. {row['summary']}"
-    audio_bytes = generate_telugu_audio(text)
+    audio_bytes = generate_telugu_audio(text, voice=voice)
     return Response(audio_bytes, mimetype="audio/mpeg")
 
 @app.route("/api/audio/daily", methods=["GET"])
 def api_audio_daily():
     date = request.args.get("date")
+    voice = request.args.get("voice", "mohan")
     if not date:
         dates = get_available_dates()
         date = dates[0] if dates else None
@@ -566,7 +570,7 @@ def api_audio_daily():
     for idx, a in enumerate(articles[:6], 1):
         text += f"ముఖ్యాంశం {idx}. {a['title']}. {a['summary']}. "
 
-    audio_bytes = generate_telugu_audio(text)
+    audio_bytes = generate_telugu_audio(text, voice=voice)
     return Response(audio_bytes, mimetype="audio/mpeg")
 
 # ----------------- Grand Mock Test Paper with OMR Sheet Route -----------------
