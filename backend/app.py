@@ -1516,6 +1516,76 @@ def pwa_sw():
     resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     return resp
 
+# ----------------- AP & TS Agriculture & Irrigation Hub Endpoints -----------------
+@app.route("/api/agri_irrigation", methods=["GET"])
+def api_agri_irrigation():
+    from agri_irrigation_data import get_agri_irrigation_data
+    return jsonify({
+        "success": True,
+        "data": get_agri_irrigation_data()
+    })
+
+@app.route("/agri_irrigation_hub", methods=["GET"])
+def agri_irrigation_hub_view():
+    from flask import make_response
+    from agri_irrigation_view import render_agri_irrigation_html
+    resp = make_response(render_agri_irrigation_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Awards, Sports & Personalities 2025-2026 Endpoints -----------------
+@app.route("/api/awards_sports", methods=["GET"])
+def api_awards_sports():
+    from awards_sports_data import AWARDS_SPORTS_DATA
+    return jsonify({
+        "success": True,
+        "data": AWARDS_SPORTS_DATA
+    })
+
+@app.route("/awards_sports_hub", methods=["GET"])
+def awards_sports_hub_view():
+    from flask import make_response
+    from awards_sports_view import render_awards_sports_html
+    resp = make_response(render_awards_sports_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- APPSC Group-1 Prelims 240M Simulator Endpoints -----------------
+@app.route("/api/group1_prelims", methods=["GET"])
+def api_group1_prelims():
+    from group1_prelims_data import GROUP1_SYLLABUS, GROUP1_REVISION_NOTES, GROUP1_QUESTIONS
+    return jsonify({
+        "success": True,
+        "syllabus": GROUP1_SYLLABUS,
+        "notes": GROUP1_REVISION_NOTES,
+        "questions": GROUP1_QUESTIONS
+    })
+
+@app.route("/group1_prelims_master", methods=["GET"])
+def group1_prelims_master_view():
+    from flask import make_response
+    from group1_prelims_view import render_group1_prelims_html
+    resp = make_response(render_group1_prelims_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- AP & TS Tribal Heritage & PESA Hub Endpoints -----------------
+@app.route("/api/tribal_heritage", methods=["GET"])
+def api_tribal_heritage():
+    from tribal_heritage_data import TRIBAL_HERITAGE_DATA
+    return jsonify({
+        "success": True,
+        "data": TRIBAL_HERITAGE_DATA
+    })
+
+@app.route("/tribal_heritage_hub", methods=["GET"])
+def tribal_heritage_hub_view():
+    from flask import make_response
+    from tribal_heritage_view import render_tribal_heritage_html
+    resp = make_response(render_tribal_heritage_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
 if __name__ == "__main__":
     print("==================================================================")
     print("🚀 తెలుగు పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ డ్యాష్‌బోర్డ్ ప్రారంభమైంది!")

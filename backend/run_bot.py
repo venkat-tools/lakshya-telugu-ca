@@ -141,7 +141,11 @@ def start_bot_polling():
 👉 <b>/staticgk</b> - స్టాటిక్ జీకే సూపర్-ఫాస్ట్ పాకెట్‌బుక్ & PDF 🇮🇳\n\
 👉 <b>/atlas</b> - మ్యాప్ పాయింటింగ్ మాస్టర్ అట్లాస్ & PDF (AP, India, World) 🗺️\n\
 👉 <b>/judgments</b> - సుప్రీంకోర్టు 30 చారిత్రక తీర్పులు (1950-2026) & PDF ⚖️\n\
-👉 <b>/paper2</b> - APPSC గ్రూప్-2 పేపర్-2 (150 Marks) మెగా పోర్టల్ & మాక్ టెస్ట్ 🎯\n"
+👉 <b>/paper2</b> - APPSC గ్రూప్-2 పేపర్-2 (150 Marks) మెగా పోర్టల్ & మాక్ టెస్ట్ 🎯\n\
+👉 <b>/agri</b> - AP & TS వ్యవసాయం, సాగునీరు & ఆక్వాకల్చర్ మాస్టర్ హబ్ & PDF 🌾\n\
+👉 <b>/awards</b> - అవార్డులు, క్రీడలు & ప్రముఖ నియామకాలు 2025–2026 & PDF 🏆\n\
+👉 <b>/group1</b> - APPSC Group-1 ప్రిలిమ్స్ (240 Marks) మెగా గ్రాండ్ సిమ్యులేటర్ 🎯\n\
+👉 <b>/tribal</b> - AP & TS గిరిజన సంస్కృతి, PVTGs & PESA చట్టం హ్యాండ్‌బుక్ & PDF 📜\n"
                     )
                     send_telegram_message(welcome, token=token, chat_id=chat_id)
 
@@ -393,7 +397,7 @@ def start_bot_polling():
                     resp += f"\n🌐 <b>పూర్తి ముఖ్యాంశాల కోసం క్లిక్ చేయండి:</b> https://lakshya-telugu-ca.onrender.com"
                     send_telegram_message(resp, token=token, chat_id=chat_id)
 
-                                                elif text == "/audio" or text == "/podcast":
+                elif text == "/audio" or text == "/podcast":
                     send_telegram_message("🎙️ <b>నేటి 5 నిమిషాల కరెంట్ అఫైర్స్ ఆడియో పాడ్‌కాస్ట్ బులెటిన్ సిద్ధం చేయబడుతోంది... క్షణాల్లో మీ టెలిగ్రామ్‌కు వస్తుంది!</b>", token=token, chat_id=chat_id)
                     send_daily_bulletin_audio(date=today_date, token=token, chat_id=chat_id)
 
@@ -839,6 +843,76 @@ def start_bot_polling():
                         "👉 https://lakshya-telugu-ca.onrender.com/group2_paper2_master"
                     )
                     send_telegram_message(p2_msg, token=token, chat_id=chat_id)
+
+                elif text == "/agri" or text == "/agri_irrigation":
+                    agri_msg = (
+                        "🌾 <b>ఆంధ్రప్రదేశ్ & తెలంగాణ వ్యవసాయం, సాగునీరు & ఆక్వాకల్చర్ మాస్టర్ గైడ్</b>\n"
+                        "───────────────────────\n\n"
+                        "🌿 <b>సిలబస్ ముఖ్య ముఖ్యాంశాలు:</b>\n"
+                        "• ప్రధాన పంటలు, ఉత్పత్తి రికార్డులు & MSP 2025-26 ధరలు\n"
+                        "• పోలవరం జాతీయ ప్రాజెక్ట్ (సెక్షన్ 90), ధవళేశ్వరం, ప్రకాశం బ్యారేజ్ & నాగార్జున సాగర్\n"
+                        "• అంతర్రాష్ట్ర నదీ జల వివాదాలు (ఆర్టికల్ 262, బచావత్ & బ్రిజేష్ కుమార్ ట్రిబ్యునళ్లు)\n"
+                        "• ఉద్యానవన పంటల్లో ఏపీ 1వ స్థానం & బ్లూ ఎకానమీ (ఆక్వా రొయ్యల ఎగుమతుల్లో 40% వాటా)\n"
+                        "• 20వ పశుగణన, ఒంగోలు జాతి పశువులు & శ్వేత విప్లవం\n\n"
+                        "📥 <b>వ్యవసాయం & సాగునీరు మాస్టర్ PDF డౌన్‌లోడ్ చేసుకోండి:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/pdfs/ap_ts_agriculture_irrigation_master.pdf\n\n"
+                        "🌐 <b>వెబ్ హబ్ & 12 ప్రాక్టీస్ MCQs:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/agri_irrigation_hub"
+                    )
+                    send_telegram_message(agri_msg, token=token, chat_id=chat_id)
+
+                elif text == "/awards" or text == "/sports" or text == "/awards_sports":
+                    aw_msg = (
+                        "🏆 <b>అవార్డులు, క్రీడలు & ప్రముఖ వ్యక్తులు 2025–2026 మెగా డైజెస్ట్</b>\n"
+                        "───────────────────────\n\n"
+                        "🎖️ <b>హై-యీల్డ్ కంపైలేషన్:</b>\n"
+                        "• భారతరత్న 2024 (పీవీ నరసింహారావు, ఎం.ఎస్. స్వామినాథన్, కర్పూరీ ఠాకూర్ తదితరులు)\n"
+                        "• పద్మవిభూషణ్ (కొణిదెల చిరంజీవి, ఎం. వెంకయ్య నాయుడు)\n"
+                        "• నోబెల్ బహుమతులు 2024–25 (AI న్యూరల్ నెట్స్, AlphaFold, microRNA, హాన్ కాంగ్)\n"
+                        "• పారిస్ ఒలింపిక్స్ (నీరజ్ రజతం, మను భాకర్ డబుల్ కాంస్యం) & పారాలింపిక్స్ 29 పతకాలు\n"
+                        "• 45వ చెస్ ఒలింపియాడ్ డబుల్ గోల్డ్ (డి. గుకేష్, అర్జున్ ఎరిగైసి 2800+ రేటింగ్)\n"
+                        "• 51వ CJI సంజీవ్ ఖన్నా, 16వ ఆర్థిక సంఘం చైర్మన్ అరవింద్ పనగరియా, కాగ్ సంజయ్ మూర్తి\n\n"
+                        "📥 <b>అవార్డులు & క్రీడలు మాస్టర్ డైజెస్ట్ PDF:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/pdfs/awards_sports_personalities_2026.pdf\n\n"
+                        "🌐 <b>ఇంటరాక్టివ్ హబ్ & 30 ప్రాక్టీస్ MCQs:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/awards_sports_hub"
+                    )
+                    send_telegram_message(aw_msg, token=token, chat_id=chat_id)
+
+                elif text == "/group1" or text == "/group1_prelims":
+                    g1_msg = (
+                        "🎯 <b>APPSC Group-1 ప్రిలిమ్స్ (240 Marks) మెగా గ్రాండ్ సిమ్యులేటర్</b>\n"
+                        "───────────────────────\n\n"
+                        "📝 <b>డ్యూయల్ పేపర్ ఎగ్జామ్ స్ట్రక్చర్:</b>\n"
+                        "• పేపర్-1: జనరల్ స్టడీస్ (120 ప్రశ్నలు - 120 మార్కులు)\n"
+                        "• పేపర్-2: జనరల్ ఆప్టిట్యూడ్ & సైన్స్ (120 ప్రశ్నలు - 120 మార్కులు)\n"
+                        "• నెగెటివ్ మార్కింగ్: ప్రతి తప్పు ప్రశ్నకు -0.33 మార్కులు\n\n"
+                        "⏱️ <b>సిమ్యులేటర్ ఫీచర్లు:</b>\n"
+                        "• రియల్-టైమ్ కౌంట్‌డౌన్ టైమర్ & క్వశ్చన్ ప్యాలెట్ (1-120 బటన్స్)\n"
+                        "• తక్షణ ఆటో-ఇవాల్యుయేషన్ & కటాఫ్ బారోమీటర్\n"
+                        "• 8 యూనిట్ల సమగ్ర తెలుగు రివిజన్ నోట్స్\n"
+                        "• ప్రతి ప్రశ్నకు సమగ్ర తెలుగు సమాధానాల వివరణలు\n\n"
+                        "🌐 <b>ఇప్పుడే 240 మార్కుల గ్రాండ్ టెస్ట్ ప్రారంభించండి:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/group1_prelims_master"
+                    )
+                    send_telegram_message(g1_msg, token=token, chat_id=chat_id)
+
+                elif text == "/tribal" or text == "/tribal_heritage" or text == "/pesa":
+                    tr_msg = (
+                        "📜 <b>ఆంధ్రప్రదేశ్ & తెలంగాణ గిరిజన సంస్కృతి, PVTGs & PESA హ్యాండ్‌బుక్</b>\n"
+                        "───────────────────────\n\n"
+                        "🏕️ <b>కోర్ అంశాల విశ్లేషణ:</b>\n"
+                        "• ఏపీలోని 7 PVTGs: చెంచు, కొండరెడ్డి, కొండసవర, గడబ, పోర్జ, తోటి, ఖోండ్\n"
+                        "• గిరిజన జాతరలు: మేడారం సమ్మక్క-సారలమ్మ, నాగోబా, తీజ్, సీత్లా భవానీ\n"
+                        "• సంప్రదాయ కళలు: గుస్సాడి (పద్మశ్రీ కనకరాజు), ధింసా, కొమ్ము కోయ, ఇడితల్ చిత్రకళ\n"
+                        "• రాజ్యాంగ రక్షణలు: 5వ షెడ్యూల్ (ఆర్టికల్ 244(1)), ట్రైబ్స్ అడ్వైజరీ కౌన్సిల్ (TAC)\n"
+                        "• శాసనాలు & తీర్పులు: భూరియా కమిటీ, PESA చట్టం 1996, FRA 2006 & చారిత్రక సమత కేసు (1997)\n\n"
+                        "📥 <b>గిరిజన సంస్కృతి & PESA హ్యాండ్‌బుక్ PDF:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/pdfs/ap_ts_tribal_heritage_pesa_handbook.pdf\n\n"
+                        "🌐 <b>వెబ్ హబ్ & 30 మోడల్ MCQs ప్రాక్టీస్:</b>\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/tribal_heritage_hub"
+                    )
+                    send_telegram_message(tr_msg, token=token, chat_id=chat_id)
             print("\nబోట్ ఆపివేయబడింది.")
             break
         except Exception as e:
