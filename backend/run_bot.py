@@ -100,6 +100,7 @@ def start_bot_polling():
                 # Handle PDF Document Uploads
                 if doc:
                     file_name = doc.get("file_name", "document.pdf")
+                    file_size = doc.get("file_size", 0)
                     mime_type = doc.get("mime_type", "")
                     is_pdf = file_name.lower().endswith(".pdf") or mime_type == "application/pdf"
 
@@ -115,6 +116,20 @@ def start_bot_polling():
                             send_telegram_message(no_perm_msg, token=token, chat_id=chat_id)
                             continue
 
+                        # Telegram Bot API getFile has a hard 20MB limit
+                        if file_size > 20 * 1024 * 1024:
+                            size_mb = round(file_size / (1024 * 1024), 1)
+                            large_file_msg = (
+                                f"⚠️ <b>ఫైల్ పరిమాణం చాలా పెద్దది ({size_mb} MB):</b>\n\n"
+                                f"టెలిగ్రామ్ బోట్ API ద్వారా గరిష్టంగా <b>20 MB</b> పరిమాణం గల ఫైల్స్‌ను మాత్రమే డౌన్‌లోడ్ చేయగలదు.\n\n"
+                                f"🌐 <b>వెబ్‌సైట్ ద్వారా నేరుగా అప్‌లోడ్ చేయండి:</b>\n"
+                                f"మా వెబ్‌సైట్‌లో <b>100 MB</b> వరకు గల పెద్ద PDF లను నేరుగా అప్‌లోడ్ చేసుకోవచ్చు (ఆటో-సింక్ అవుతుంది):\n"
+                                f"👉 https://lakshya-telugu-ca.onrender.com/pdf_upload_hub\n\n"
+                                f"<i>(చిట్కా: 20MB లోపు ఉన్న PDF లను టెలిగ్రామ్‌లో నేరుగా పంపవచ్చు)</i>"
+                            )
+                            send_telegram_message(large_file_msg, token=token, chat_id=chat_id)
+                            continue
+
                         send_telegram_message(
                             f"⏳ <b>మీరు పంపిన PDF అందింది:</b> <code>{file_name}</code>\n\n"
                             f"<i>PDF నుండి సిలబస్ ముఖ్యాంశాలు, ఆర్టికల్స్ మరియు క్విజ్ MCQs సంగ్రహించి వెబ్‌సైట్‌లో అప్‌డేట్ చేస్తున్నాం... దయచేసి కొన్ని సెకన్లు వేచి ఉండండి.</i>",
@@ -128,7 +143,8 @@ def start_bot_polling():
                             file_info_res = requests.get(file_info_url, timeout=30).json()
 
                             if not file_info_res.get("ok"):
-                                raise RuntimeError("టెలిగ్రామ్ సర్వర్ నుండి ఫైల్ పాత్ పొందలేకపోయాము.")
+                                err_desc = file_info_res.get("description", "టెలిగ్రామ్ సర్వర్ నుండి ఫైల్ పాత్ పొందలేకపోయాము.")
+                                raise RuntimeError(f"టెలిగ్రామ్ ఎర్రర్: {err_desc}")
 
                             tg_file_path = file_info_res["result"]["file_path"]
                             download_url = f"https://api.telegram.org/file/bot{token}/{tg_file_path}"
@@ -144,7 +160,7 @@ def start_bot_polling():
                             check_str = (caption + " " + file_name).lower()
                             if any(k in check_str for k in ["polity", "రాజ్యాంగం", "పాలిటీ", "constitution"]):
                                 cat = "polity"
-                            elif any(k in check_str for k in ["history", "చరిత్ర"]):
+                            elif any(k in check_str for k in ["history", "చరిత్ర", "mindmap", "mind map"]):
                                 cat = "history"
                             elif any(k in check_str for k in ["geography", "భూగోళ"]):
                                 cat = "geography"
@@ -155,7 +171,11 @@ def start_bot_polling():
                             elif any(k in check_str for k in ["scheme", "పథకాలు", "సంక్షేమం", "welfare"]):
                                 cat = "regional"
 
-                            custom_title = caption if (caption and not caption.startswith("/")) else file_name.replace(".pdf", "").replace("_", " ").title()
+                            # Clean custom_title
+                            if caption and caption.lower() != "lakshya2026" and not caption.startswith("/"):
+                                custom_title = caption
+                            else:
+                                custom_title = ""
 
                             from pdf_extractor import process_uploaded_pdf
                             result = process_uploaded_pdf(

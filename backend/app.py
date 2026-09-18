@@ -88,14 +88,29 @@ start_scheduler_thread()
 
 # Start background Telegram bot polling thread when hosted on cloud
 def start_embedded_bot():
-    try:
-        import threading
-        from run_bot import start_bot_polling
-        bot_thread = threading.Thread(target=start_bot_polling, daemon=True)
-        bot_thread.start()
-        print("🤖 [Embedded Bot] టెలిగ్రామ్ బోట్ బ్యాక్‌గ్రౌండ్ థ్రెడ్ ప్రారంభమైంది.")
-    except Exception as e:
-        print("⚠️ Embedded bot error:", e)
+    def _run_bot_worker():
+        # Prevent multiple gunicorn workers from concurrent getUpdates polling (avoids Telegram 409 Conflict)
+        try:
+            import tempfile, fcntl
+            lock_path = os.path.join(tempfile.gettempdir(), "lakshya_bot_polling.lock")
+            lock_file = open(lock_path, "w")
+            try:
+                fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except (BlockingIOError, IOError):
+                print("🤖 [Embedded Bot] Another gunicorn worker is already polling. Skipping.")
+                return
+        except ImportError:
+            pass  # Windows or environment without fcntl
+
+        try:
+            from run_bot import start_bot_polling
+            print("🤖 [Embedded Bot] టెలిగ్రామ్ బోట్ బ్యాక్‌గ్రౌండ్ థ్రెడ్ ప్రారంభమైంది.")
+            start_bot_polling()
+        except Exception as e:
+            print("⚠️ Embedded bot error:", e)
+
+    import threading
+    threading.Thread(target=_run_bot_worker, daemon=True).start()
 
 if os.environ.get("RENDER") or os.environ.get("START_EMBEDDED_BOT"):
     start_embedded_bot()

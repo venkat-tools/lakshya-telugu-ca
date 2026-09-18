@@ -52,40 +52,49 @@ def clean_extracted_text(text):
 
 def extract_mcqs_from_text(text):
     """
-    Detects multiple choice questions in Telugu/English from text.
-    Looks for Question + A), B), C), D) + Answer pattern.
+    Detects multiple choice questions in Telugu/English from text safely without backtracking.
+    Looks for Question + A), B), C), D) + Answer pattern within small blocks.
     """
     quizzes = []
-    # Pattern 1: Question with (A), (B), (C), (D) or A), B), C), D)
-    pattern = re.compile(
-        r"(?:ప్రశ్న|\bQ\.?|\d+[\.\)])\s*(.*?)\s*"
-        r"(?:[\(\[]?[Aa][\)\]\.])\s*(.*?)\s*"
-        r"(?:[\(\[]?[Bb][\)\]\.])\s*(.*?)\s*"
-        r"(?:[\(\[]?[Cc][\)\]\.])\s*(.*?)\s*"
-        r"(?:[\(\[]?[Dd][\)\]\.])\s*(.*?)\s*"
-        r"(?:సమాధానం|జవాబు|Ans(?:wer)?|Correct)[\s:：]*([A-Da-d])",
-        re.DOTALL
-    )
+    paragraphs = text.split("\n\n")
+    for p in paragraphs:
+        if len(p) > 2500:
+            continue
+        # Fast filter: must contain options marker
+        has_a = any(k in p for k in ["A)", "A.", "(A)", "(a)", "ఎ)"])
+        has_b = any(k in p for k in ["B)", "B.", "(B)", "(b)", "బి)"])
+        if not (has_a and has_b):
+            continue
 
-    matches = pattern.findall(text)
-    for m in matches[:10]:
-        q_text = clean_extracted_text(m[0])
-        opt_a = clean_extracted_text(m[1])
-        opt_b = clean_extracted_text(m[2])
-        opt_c = clean_extracted_text(m[3])
-        opt_d = clean_extracted_text(m[4])
-        correct = m[5].strip().upper()
+        pattern = re.compile(
+            r"(?:ప్రశ్న|\bQ\.?|\d+[\.\)])\s*([^\n\r]+(?:\n[^\n\r]+)?)\s*"
+            r"(?:[\(\[]?[Aa][\)\]\.])\s*([^\n\r]+)\s*"
+            r"(?:[\(\[]?[Bb][\)\]\.])\s*([^\n\r]+)\s*"
+            r"(?:[\(\[]?[Cc][\)\]\.])\s*([^\n\r]+)\s*"
+            r"(?:[\(\[]?[Dd][\)\]\.])\s*([^\n\r]+)\s*"
+            r"(?:సమాధానం|జవాబు|Ans(?:wer)?|Correct)[\s:：]*([A-Da-d])"
+        )
+        m = pattern.search(p)
+        if m:
+            q_text = clean_extracted_text(m.group(1))
+            opt_a = clean_extracted_text(m.group(2))
+            opt_b = clean_extracted_text(m.group(3))
+            opt_c = clean_extracted_text(m.group(4))
+            opt_d = clean_extracted_text(m.group(5))
+            correct = m.group(6).strip().upper()
 
-        if len(q_text) > 10 and opt_a and opt_b:
-            quizzes.append({
-                "question": q_text[:300],
-                "option_a": opt_a[:120],
-                "option_b": opt_b[:120],
-                "option_c": opt_c[:120],
-                "option_d": opt_d[:120],
-                "correct": correct if correct in ["A", "B", "C", "D"] else "A",
-                "explanation": f"అప్‌లోడ్ చేసిన స్టడీ మెటీరియల్ ఆధారంగా రూపొందించిన ప్రశ్న."
-            })
+            if len(q_text) > 8 and opt_a and opt_b:
+                quizzes.append({
+                    "question": q_text[:300],
+                    "option_a": opt_a[:120],
+                    "option_b": opt_b[:120],
+                    "option_c": opt_c[:120],
+                    "option_d": opt_d[:120],
+                    "correct": correct if correct in ["A", "B", "C", "D"] else "A",
+                    "explanation": f"అప్‌లోడ్ చేసిన స్టడీ మెటీరియల్ ఆధారంగా రూపొందించిన ప్రశ్న."
+                })
+        if len(quizzes) >= 10:
+            break
     return quizzes
 
 def split_into_semantic_chunks(text, max_chunks=5):
@@ -170,7 +179,12 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
 
     # Auto-detect and convert legacy Telugu fonts (Anu Script / Shree-Lipi / Akruti)
     from anu_converter import is_legacy_telugu_font, convert_legacy_to_unicode
-    if is_legacy_telugu_font(full_text):
+    from mindmap_converter import is_mindmap_font, convert_mindmap_to_unicode
+
+    if is_mindmap_font(full_text):
+        print("Detected CIDFont / Mindmap Telugu font. Converting to Unicode...")
+        full_text = convert_mindmap_to_unicode(full_text)
+    elif is_legacy_telugu_font(full_text):
         print("Detected legacy Telugu font (Anu Script / Shree-Lipi). Converting to Unicode...")
         full_text = convert_legacy_to_unicode(full_text)
 
@@ -178,21 +192,31 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
 
     # Title detection
     doc_title = custom_title.strip()
-    if is_legacy_telugu_font(doc_title):
+    if is_mindmap_font(doc_title):
+        doc_title = convert_mindmap_to_unicode(doc_title)
+    elif is_legacy_telugu_font(doc_title):
         doc_title = convert_legacy_to_unicode(doc_title)
 
     if not doc_title:
         # Check first line of page 1
         first_lines = [l.strip() for l in full_text.split("\n") if len(l.strip()) > 8]
-        if first_lines:
+        if first_lines and not any(k in first_lines[0] for k in ["విషయ సూచిక", "Content", "Table"]):
             doc_title = first_lines[0][:100]
         else:
-            doc_title = os.path.splitext(orig_filename)[0].replace("_", " ").title()
+            clean_base = os.path.splitext(orig_filename)[0].replace("_", " ").title()
+            if "Ts History" in clean_base:
+                doc_title = "తెలంగాణ చరిత్ర సమగ్ర మైండ్‌మ్యాప్ (TS History Mindmap)"
+            elif "Movement" in clean_base:
+                doc_title = "తెలంగాణ ఉద్యమ చరిత్ర మైండ్‌మ్యాప్ (Movement Mindmap)"
+            else:
+                doc_title = clean_base
 
-    if is_legacy_telugu_font(doc_title):
+    if is_mindmap_font(doc_title):
+        doc_title = convert_mindmap_to_unicode(doc_title)
+    elif is_legacy_telugu_font(doc_title):
         doc_title = convert_legacy_to_unicode(doc_title)
 
-    if len(doc_title.strip()) < 5 or is_legacy_telugu_font(doc_title):
+    if len(doc_title.strip()) < 5 or is_mindmap_font(doc_title) or is_legacy_telugu_font(doc_title):
         doc_title = f"{CATEGORY_NAMES.get(category, 'పోటీ పరీక్షల')} స్టడీ మెటీరియల్"
 
     articles_count = 0
