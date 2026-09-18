@@ -12,10 +12,10 @@ if exist "%LOCALAPPDATA%\Programs\Python\Python312\python.exe" (
     set "PYTHON_CMD=%LOCALAPPDATA%\Programs\Python\Python312\python.exe"
 )
 
-set SCRIPT_PATH=%~dp0scheduler.py
+set SCRIPT_PATH=%~dp0run_morning_sync.bat
 
 echo [1/2] Windows Task Scheduler లో 'TeluguDailyCurrentAffairs' టాస్క్ నమోదు చేయబడుతోంది...
-schtasks /create /tn "TeluguDailyCurrentAffairs" /tr "\"%PYTHON_CMD%\" \"%SCRIPT_PATH%\"" /sc daily /st 07:00 /f
+schtasks /create /tn "TeluguDailyCurrentAffairs" /tr "cmd.exe /c \"%SCRIPT_PATH%\"" /sc daily /st 07:00 /f
 
 if %ERRORLEVEL% equ 0 (
     echo.

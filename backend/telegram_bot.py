@@ -18,16 +18,38 @@ from db import get_articles, get_quiz_by_date, get_one_liners_by_date, get_avail
 IST = timezone(timedelta(hours=5, minutes=30))
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "telegram_config.json")
-SUBSCRIBERS_PATH = os.path.join(os.path.dirname(__file__), "subscribers.json")
+DEFAULT_BOT_TOKEN = "8858325846:AAFiO2N3ymKzPIe1lFC8doEru3WPmIjx9UM"
+DEFAULT_CHAT_ID = "5405953028"
 
 def load_config():
+    bot_token = ""
+    chat_id = ""
+    enabled = True
     if os.path.exists(CONFIG_PATH):
         try:
             with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
+                cfg = json.load(f)
+                bot_token = cfg.get("bot_token", "").strip()
+                chat_id = str(cfg.get("chat_id", "")).strip()
+                enabled = cfg.get("enabled", True)
         except Exception:
             pass
-    return {"bot_token": "", "chat_id": ""}
+
+    if not bot_token:
+        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    if not chat_id:
+        chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+
+    if not bot_token:
+        bot_token = DEFAULT_BOT_TOKEN
+    if not chat_id:
+        chat_id = DEFAULT_CHAT_ID
+
+    return {
+        "bot_token": bot_token,
+        "chat_id": chat_id,
+        "enabled": enabled
+    }
 
 SUBSCRIBERS_PATH = os.path.join(os.path.dirname(__file__), "subscribers.json")
 CHANNELS_PATH = os.path.join(os.path.dirname(__file__), "channels.json")

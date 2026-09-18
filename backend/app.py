@@ -556,7 +556,7 @@ def api_scheduler_config():
     cfg = load_scheduler_config()
     return jsonify({"success": True, "config": cfg})
 
-@app.route("/api/scheduler/trigger", methods=["POST"])
+@app.route("/api/scheduler/trigger", methods=["POST", "GET"])
 def api_scheduler_trigger():
     res = run_daily_job()
     return jsonify({"success": True, "message": "డైలీ జాబ్ విజయవంతంగా రన్ అయింది!", "result": res})
