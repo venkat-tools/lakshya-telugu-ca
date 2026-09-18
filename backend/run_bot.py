@@ -182,31 +182,28 @@ def start_bot_polling():
                                 file_input=temp_pdf_path,
                                 custom_title=custom_title,
                                 category=cat,
-                                sync_to_website=True,
-                                extract_quizzes=True
+                                sync_to_website=False,
+                                extract_quizzes=False
                             )
 
                             title = result["title"]
                             total_pages = result["total_pages"]
                             size_fmt = result["file_size_formatted"]
                             cat_name = result["category_name"]
-                            articles_cnt = result["articles_created"]
-                            quizzes_cnt = result["quizzes_created"]
                             pdf_url = result["pdf_url"]
 
                             success_msg = (
-                                f"🎉 <b>PDF విజయవంతంగా వెబ్‌సైట్‌లో అప్‌డేట్ చేయబడింది!</b>\n"
+                                f"🎉 <b>PDF విజయవంతంగా డిజిటల్ లైబ్రరీలో భద్రపరచబడింది!</b>\n"
                                 f"───────────────────────\n"
                                 f"📖 <b>మెటీరియల్:</b> {title}\n"
                                 f"📄 <b>పేజీలు:</b> {total_pages} | <b>సైజ్:</b> {size_fmt}\n"
                                 f"🏷️ <b>విభాగం:</b> {cat_name}\n"
-                                f"📰 <b>వెబ్‌సైట్‌లో చేర్చిన ఆర్టికల్స్:</b> {articles_cnt} విభాగాలు\n"
-                                f"📝 <b>జనరేట్ చేసిన ప్రాక్టీస్ MCQs:</b> {quizzes_cnt}\n\n"
+                                f"🔒 <b>కరెంట్ అఫైర్స్ సెపరేషన్:</b> రోజువారీ వార్తల్లో కలవకుండా కేవలం డిజిటల్ లైబ్రరీ మరియు OMR టెస్ట్ హబ్‌లో మాత్రమే అందుబాటులో ఉంచబడింది.\n\n"
                                 f"🌐 <b>వెబ్‌సైట్ డిజిటల్ లైబ్రరీ లింక్:</b>\n"
                                 f"👉 https://lakshya-telugu-ca.onrender.com/pdf_upload_hub\n\n"
                                 f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్ లింక్:</b>\n"
                                 f"👉 https://lakshya-telugu-ca.onrender.com{pdf_url}\n\n"
-                                f"<i>విద్యార్థులు ఇప్పుడు వెబ్‌సైట్ మరియు డిజిటల్ లైబ్రరీలో ఈ స్టడీ మెటీరియల్‌ను చదువుకోవచ్చు!</i> 🚀"
+                                f"<i>విద్యార్థులు ఇప్పుడు డిజిటల్ లైబ్రరీలో ఈ స్టడీ మెటీరియల్‌ను చదువుకోవచ్చు & 1-Click OMR మాక్ టెస్ట్ రాసుకోవచ్చు!</i> 🚀"
                             )
                             send_telegram_message(success_msg, token=token, chat_id=chat_id)
 

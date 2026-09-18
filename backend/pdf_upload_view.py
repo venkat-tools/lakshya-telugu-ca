@@ -63,8 +63,8 @@ def render_pdf_upload_html():
                     <a href="/pdfs/uploads/{m['filename']}" download class="bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center" title="డౌన్‌లోడ్">
                         <span>📥</span>
                     </a>
-                    <button onclick="deleteMaterial({m['id']})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 py-2 px-2.5 rounded-xl text-xs font-bold transition cursor-pointer" title="తొలగించు">
-                        <span>🗑️</span>
+                    <button onclick="confirmDeleteMaterial({m['id']}, '{m.get('title', '').replace(chr(39), '').replace(chr(34), '')[:30]}')" class="bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer" title="ఈ PDF ని డిలీట్ చేయండి">
+                        <span>🗑️ డిలీట్</span>
                     </button>
                 </div>
             </div>
@@ -199,16 +199,24 @@ def render_pdf_upload_html():
                 </div>
 
                 <!-- Sync Checkboxes -->
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                    <h4 class="text-xs font-black text-slate-800">⚙️ వెబ్‌సైట్ ఆటో-సింక్ సెట్టింగ్స్:</h4>
-                    <div class="flex flex-wrap gap-4 text-xs font-bold text-slate-700">
+                <div class="bg-blue-50/60 p-4 rounded-2xl border border-blue-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-black text-blue-950 flex items-center gap-1.5">
+                            <span>🛡️</span> డిజిటల్ లైబ్రరీ & భద్రత:
+                        </h4>
+                        <span class="text-[11px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-md">కరెంట్ అఫైర్స్ సురక్షితం</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600 leading-relaxed">
+                        అప్‌లోడ్ చేసిన స్టడీ PDF లు ప్రత్యేకంగా <b>డిజిటల్ లైబ్రరీ</b> మరియు <b>1-Click OMR మాక్ టెస్ట్ హబ్</b> లో మాత్రమే భద్రపరచబడతాయి. నేటి ఈ-పేపర్ మరియు డైలీ కరెంట్ అఫైర్స్ ఫీడ్‌తో కలవవు.
+                    </p>
+                    <div class="flex flex-wrap gap-4 text-xs font-semibold text-slate-600 pt-1">
                         <label class="inline-flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="syncArticles" checked class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" />
-                            <span>PDF లోని ముఖ్య సమాచారాన్ని వెబ్‌సైట్ ఆర్టికల్స్ & వన్‌లైనర్స్‌గా అప్‌డేట్ చేయి</span>
+                            <input type="checkbox" id="syncArticles" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500" />
+                            <span>వెబ్‌సైట్ స్టడీ నోట్స్ గా సింక్ చేయి (ఐచ్ఛికం)</span>
                         </label>
                         <label class="inline-flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="syncQuizzes" checked class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500" />
-                            <span>PDF లోని ప్రశ్నలను క్విజ్ విభాగానికి జోడించు</span>
+                            <input type="checkbox" id="syncQuizzes" class="w-3.5 h-3.5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500" />
+                            <span>ప్రాక్టీస్ MCQs జనరేట్ చేయి (ఐచ్ఛికం)</span>
                         </label>
                     </div>
                 </div>
@@ -221,7 +229,7 @@ def render_pdf_upload_html():
                     </div>
 
                     <button type="submit" id="uploadSubmitBtn" class="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white font-black px-6 py-3 rounded-2xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
-                        <span>📤 PDF అప్‌లోడ్ చేసి వెబ్‌సైట్‌ను అప్‌డేట్ చేయండి</span>
+                        <span>📤 PDF అప్‌లోడ్ చేసి లైబ్రరీకి జోడించండి</span>
                     </button>
                 </div>
             </form>
@@ -232,13 +240,16 @@ def render_pdf_upload_html():
 
         <!-- Digital Library of Uploaded PDFs -->
         <div>
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
                 <div>
                     <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
                         <span>📚</span> అప్‌లోడ్ చేసిన స్టడీ మెటీరియల్స్ లైబ్రరీ ({len(materials)} డాక్యుమెంట్లు)
                     </h3>
                     <p class="text-xs text-slate-500">వెబ్‌సైట్ ద్వారా లైవ్‌గా చదువుకోవచ్చు లేదా PDF డౌన్‌లోడ్ చేసుకోవచ్చు</p>
                 </div>
+                {f'''<button onclick="purgeAllMaterials()" class="bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <span>🧹 అన్ని PDF లు తొలగించు</span>
+                </button>''' if materials else ''}
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="materialsGrid">
@@ -337,10 +348,10 @@ def render_pdf_upload_html():
             }}
         }}
 
-        async function deleteMaterial(id) {{
-            if (!confirm('ఈ స్టడీ PDF ని మరియు దాని లైబ్రరీ ఫైల్‌ను ఖచ్చితంగా తొలగించాలనుకుంటున్నారా?')) return;
-            const pin = prompt('అడ్మిన్ పిన్ నమోదు చేయండి:', 'lakshya2026');
-            if (!pin) return;
+        async function confirmDeleteMaterial(id, title) {{
+            const displayTitle = title ? '"' + title + '"' : 'ఈ స్టడీ PDF';
+            if (!confirm(displayTitle + ' ని సర్వర్ మరియు లైబ్రరీ నుండి ఖచ్చితంగా తొలగించాలనుకుంటున్నారా?')) return;
+            const pin = 'lakshya2026';
 
             try {{
                 const res = await fetch('/api/uploaded_materials/' + id + '?pin=' + encodeURIComponent(pin), {{
@@ -349,8 +360,35 @@ def render_pdf_upload_html():
                 const data = await res.json();
                 if (data && data.success) {{
                     const el = document.getElementById('mat-card-' + id);
-                    if (el) el.remove();
+                    if (el) {{
+                        el.style.transition = 'all 0.3s ease';
+                        el.style.opacity = '0';
+                        el.style.transform = 'scale(0.9)';
+                        setTimeout(() => el.remove(), 300);
+                    }}
                     alert('✅ స్టడీ మెటీరియల్ విజయవంతంగా తొలగించబడింది.');
+                }} else {{
+                    alert('⚠️ లోపం: ' + (data.error || 'తొలగించడం సాధ్యపడలేదు.'));
+                }}
+            }} catch (e) {{
+                alert('ఎర్రర్: ' + e.message);
+            }}
+        }}
+
+        const deleteMaterial = confirmDeleteMaterial;
+
+        async function purgeAllMaterials() {{
+            if (!confirm('లైబ్రరీలోని అన్ని అప్‌లోడ్ చేసిన స్టడీ PDF ఫైళ్లను ఖచ్చితంగా తొలగించాలనుకుంటున్నారా?')) return;
+            const pin = 'lakshya2026';
+
+            try {{
+                const res = await fetch('/api/uploaded_materials/purge_all?pin=' + encodeURIComponent(pin), {{
+                    method: 'POST'
+                }});
+                const data = await res.json();
+                if (data && data.success) {{
+                    alert('✅ ' + data.message);
+                    window.location.reload();
                 }} else {{
                     alert('⚠️ లోపం: ' + (data.error || 'తొలగించడం సాధ్యపడలేదు.'));
                 }}

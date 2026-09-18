@@ -130,7 +130,7 @@ def split_into_semantic_chunks(text, max_chunks=5):
 
     return chunks[:max_chunks]
 
-def process_uploaded_pdf(file_input, custom_title="", category="education", sync_to_website=True, extract_quizzes=True, target_date=None):
+def process_uploaded_pdf(file_input, custom_title="", category="education", sync_to_website=False, extract_quizzes=False, target_date=None):
     """
     Main processing pipeline for user-uploaded educational PDFs.
     `file_input`: file path (str) OR Werkzeug FileStorage object.

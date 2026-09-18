@@ -158,6 +158,12 @@ def render_epaper_html(date=None):
     articles = []
     seen_titles = set()
     for a in raw_articles:
+        src = a.get("source", "")
+        tags = a.get("tags", "")
+        cat = a.get("category", "")
+        # Strictly exclude user-uploaded study materials from daily e-paper
+        if src.startswith("PDF:") or "యూజర్ అప్‌లోడ్" in tags or cat == "study_material":
+            continue
         if is_exam_worthy(a) and not is_duplicate_article(a["title"], seen_titles):
             articles.append(a)
             seen_titles.add(a["title"])
@@ -167,11 +173,14 @@ def render_epaper_html(date=None):
     seen_ol = set()
     for ol in raw_one_liners:
         p = ol.get("point", "")
+        if any(bad in p for bad in ["విషయ సూచిక", "అప్‌లోడ్", "PDF:", "Target groups", "SP_REDDY"]):
+            continue
         from scraper import is_exam_worthy_content
         if is_exam_worthy_content(p) and not is_duplicate_article(p, seen_ol):
             one_liners.append(ol)
             seen_ol.add(p)
-    quizzes = get_quiz_by_date(date=date)
+    raw_quizzes = get_quiz_by_date(date=date)
+    quizzes = [q for q in raw_quizzes if "ఇటీవల అప్‌లోడ్ చేసిన స్టడీ మెటీరియల్" not in q.get("question", "") and not (q.get("exam_tag") or "").startswith("PDF")]
 
     # Group articles by category
     by_cat = {}

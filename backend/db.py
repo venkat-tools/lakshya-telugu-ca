@@ -241,21 +241,62 @@ def get_uploaded_materials(category=None):
 def delete_uploaded_material(material_id):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT filename, title, file_path FROM uploaded_materials WHERE id = ?", (material_id,))
+    cursor.execute("SELECT id, filename, title, file_path FROM uploaded_materials WHERE id = ?", (material_id,))
     row = cursor.fetchone()
     if row:
+        fn = row["filename"]
+        title = row["title"]
         if row["file_path"] and os.path.exists(row["file_path"]):
             try:
                 os.remove(row["file_path"])
             except Exception:
                 pass
-        # Clean up any articles and quizzes created from this file
-        cursor.execute("DELETE FROM articles WHERE detailed_notes LIKE ?", (f"%{row['filename']}%",))
-        cursor.execute("DELETE FROM articles WHERE source LIKE ?", (f"%{row['filename']}%",))
-        cursor.execute("DELETE FROM quiz_questions WHERE exam_tag LIKE ?", (f"%{row['filename']}%",))
-        cursor.execute("DELETE FROM quiz_questions WHERE exam_tag LIKE ?", (f"%{row['title'][:25]}%",))
+        
+        # Also ensure file is deleted from frontend/pdfs/uploads/
+        fe_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "pdfs", "uploads", fn)
+        if os.path.exists(fe_path):
+            try:
+                os.remove(fe_path)
+            except Exception:
+                pass
+
+        # Clean up any articles, one_liners, and quizzes created from this file
+        cursor.execute("DELETE FROM articles WHERE detailed_notes LIKE ? OR source LIKE ? OR title LIKE ?", (f"%{fn}%", f"%{title[:30]}%", f"%{title[:30]}%"))
+        cursor.execute("DELETE FROM one_liners WHERE point LIKE ? OR point LIKE ?", (f"%{fn[:20]}%", f"%{title[:30]}%"))
+        cursor.execute("DELETE FROM quiz_questions WHERE exam_tag LIKE ? OR exam_tag LIKE ? OR question LIKE ?", (f"%{fn}%", f"%{title[:25]}%", f"%{title[:30]}%"))
 
     cursor.execute("DELETE FROM uploaded_materials WHERE id = ?", (material_id,))
     conn.commit()
     conn.close()
     return True
+
+def purge_all_uploaded_materials():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, filename, title, file_path FROM uploaded_materials")
+    rows = cursor.fetchall()
+    for row in rows:
+        fn = row["filename"]
+        title = row["title"]
+        if row["file_path"] and os.path.exists(row["file_path"]):
+            try:
+                os.remove(row["file_path"])
+            except Exception:
+                pass
+        fe_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "pdfs", "uploads", fn)
+        if os.path.exists(fe_path):
+            try:
+                os.remove(fe_path)
+            except Exception:
+                pass
+        cursor.execute("DELETE FROM articles WHERE detailed_notes LIKE ? OR source LIKE ? OR title LIKE ?", (f"%{fn}%", f"%{title[:30]}%", f"%{title[:30]}%"))
+        cursor.execute("DELETE FROM one_liners WHERE point LIKE ? OR point LIKE ?", (f"%{fn[:20]}%", f"%{title[:30]}%"))
+        cursor.execute("DELETE FROM quiz_questions WHERE exam_tag LIKE ? OR exam_tag LIKE ? OR question LIKE ?", (f"%{fn}%", f"%{title[:25]}%", f"%{title[:30]}%"))
+
+    cursor.execute("DELETE FROM articles WHERE source LIKE 'PDF:%' OR tags LIKE '%యూజర్ అప్‌లోడ్%'")
+    cursor.execute("DELETE FROM uploaded_materials")
+    count = len(rows)
+    conn.commit()
+    conn.close()
+    return count
+

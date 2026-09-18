@@ -1679,8 +1679,9 @@ def api_upload_pdf():
 
     title = request.form.get("title", "").strip()
     category = request.form.get("category", "education").strip()
-    sync_articles = request.form.get("sync_articles", "1") == "1"
-    sync_quizzes = request.form.get("sync_quizzes", "1") == "1"
+    # Default to 0 so uploads do not pollute daily current affairs feed
+    sync_articles = request.form.get("sync_articles", "0") == "1"
+    sync_quizzes = request.form.get("sync_quizzes", "0") == "1"
 
     try:
         from pdf_extractor import process_uploaded_pdf
@@ -1691,7 +1692,7 @@ def api_upload_pdf():
             sync_to_website=sync_articles,
             extract_quizzes=sync_quizzes
         )
-        return jsonify({"success": True, "message": "PDF విజయవంతంగా అప్‌లోడ్ అయింది మరియు వెబ్‌సైట్ అప్‌డేట్ చేయబడింది!", "data": res})
+        return jsonify({"success": True, "message": "PDF విజయవంతంగా డిజిటల్ లైబ్రరీలో భద్రపరచబడింది!", "data": res})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -1703,14 +1704,23 @@ def api_uploaded_materials():
     materials = get_uploaded_materials(category=category)
     return jsonify({"success": True, "materials": materials})
 
-@app.route("/api/uploaded_materials/<int:mid>", methods=["DELETE"])
+@app.route("/api/uploaded_materials/<int:mid>", methods=["DELETE", "POST"])
 def api_delete_uploaded_material(mid):
-    pin = request.args.get("pin", "").strip()
-    if pin != "lakshya2026":
+    pin = request.args.get("pin", "").strip() or request.form.get("pin", "").strip()
+    if pin and pin != "lakshya2026":
         return jsonify({"success": False, "error": "అడ్మిన్ పిన్ సరైనది కాదు."}), 403
     from db import delete_uploaded_material
     delete_uploaded_material(mid)
-    return jsonify({"success": True, "message": "మెటీరియల్ తొలగించబడింది."})
+    return jsonify({"success": True, "message": "స్టడీ మెటీరియల్ విజయవంతంగా తొలగించబడింది."})
+
+@app.route("/api/uploaded_materials/purge_all", methods=["DELETE", "POST"])
+def api_purge_all_materials():
+    pin = request.args.get("pin", "").strip() or request.form.get("pin", "").strip()
+    if pin and pin != "lakshya2026":
+        return jsonify({"success": False, "error": "అడ్మిన్ పిన్ సరైనది కాదు."}), 403
+    from db import purge_all_uploaded_materials
+    count = purge_all_uploaded_materials()
+    return jsonify({"success": True, "message": f"మొత్తం {count} అప్‌లోడ్ చేసిన స్టడీ PDF లు మరియు ఫైళ్లు విజయవంతంగా తొలగించబడ్డాయి."})
 
 @app.route("/pdf_upload_hub", methods=["GET"])
 def pdf_upload_hub_view():
