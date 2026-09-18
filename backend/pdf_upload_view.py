@@ -169,7 +169,7 @@ def render_pdf_upload_html():
                         <p class="text-sm font-black text-slate-800" id="selectedFileName">
                             ఇక్కడ PDF ఫైల్‌ను డ్రాప్ చేయండి లేదా క్లిక్ చేసి ఎంచుకోండి
                         </p>
-                        <p class="text-xs text-slate-400 mt-1">గరిష్ట పరిమాణం: 50 MB వరకు • .pdf ఫార్మాట్ మాత్రమే</p>
+                        <p class="text-xs text-slate-400 mt-1">గరిష్ట పరిమాణం: 100 MB వరకు • .pdf ఫార్మాట్ మాత్రమే</p>
                     </div>
                 </div>
 
@@ -265,6 +265,12 @@ def render_pdf_upload_html():
             const fileInput = document.getElementById('pdfFileInput');
             if (!fileInput.files || !fileInput.files[0]) {{
                 alert('దయచేసి అప్‌లోడ్ చేయడానికి ఒక PDF ఫైల్‌ను ఎంచుకోండి.');
+                return;
+            }}
+            const file = fileInput.files[0];
+            const sizeMB = file.size / (1024 * 1024);
+            if (sizeMB > 100) {{
+                alert('ఈ PDF ఫైల్ సైజ్ చాలా పెద్దది (' + sizeMB.toFixed(1) + ' MB). వెబ్‌సైట్ అప్‌లోడ్ గరిష్ట పరిమితి 100 MB.\\n\\nచిట్కా: PDF ని ఆన్‌లైన్‌లో కంప్రెస్ చేసి అప్‌లోడ్ చేయండి లేదా నేరుగా టెలిగ్రామ్ బోట్ (@venkat_telugu_ca_bot) కు పంపండి (టెలిగ్రామ్‌లో 2000 MB వరకు అనుమతి ఉంది).');
                 return;
             }}
 
