@@ -63,7 +63,7 @@ def render_pdf_upload_html():
                     <a href="/pdfs/uploads/{m['filename']}" download class="bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center" title="డౌన్‌లోడ్">
                         <span>📥</span>
                     </a>
-                    <button onclick="confirmDeleteMaterial({m['id']}, '{m.get('title', '').replace(chr(39), '').replace(chr(34), '')[:30]}')" class="bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer" title="ఈ PDF ని డిలీట్ చేయండి">
+                    <button onclick="confirmDeleteMaterial({m['id']}, '{m.get('title', '').replace(chr(39), '').replace(chr(34), '')[:30]}')" class="admin-only-action hidden bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer" title="ఈ PDF ని డిలీట్ చేయండి">
                         <span>🗑️ డిలీట్</span>
                     </button>
                 </div>
@@ -111,8 +111,11 @@ def render_pdf_upload_html():
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <a href="/" class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
-                    🌐 వెబ్‌సైట్ డ్యాష్‌బోర్డ్
+                <button id="adminAuthBtn" onclick="handleAdminAuthClick()" class="text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <span id="adminAuthIcon">🔒</span> <span id="adminAuthText">అడ్మిన్ లాగిన్</span>
+                </button>
+                <a href="/" class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition">
+                    🌐 డ్యాష్‌బోర్డ్
                 </a>
             </div>
         </div>
@@ -221,11 +224,10 @@ def render_pdf_upload_html():
                     </div>
                 </div>
 
-                <!-- Admin PIN -->
+                <!-- Upload Action & Student Notice -->
                 <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
-                    <div class="flex items-center gap-2">
-                        <label class="text-xs font-bold text-slate-500">🔒 అడ్మిన్ పిన్:</label>
-                        <input type="password" id="adminPin" value="lakshya2026" class="w-32 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold outline-none text-slate-700" />
+                    <div class="text-xs text-slate-500 flex items-center gap-1.5">
+                        <span class="text-base">🎓</span> <span>విద్యార్థులు & అధ్యాపకులు ఎవరైనా తమ స్టడీ PDF లను సులభంగా అప్‌లోడ్ చేయవచ్చు</span>
                     </div>
 
                     <button type="submit" id="uploadSubmitBtn" class="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white font-black px-6 py-3 rounded-2xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
@@ -247,7 +249,7 @@ def render_pdf_upload_html():
                     </h3>
                     <p class="text-xs text-slate-500">వెబ్‌సైట్ ద్వారా లైవ్‌గా చదువుకోవచ్చు లేదా PDF డౌన్‌లోడ్ చేసుకోవచ్చు</p>
                 </div>
-                {f'''<button onclick="purgeAllMaterials()" class="bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                {f'''<button onclick="purgeAllMaterials()" class="admin-only-action hidden bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
                     <span>🧹 అన్ని PDF లు తొలగించు</span>
                 </button>''' if materials else ''}
             </div>
@@ -299,7 +301,6 @@ def render_pdf_upload_html():
             formData.append('category', document.getElementById('pdfCategory').value);
             formData.append('sync_articles', document.getElementById('syncArticles').checked ? '1' : '0');
             formData.append('sync_quizzes', document.getElementById('syncQuizzes').checked ? '1' : '0');
-            formData.append('admin_pin', document.getElementById('adminPin').value);
 
             try {{
                 const res = await fetch('/api/upload_pdf', {{
@@ -326,9 +327,8 @@ def render_pdf_upload_html():
                 if (data && data.success) {{
                     statusBox.className = 'mt-6 p-4 rounded-2xl border bg-emerald-50 border-emerald-300 text-emerald-950 text-xs leading-relaxed';
                     statusBox.innerHTML = `
-                        <div class="font-black text-sm text-emerald-900 mb-1">🎉 విజయం! PDF విజయవంతంగా అప్‌లోడ్ చేయబడింది!</div>
+                        <div class="font-black text-sm text-emerald-900 mb-1">🎉 విజయం! PDF విజయవంతంగా లైబ్రరీకి జోడించబడింది!</div>
                         <div>• <b>మెటీరియల్:</b> ${{data.data.title}} (${{data.data.total_pages}} పేజీలు, ${{data.data.file_size_formatted}})</div>
-                        <div>• <b>వెబ్‌సైట్ సింక్:</b> ${{data.data.articles_created}} ఆర్టికల్స్ మరియు ${{data.data.quizzes_created}} క్విజ్ ప్రశ్నలు జోడించబడ్డాయి.</div>
                         <div class="mt-2 font-bold text-blue-700">పేజీని 2 సెకన్లలో రీలోడ్ చేస్తున్నాం...</div>
                     `;
                     setTimeout(() => {{
@@ -338,20 +338,81 @@ def render_pdf_upload_html():
                     statusBox.className = 'mt-6 p-4 rounded-2xl border bg-rose-50 border-rose-300 text-rose-950 text-xs';
                     statusBox.innerHTML = '<b>⚠️ లోపం:</b> ' + (data.error || 'PDF అప్‌లోడ్ చేయడం సాధ్యపడలేదు.');
                     btn.disabled = false;
-                    btn.innerHTML = '📤 PDF అప్‌లోడ్ చేసి వెబ్‌సైట్‌ను అప్‌డేట్ చేయండి';
+                    btn.innerHTML = '📤 PDF అప్‌లోడ్ చేసి లైబ్రరీకి జోడించండి';
                 }}
             }} catch (err) {{
                 statusBox.className = 'mt-6 p-4 rounded-2xl border bg-rose-50 border-rose-300 text-rose-950 text-xs';
                 statusBox.innerHTML = '<b>❌ సర్వర్ ఎర్రర్:</b> ' + err.message;
                 btn.disabled = false;
-                btn.innerHTML = '📤 PDF అప్‌లోడ్ చేసి వెబ్‌సైట్‌ను అప్‌డేట్ చేయండి';
+                btn.innerHTML = '📤 PDF అప్‌లోడ్ చేసి లైబ్రరీకి జోడించండి';
+            }}
+        }}
+
+        function getAdminPin() {{
+            return sessionStorage.getItem('lakshya_admin_pin') || '';
+        }}
+
+        function updateAdminUI() {{
+            const pin = getAdminPin();
+            const isAdmin = (pin === 'lakshya2026');
+            const elements = document.querySelectorAll('.admin-only-action');
+            elements.forEach(el => {{
+                if (isAdmin) {{
+                    el.classList.remove('hidden');
+                }} else {{
+                    el.classList.add('hidden');
+                }}
+            }});
+
+            const authBtn = document.getElementById('adminAuthBtn');
+            const authIcon = document.getElementById('adminAuthIcon');
+            const authText = document.getElementById('adminAuthText');
+            if (authBtn && authIcon && authText) {{
+                if (isAdmin) {{
+                    authBtn.className = 'text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs';
+                    authIcon.innerText = '🔓';
+                    authText.innerText = 'అడ్మిన్ లాగౌట్';
+                    authBtn.title = 'అడ్మిన్ మోడ్ నుండి లాగౌట్ అవ్వండి';
+                }} else {{
+                    authBtn.className = 'text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs';
+                    authIcon.innerText = '🔒';
+                    authText.innerText = 'అడ్మిన్ లాగిన్';
+                    authBtn.title = 'PDF లను తొలగించడానికి అడ్మిన్ లాగిన్ చేయండి';
+                }}
+            }}
+        }}
+
+        function handleAdminAuthClick() {{
+            const currentPin = getAdminPin();
+            if (currentPin === 'lakshya2026') {{
+                if (confirm('అడ్మిన్ మోడ్ నుండి లాగౌట్ అవ్వాలనుకుంటున్నారా?')) {{
+                    sessionStorage.removeItem('lakshya_admin_pin');
+                    updateAdminUI();
+                    alert('అడ్మిన్ మోడ్ లాగౌట్ చేయబడింది. ప్రస్తుతం సాధారణ విద్యార్థి మోడ్ సక్రియంగా ఉంది.');
+                }}
+                return;
+            }}
+
+            const entered = prompt('దయచేసి అడ్మిన్ పిన్ (Admin PIN) నమోదు చేయండి (కేవలం అడ్మిన్ కొరకు మాత్రమే):');
+            if (!entered) return;
+            if (entered.trim() === 'lakshya2026') {{
+                sessionStorage.setItem('lakshya_admin_pin', 'lakshya2026');
+                updateAdminUI();
+                alert('✅ అడ్మిన్ మోడ్ విజయవంతంగా ఆక్టివేట్ అయింది. ఇప్పుడు మీరు అవసరమైన PDF లను తొలగించవచ్చు.');
+            }} else {{
+                alert('❌ తప్పుడు పిన్! విద్యార్థులకు PDF లను తొలగించే అనుమతి లేదు.');
             }}
         }}
 
         async function confirmDeleteMaterial(id, title) {{
+            const pin = getAdminPin();
+            if (pin !== 'lakshya2026') {{
+                alert('⚠️ PDF లను తొలగించడానికి కేవలం అడ్మిన్‌కు మాత్రమే అనుమతి ఉంది. దయచేసి పైన ఉన్న "అడ్మిన్ లాగిన్" ద్వారా లాగిన్ అవ్వండి.');
+                return;
+            }}
+
             const displayTitle = title ? '"' + title + '"' : 'ఈ స్టడీ PDF';
             if (!confirm(displayTitle + ' ని సర్వర్ మరియు లైబ్రరీ నుండి ఖచ్చితంగా తొలగించాలనుకుంటున్నారా?')) return;
-            const pin = 'lakshya2026';
 
             try {{
                 const res = await fetch('/api/uploaded_materials/' + id + '?pin=' + encodeURIComponent(pin), {{
@@ -378,8 +439,13 @@ def render_pdf_upload_html():
         const deleteMaterial = confirmDeleteMaterial;
 
         async function purgeAllMaterials() {{
+            const pin = getAdminPin();
+            if (pin !== 'lakshya2026') {{
+                alert('⚠️ అన్ని PDF లను తొలగించడానికి కేవలం అడ్మిన్‌కు మాత్రమే అనుమతి ఉంది.');
+                return;
+            }}
+
             if (!confirm('లైబ్రరీలోని అన్ని అప్‌లోడ్ చేసిన స్టడీ PDF ఫైళ్లను ఖచ్చితంగా తొలగించాలనుకుంటున్నారా?')) return;
-            const pin = 'lakshya2026';
 
             try {{
                 const res = await fetch('/api/uploaded_materials/purge_all?pin=' + encodeURIComponent(pin), {{
@@ -396,6 +462,14 @@ def render_pdf_upload_html():
                 alert('ఎర్రర్: ' + e.message);
             }}
         }}
+
+        document.addEventListener('DOMContentLoaded', () => {{
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('admin') === 'lakshya2026') {{
+                sessionStorage.setItem('lakshya_admin_pin', 'lakshya2026');
+            }}
+            updateAdminUI();
+        }});
     </script>
 </body>
 </html>

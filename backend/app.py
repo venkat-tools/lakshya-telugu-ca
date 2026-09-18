@@ -1673,10 +1673,7 @@ def api_upload_pdf():
     if not file or not file.filename or not file.filename.lower().endswith(".pdf"):
         return jsonify({"success": False, "error": "కేవలం .pdf ఫార్మాట్ ఫైల్స్ మాత్రమే అనుమతించబడతాయి."}), 400
 
-    admin_pin = request.form.get("admin_pin", "").strip()
-    if admin_pin and admin_pin != "lakshya2026":
-        return jsonify({"success": False, "error": "చెల్లని అడ్మిన్ పిన్. దయచేసి సరైన పిన్ నమోదు చేయండి."}), 403
-
+    # Students and teachers can upload study PDFs freely without admin pin
     title = request.form.get("title", "").strip()
     category = request.form.get("category", "education").strip()
     # Default to 0 so uploads do not pollute daily current affairs feed
@@ -1707,8 +1704,8 @@ def api_uploaded_materials():
 @app.route("/api/uploaded_materials/<int:mid>", methods=["DELETE", "POST"])
 def api_delete_uploaded_material(mid):
     pin = request.args.get("pin", "").strip() or request.form.get("pin", "").strip()
-    if pin and pin != "lakshya2026":
-        return jsonify({"success": False, "error": "అడ్మిన్ పిన్ సరైనది కాదు."}), 403
+    if pin != "lakshya2026":
+        return jsonify({"success": False, "error": "PDF ని తొలగించడానికి కేవలం అడ్మిన్ కు మాత్రమే అనుమతి ఉంది. సరైన పిన్ అవసరం."}), 403
     from db import delete_uploaded_material
     delete_uploaded_material(mid)
     return jsonify({"success": True, "message": "స్టడీ మెటీరియల్ విజయవంతంగా తొలగించబడింది."})
@@ -1716,8 +1713,8 @@ def api_delete_uploaded_material(mid):
 @app.route("/api/uploaded_materials/purge_all", methods=["DELETE", "POST"])
 def api_purge_all_materials():
     pin = request.args.get("pin", "").strip() or request.form.get("pin", "").strip()
-    if pin and pin != "lakshya2026":
-        return jsonify({"success": False, "error": "అడ్మిన్ పిన్ సరైనది కాదు."}), 403
+    if pin != "lakshya2026":
+        return jsonify({"success": False, "error": "అన్ని PDF లను తొలగించడానికి కేవలం అడ్మిన్ కు మాత్రమే అనుమతి ఉంది. సరైన పిన్ అవసరం."}), 403
     from db import purge_all_uploaded_materials
     count = purge_all_uploaded_materials()
     return jsonify({"success": True, "message": f"మొత్తం {count} అప్‌లోడ్ చేసిన స్టడీ PDF లు మరియు ఫైళ్లు విజయవంతంగా తొలగించబడ్డాయి."})
