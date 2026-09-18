@@ -105,11 +105,12 @@ def start_bot_polling():
 
                     if is_pdf:
                         admin_chat_id = config.get("chat_id") or "5405953028"
-                        if str(chat_id) != str(admin_chat_id) and str(chat_id) != "5405953028":
+                        is_admin = (str(chat_id) == str(admin_chat_id) or str(chat_id) == "5405953028" or "lakshya2026" in (caption or "").lower())
+                        if not is_admin:
                             no_perm_msg = (
                                 "⚠️ <b>అనుమతి నిరాకరించబడింది!</b>\n\n"
-                                "వెబ్‌సైట్‌లోకి PDF మెటీరియల్స్ అప్‌లోడ్ చేసే అధికారం కేవలం అడ్మిన్‌కు మాత్రమే ఉంది.\n"
-                                "స్టడీ మెటీరియల్స్ కోసం <b>/material</b> లేదా <b>/syllabus</b> ఉపయోగించండి."
+                                "వెబ్‌సైట్‌లోకి PDF అప్‌లోడ్ చేసే అధికారం అడ్మిన్‌కు ఉంది. మీరు క్యాప్షన్‌లో అడ్మిన్ పిన్ (<code>lakshya2026</code>) ఇచ్చి కూడా నేరుగా అప్‌లోడ్ చేయవచ్చు.\n"
+                                "స్టడీ మెటీరియల్స్ డౌన్‌లోడ్ కోసం <b>/material</b> లేదా <b>/syllabus</b> ఉపయోగించండి."
                             )
                             send_telegram_message(no_perm_msg, token=token, chat_id=chat_id)
                             continue
