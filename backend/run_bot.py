@@ -7,6 +7,7 @@ Listens for user commands: /start, /today, /quiz, /oneliners, /help
 import time
 import requests
 import sys
+import os
 from datetime import datetime
 from telegram_bot import load_config, broadcast_daily_digest, send_telegram_message, send_telegram_quiz_poll, add_subscriber, send_monthly_magazine_telegram, load_channels, add_channel, remove_channel, send_daily_bulletin_audio
 from db import get_articles, get_quiz_by_date, get_one_liners_by_date, get_available_dates
@@ -83,13 +84,122 @@ def start_bot_polling():
             for update in data.get("result", []):
                 last_update_id = update["update_id"]
                 msg = update.get("message")
-                if not msg or "text" not in msg:
+                if not msg:
                     continue
 
                 chat_id = msg["chat"]["id"]
                 add_subscriber(chat_id)
-                text = msg["text"].strip()
+                doc = msg.get("document")
+                caption = (msg.get("caption") or "").strip()
+                text = (msg.get("text") or caption).strip()
                 user_name = msg.get("from", {}).get("first_name", "మిత్రమా")
+
+                if not text and not doc:
+                    continue
+
+                # Handle PDF Document Uploads
+                if doc:
+                    file_name = doc.get("file_name", "document.pdf")
+                    mime_type = doc.get("mime_type", "")
+                    is_pdf = file_name.lower().endswith(".pdf") or mime_type == "application/pdf"
+
+                    if is_pdf:
+                        admin_chat_id = config.get("chat_id") or "5405953028"
+                        if str(chat_id) != str(admin_chat_id) and str(chat_id) != "5405953028":
+                            no_perm_msg = (
+                                "⚠️ <b>అనుమతి నిరాకరించబడింది!</b>\n\n"
+                                "వెబ్‌సైట్‌లోకి PDF మెటీరియల్స్ అప్‌లోడ్ చేసే అధికారం కేవలం అడ్మిన్‌కు మాత్రమే ఉంది.\n"
+                                "స్టడీ మెటీరియల్స్ కోసం <b>/material</b> లేదా <b>/syllabus</b> ఉపయోగించండి."
+                            )
+                            send_telegram_message(no_perm_msg, token=token, chat_id=chat_id)
+                            continue
+
+                        send_telegram_message(
+                            f"⏳ <b>మీరు పంపిన PDF అందింది:</b> <code>{file_name}</code>\n\n"
+                            f"<i>PDF నుండి సిలబస్ ముఖ్యాంశాలు, ఆర్టికల్స్ మరియు క్విజ్ MCQs సంగ్రహించి వెబ్‌సైట్‌లో అప్‌డేట్ చేస్తున్నాం... దయచేసి కొన్ని సెకన్లు వేచి ఉండండి.</i>",
+                            token=token,
+                            chat_id=chat_id
+                        )
+
+                        try:
+                            file_id = doc["file_id"]
+                            file_info_url = f"https://api.telegram.org/bot{token}/getFile?file_id={file_id}"
+                            file_info_res = requests.get(file_info_url, timeout=30).json()
+
+                            if not file_info_res.get("ok"):
+                                raise RuntimeError("టెలిగ్రామ్ సర్వర్ నుండి ఫైల్ పాత్ పొందలేకపోయాము.")
+
+                            tg_file_path = file_info_res["result"]["file_path"]
+                            download_url = f"https://api.telegram.org/file/bot{token}/{tg_file_path}"
+                            pdf_bytes = requests.get(download_url, timeout=120).content
+
+                            import tempfile
+                            temp_dir = tempfile.gettempdir()
+                            temp_pdf_path = os.path.join(temp_dir, f"tg_{int(time.time())}_{file_name}")
+                            with open(temp_pdf_path, "wb") as pf:
+                                pf.write(pdf_bytes)
+
+                            cat = "education"
+                            check_str = (caption + " " + file_name).lower()
+                            if any(k in check_str for k in ["polity", "రాజ్యాంగం", "పాలిటీ", "constitution"]):
+                                cat = "polity"
+                            elif any(k in check_str for k in ["history", "చరిత్ర"]):
+                                cat = "history"
+                            elif any(k in check_str for k in ["geography", "భూగోళ"]):
+                                cat = "geography"
+                            elif any(k in check_str for k in ["economy", "ఆర్థిక", "బడ్జెట్", "budget"]):
+                                cat = "economy"
+                            elif any(k in check_str for k in ["science", "సైన్స్", "isro", "tech"]):
+                                cat = "scitech"
+                            elif any(k in check_str for k in ["scheme", "పథకాలు", "సంక్షేమం", "welfare"]):
+                                cat = "regional"
+
+                            custom_title = caption if (caption and not caption.startswith("/")) else file_name.replace(".pdf", "").replace("_", " ").title()
+
+                            from pdf_extractor import process_uploaded_pdf
+                            result = process_uploaded_pdf(
+                                file_input=temp_pdf_path,
+                                custom_title=custom_title,
+                                category=cat,
+                                sync_to_website=True,
+                                extract_quizzes=True
+                            )
+
+                            title = result["title"]
+                            total_pages = result["total_pages"]
+                            size_fmt = result["file_size_formatted"]
+                            cat_name = result["category_name"]
+                            articles_cnt = result["articles_created"]
+                            quizzes_cnt = result["quizzes_created"]
+                            pdf_url = result["pdf_url"]
+
+                            success_msg = (
+                                f"🎉 <b>PDF విజయవంతంగా వెబ్‌సైట్‌లో అప్‌డేట్ చేయబడింది!</b>\n"
+                                f"───────────────────────\n"
+                                f"📖 <b>మెటీరియల్:</b> {title}\n"
+                                f"📄 <b>పేజీలు:</b> {total_pages} | <b>సైజ్:</b> {size_fmt}\n"
+                                f"🏷️ <b>విభాగం:</b> {cat_name}\n"
+                                f"📰 <b>వెబ్‌సైట్‌లో చేర్చిన ఆర్టికల్స్:</b> {articles_cnt} విభాగాలు\n"
+                                f"📝 <b>జనరేట్ చేసిన ప్రాక్టీస్ MCQs:</b> {quizzes_cnt}\n\n"
+                                f"🌐 <b>వెబ్‌సైట్ డిజిటల్ లైబ్రరీ లింక్:</b>\n"
+                                f"👉 https://lakshya-telugu-ca.onrender.com/pdf_upload_hub\n\n"
+                                f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్ లింక్:</b>\n"
+                                f"👉 https://lakshya-telugu-ca.onrender.com{pdf_url}\n\n"
+                                f"<i>విద్యార్థులు ఇప్పుడు వెబ్‌సైట్ మరియు డిజిటల్ లైబ్రరీలో ఈ స్టడీ మెటీరియల్‌ను చదువుకోవచ్చు!</i> 🚀"
+                            )
+                            send_telegram_message(success_msg, token=token, chat_id=chat_id)
+
+                            try:
+                                if os.path.exists(temp_pdf_path):
+                                    os.remove(temp_pdf_path)
+                            except Exception:
+                                pass
+
+                        except Exception as pe:
+                            err_msg = f"❌ <b>PDF ప్రాసెసింగ్‌లో లోపం ఎదురైంది:</b>\n<code>{str(pe)[:300]}</code>"
+                            send_telegram_message(err_msg, token=token, chat_id=chat_id)
+
+                        continue
 
                 dates = get_available_dates()
                 today_date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
@@ -145,9 +255,23 @@ def start_bot_polling():
 👉 <b>/agri</b> - AP & TS వ్యవసాయం, సాగునీరు & ఆక్వాకల్చర్ మాస్టర్ హబ్ & PDF 🌾\n\
 👉 <b>/awards</b> - అవార్డులు, క్రీడలు & ప్రముఖ నియామకాలు 2025–2026 & PDF 🏆\n\
 👉 <b>/group1</b> - APPSC Group-1 ప్రిలిమ్స్ (240 Marks) మెగా గ్రాండ్ సిమ్యులేటర్ 🎯\n\
-👉 <b>/tribal</b> - AP & TS గిరిజన సంస్కృతి, PVTGs & PESA చట్టం హ్యాండ్‌బుక్ & PDF 📜\n"
+👉 <b>/tribal</b> - AP & TS గిరిజన సంస్కృతి, PVTGs & PESA చట్టం హ్యాండ్‌బుక్ & PDF 📜\n\
+👉 <b>/upload</b> - ఎడ్యుకేషనల్ PDF అప్‌లోడ్ పోర్టల్ & ఆటో-సింక్ గైడ్ 📤\n"
                     )
                     send_telegram_message(welcome, token=token, chat_id=chat_id)
+
+                elif text in ["/upload", "/upload_pdf", "/pdfhub"]:
+                    upload_msg = (
+                        "📤 <b>లక్ష్య ఎడ్యుకేషనల్ PDF అప్‌లోడర్ & ఆటో-సింక్ హబ్</b>\n"
+                        "───────────────────────\n"
+                        "మీరు ఏవైనా ఎడ్యుకేషన్ నోట్స్, APPSC/TSPSC జీవోలు, మోడల్ పేపర్స్ PDF లను నేరుగా వెబ్‌సైట్‌లోకి అప్‌లోడ్ చేయవచ్చు!\n\n"
+                        "📱 <b>రెండు సులువైన పద్ధతులు:</b>\n"
+                        "1️⃣ <b>టెలిగ్రామ్ ద్వారా:</b> మీ మొబైల్ నుండి ఏదైనా స్టడీ PDF ని నేరుగా ఈ చాట్‌కు డాక్యుమెంట్‌గా పంపండి. బోట్ ఆటోమేటిక్‌గా అందులోని కంటెంట్‌ను సంగ్రహించి వెబ్‌సైట్‌లో అప్‌డేట్ చేస్తుంది!\n\n"
+                        "2️⃣ <b>వెబ్ పోర్టల్ ద్వారా:</b> బ్రౌజర్‌లో డ్రాగ్ & డ్రాప్ ద్వారా అప్‌లోడ్ చేయడానికి క్రింది లింక్ క్లిక్ చేయండి:\n"
+                        "👉 https://lakshya-telugu-ca.onrender.com/pdf_upload_hub\n\n"
+                        "🔑 <i>అడ్మిన్ సెక్యూరిటీ పిన్: <code>lakshya2026</code></i>"
+                    )
+                    send_telegram_message(upload_msg, token=token, chat_id=chat_id)
 
                 elif text == "/subscribe":
                     sub_msg = (

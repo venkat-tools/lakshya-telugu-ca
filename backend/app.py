@@ -1644,6 +1644,66 @@ def tribal_heritage_hub_view():
     resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     return resp
 
+# ----------------- Educational PDF Uploader & Auto-Sync Endpoints -----------------
+@app.route("/api/upload_pdf", methods=["POST"])
+def api_upload_pdf():
+    if "file" not in request.files:
+        return jsonify({"success": False, "error": "దయచేసి PDF ఫైల్‌ను అప్‌లోడ్ చేయండి."}), 400
+    file = request.files["file"]
+    if not file or not file.filename or not file.filename.lower().endswith(".pdf"):
+        return jsonify({"success": False, "error": "కేవలం .pdf ఫార్మాట్ ఫైల్స్ మాత్రమే అనుమతించబడతాయి."}), 400
+
+    admin_pin = request.form.get("admin_pin", "").strip()
+    if admin_pin and admin_pin != "lakshya2026":
+        return jsonify({"success": False, "error": "చెల్లని అడ్మిన్ పిన్. దయచేసి సరైన పిన్ నమోదు చేయండి."}), 403
+
+    title = request.form.get("title", "").strip()
+    category = request.form.get("category", "education").strip()
+    sync_articles = request.form.get("sync_articles", "1") == "1"
+    sync_quizzes = request.form.get("sync_quizzes", "1") == "1"
+
+    try:
+        from pdf_extractor import process_uploaded_pdf
+        res = process_uploaded_pdf(
+            file_input=file,
+            custom_title=title,
+            category=category,
+            sync_to_website=sync_articles,
+            extract_quizzes=sync_quizzes
+        )
+        return jsonify({"success": True, "message": "PDF విజయవంతంగా అప్‌లోడ్ అయింది మరియు వెబ్‌సైట్ అప్‌డేట్ చేయబడింది!", "data": res})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/uploaded_materials", methods=["GET"])
+def api_uploaded_materials():
+    from db import get_uploaded_materials
+    category = request.args.get("category")
+    materials = get_uploaded_materials(category=category)
+    return jsonify({"success": True, "materials": materials})
+
+@app.route("/api/uploaded_materials/<int:mid>", methods=["DELETE"])
+def api_delete_uploaded_material(mid):
+    pin = request.args.get("pin", "").strip()
+    if pin != "lakshya2026":
+        return jsonify({"success": False, "error": "అడ్మిన్ పిన్ సరైనది కాదు."}), 403
+    from db import delete_uploaded_material
+    delete_uploaded_material(mid)
+    return jsonify({"success": True, "message": "మెటీరియల్ తొలగించబడింది."})
+
+@app.route("/pdf_upload_hub", methods=["GET"])
+def pdf_upload_hub_view():
+    from flask import make_response
+    from pdf_upload_view import render_pdf_upload_html
+    resp = make_response(render_pdf_upload_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+@app.route("/pdfs/uploads/<path:filename>", methods=["GET"])
+def serve_uploaded_pdf(filename):
+    uploads_dir = os.path.join(FRONTEND_DIR, "pdfs", "uploads")
+    return send_from_directory(uploads_dir, filename, mimetype="application/pdf")
+
 if __name__ == "__main__":
     print("==================================================================")
     print("🚀 తెలుగు పోటీ పరీక్షల డైలీ కరెంట్ అఫైర్స్ డ్యాష్‌బోర్డ్ ప్రారంభమైంది!")

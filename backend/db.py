@@ -67,6 +67,23 @@ def init_db():
     )
     """)
 
+    # Table for User-Uploaded Educational PDFs & Study Materials
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS uploaded_materials (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        category TEXT NOT NULL,
+        filename TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        file_size INTEGER,
+        total_pages INTEGER,
+        extracted_summary TEXT,
+        articles_created INTEGER DEFAULT 0,
+        quizzes_created INTEGER DEFAULT 0,
+        uploaded_at TEXT
+    )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -194,3 +211,44 @@ def get_stats(date=None):
         "one_liners_count": one_liners_count,
         "categories": category_counts
     }
+
+def insert_uploaded_material(title, category, filename, file_path, file_size=0, total_pages=1, extracted_summary="", articles_created=0, quizzes_created=0):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO uploaded_materials (title, category, filename, file_path, file_size, total_pages, extracted_summary, articles_created, quizzes_created, uploaded_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (title, category, filename, file_path, file_size, total_pages, extracted_summary, articles_created, quizzes_created, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    mid = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return mid
+
+def get_uploaded_materials(category=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "SELECT * FROM uploaded_materials"
+    params = []
+    if category and category != "all":
+        query += " WHERE category = ?"
+        params.append(category)
+    query += " ORDER BY id DESC"
+    cursor.execute(query, params)
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+def delete_uploaded_material(material_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT file_path FROM uploaded_materials WHERE id = ?", (material_id,))
+    row = cursor.fetchone()
+    if row and row["file_path"] and os.path.exists(row["file_path"]):
+        try:
+            os.remove(row["file_path"])
+        except Exception:
+            pass
+    cursor.execute("DELETE FROM uploaded_materials WHERE id = ?", (material_id,))
+    conn.commit()
+    conn.close()
+    return True
