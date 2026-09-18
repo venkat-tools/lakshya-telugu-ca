@@ -130,7 +130,23 @@ def render_pdf_upload_html():
                     మీరు స్టడీ PDF అప్‌లోడ్ చేయగానే వెబ్‌సైట్ స్వయంచాలకంగా అప్‌డేట్ అవుతుంది!
                 </h2>
                 <p class="text-xs sm:text-sm text-blue-100 leading-relaxed">
-                    APPSC/TSPSC నోటిఫికేషన్లు, ప్రభుత్వ సంక్షేమ జీవోలు, కరెంట్ అఫైర్స్ నోట్స్ లేదా మోడల్ పేపర్స్ PDF ని ఇక్కడ అప్‌లోడ్ చేయండి. పైథాన్ pypdf ఇంజిన్ ఆటోమేటిక్‌గా అందులోని సమాచారాన్ని సంగ్రహించి వెబ్‌సైట్‌లోని ఆర్టికల్స్, వన్‌లైనర్స్ మరియు క్విజ్ ప్రశ్నలను తక్షణమే అప్‌డేట్ చేస్తుంది.
+                    APPSC/TSPSC నోటిఫికేషన్లు, ప్రభుత్వ సంక్షేమ జీవోలు, కరెంట్ అఫైర్స్ నోట్స్ లేదా మోడల్ పేపర్స్ PDF ని ఇక్కడ అప్‌లోడ్ చేయండి. పైథాన్ ఇంజిన్ ఆటోమేటిక్‌గా అందులోని సమాచారాన్ని సంగ్రహించి వెబ్‌సైట్‌లోని ఆర్టికల్స్, వన్‌లైనర్స్ మరియు క్విజ్ ప్రశ్నలను తక్షణమే అప్‌డేట్ చేస్తుంది.
+                </p>
+            </div>
+        </div>
+
+        <!-- Font Compatibility & Legacy DTP Guide Box -->
+        <div class="bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-lg shrink-0 shadow-xs">
+                💡
+            </div>
+            <div class="space-y-1 text-xs sm:text-sm">
+                <h4 class="font-black text-amber-950 flex items-center gap-2">
+                    <span>తెలుగు PDF ఫాంట్ మార్గదర్శకాలు (PDF Font Compatibility):</span>
+                </h4>
+                <p class="text-amber-900 leading-relaxed">
+                    • <b>డిజిటల్ యూనికోడ్ PDF లు:</b> నేటి వార్తాపత్రికలు, డిజిటల్ నోట్స్, ప్రభుత్వ జీవోలు మరియు ఆధునిక పుస్తకాల PDF లు 100% స్వచ్ఛమైన తెలుగులో ఆటోమేటిక్‌గా అప్‌డేట్ అవుతాయి.<br>
+                    • <b>పాత DTP ఫాంట్లు (Anu Script / Shree-Lipi):</b> పాత గ్రూప్స్ ప్రశ్నపత్రాలు లేదా పుస్తకాలలోని పాత 8-బిట్ ఫాంట్లలో ఉన్న టెక్స్ట్‌ను మా సిస్టమ్ ఆటోమేటిక్‌గా గుర్తించి యూనికోడ్ తెలుగులోకి కన్వర్ట్ చేసి చూపిస్తుంది.
                 </p>
             </div>
         </div>

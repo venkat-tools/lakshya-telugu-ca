@@ -241,13 +241,20 @@ def get_uploaded_materials(category=None):
 def delete_uploaded_material(material_id):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT file_path FROM uploaded_materials WHERE id = ?", (material_id,))
+    cursor.execute("SELECT filename, title, file_path FROM uploaded_materials WHERE id = ?", (material_id,))
     row = cursor.fetchone()
-    if row and row["file_path"] and os.path.exists(row["file_path"]):
-        try:
-            os.remove(row["file_path"])
-        except Exception:
-            pass
+    if row:
+        if row["file_path"] and os.path.exists(row["file_path"]):
+            try:
+                os.remove(row["file_path"])
+            except Exception:
+                pass
+        # Clean up any articles and quizzes created from this file
+        cursor.execute("DELETE FROM articles WHERE detailed_notes LIKE ?", (f"%{row['filename']}%",))
+        cursor.execute("DELETE FROM articles WHERE source LIKE ?", (f"%{row['filename']}%",))
+        cursor.execute("DELETE FROM quiz_questions WHERE exam_tag LIKE ?", (f"%{row['filename']}%",))
+        cursor.execute("DELETE FROM quiz_questions WHERE exam_tag LIKE ?", (f"%{row['title'][:25]}%",))
+
     cursor.execute("DELETE FROM uploaded_materials WHERE id = ?", (material_id,))
     conn.commit()
     conn.close()

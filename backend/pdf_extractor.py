@@ -167,10 +167,20 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
             pass
 
     full_text = clean_extracted_text("\n\n".join(extracted_pages))
+
+    # Auto-detect and convert legacy Telugu fonts (Anu Script / Shree-Lipi / Akruti)
+    from anu_converter import is_legacy_telugu_font, convert_legacy_to_unicode
+    if is_legacy_telugu_font(full_text):
+        print("Detected legacy Telugu font (Anu Script / Shree-Lipi). Converting to Unicode...")
+        full_text = convert_legacy_to_unicode(full_text)
+
     snippet = full_text[:400] if full_text else "PDF లోని టెక్స్ట్ ఇమేజ్ లేదా రక్షించబడిన ఫార్మాట్‌లో ఉంది."
 
     # Title detection
     doc_title = custom_title.strip()
+    if is_legacy_telugu_font(doc_title):
+        doc_title = convert_legacy_to_unicode(doc_title)
+
     if not doc_title:
         # Check first line of page 1
         first_lines = [l.strip() for l in full_text.split("\n") if len(l.strip()) > 8]
@@ -178,6 +188,12 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
             doc_title = first_lines[0][:100]
         else:
             doc_title = os.path.splitext(orig_filename)[0].replace("_", " ").title()
+
+    if is_legacy_telugu_font(doc_title):
+        doc_title = convert_legacy_to_unicode(doc_title)
+
+    if len(doc_title.strip()) < 5 or is_legacy_telugu_font(doc_title):
+        doc_title = f"{CATEGORY_NAMES.get(category, 'పోటీ పరీక్షల')} స్టడీ మెటీరియల్"
 
     articles_count = 0
     quizzes_count = 0
