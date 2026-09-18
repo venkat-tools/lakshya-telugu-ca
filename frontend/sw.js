@@ -1,5 +1,5 @@
 // Lakshya PWA Service Worker (Stale-While-Revalidate & Offline Kit)
-const CACHE_NAME = 'lakshya-pwa-v4';
+const CACHE_NAME = 'lakshya-pwa-v5';
 const OFFLINE_URL = '/';
 
 const CORE_PRECACHE = [
@@ -10,6 +10,13 @@ const CORE_PRECACHE = [
   '/manifest.json',
   '/icon.svg',
   '/lakshya_logo.jpg',
+  '/editorials_hub',
+  '/api/editorials',
+  '/telegram_channels_hub',
+  '/api/telegram/channels',
+  '/pdf_upload_hub',
+  '/api/pdf_materials',
+  '/api/omr_test_print',
   '/map_pointing_atlas',
   '/sc_judgments_hub',
   '/group2_paper2_master',

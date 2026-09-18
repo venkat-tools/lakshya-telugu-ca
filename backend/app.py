@@ -1676,6 +1676,7 @@ def api_upload_pdf():
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/api/uploaded_materials", methods=["GET"])
+@app.route("/api/pdf_materials", methods=["GET"])
 def api_uploaded_materials():
     from db import get_uploaded_materials
     category = request.args.get("category")
@@ -1703,6 +1704,75 @@ def pdf_upload_hub_view():
 def serve_uploaded_pdf(filename):
     uploads_dir = os.path.join(FRONTEND_DIR, "pdfs", "uploads")
     return send_from_directory(uploads_dir, filename, mimetype="application/pdf")
+
+
+# ----------------- 1-Click OMR Mock Test & Question Paper Generator -----------------
+@app.route("/api/omr_test_print", methods=["GET"])
+def api_omr_test_print():
+    from flask import make_response
+    from omr_generator import generate_omr_test_html
+    mat_id = request.args.get("material_id")
+    resp = make_response(generate_omr_test_html(material_id=mat_id))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+# ----------------- Telegram Channels & Groups Broadcaster Endpoints -----------------
+@app.route("/telegram_channels_hub", methods=["GET"])
+def telegram_channels_hub_view():
+    from flask import make_response
+    from telegram_channels_view import render_telegram_channels_html
+    resp = make_response(render_telegram_channels_html())
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    return resp
+
+@app.route("/api/telegram/channels", methods=["GET"])
+def api_telegram_channels_list():
+    from telegram_bot import load_channels
+    return jsonify({"success": True, "channels": load_channels()})
+
+@app.route("/api/telegram/channels/add", methods=["POST"])
+def api_telegram_channels_add():
+    data = request.get_json() or {}
+    cid = data.get("channel_id", "").strip()
+    title = data.get("title", "").strip()
+    if not cid:
+        return jsonify({"success": False, "error": "దయచేసి ఛానల్ ID లేదా యూజర్‌నేమ్ నమోదు చేయండి."}), 400
+    from telegram_bot import add_channel
+    channels = add_channel(channel_id=cid, title=title)
+    return jsonify({"success": True, "channels": channels})
+
+@app.route("/api/telegram/channels/remove", methods=["POST"])
+def api_telegram_channels_remove():
+    data = request.get_json() or {}
+    cid = data.get("channel_id", "").strip()
+    if not cid:
+        return jsonify({"success": False, "error": "ఛానల్ ID అవసరం."}), 400
+    from telegram_bot import remove_channel
+    channels = remove_channel(channel_id=cid)
+    return jsonify({"success": True, "channels": channels})
+
+@app.route("/api/telegram/channels/test", methods=["POST"])
+def api_telegram_channels_test():
+    data = request.get_json() or {}
+    cid = data.get("channel_id", "").strip()
+    if not cid:
+        return jsonify({"success": False, "error": "ఛానల్ ID అవసరం."}), 400
+    from telegram_bot import send_telegram_message, load_config
+    cfg = load_config()
+    token = cfg.get("bot_token")
+    test_msg = (
+        f"🔔 <b>లక్ష్య తెలుగు కరెంట్ అఫైర్స్ - కనెక్టివిటీ టెస్ట్</b>\n"
+        f"ఈ ఛానల్ (@venkat_telugu_ca_bot) కి విజయవంతంగా అనుసంధానించబడింది! 🎉\n"
+        f"ప్రతిరోజూ ఉదయం 7:00 గంటలకు ఇక్కడ పూర్తి ఈ-పేపర్ PDF, ముఖ్యాంశాలు మరియు క్విజ్ పోల్స్ పోస్ట్ చేయబడతాయి."
+    )
+    res = send_telegram_message(test_msg, token=token, chat_id=cid)
+    return jsonify(res)
+
+@app.route("/api/telegram/channels/broadcast_now", methods=["POST"])
+def api_telegram_channels_broadcast_now():
+    from telegram_bot import broadcast_daily_digest
+    res = broadcast_daily_digest()
+    return jsonify(res)
 
 if __name__ == "__main__":
     print("==================================================================")

@@ -126,6 +126,12 @@
           <span class="hidden sm:inline">నోట్స్ PDF</span>
         </button>
 
+        <!-- Bookmarks / Saved Items Button -->
+        <button id="openBookmarksModalBtn" onclick="openBookmarksModal()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-amber-300/50 cursor-pointer" title="మీరు సేవ్ చేసుకున్న ముఖ్యమైన బిట్స్ & ఆర్టికల్స్ (Bookmarks)">
+          <i data-lucide="bookmark" class="w-4 h-4 text-slate-950"></i>
+          <span>🔖 బుక్‌మార్క్స్ (<span id="bookmarkCount">0</span>)</span>
+        </button>
+
         <!-- Educational PDF Upload Hub Link -->
         <a href="/pdf_upload_hub" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-blue-400/40" title="ఎడ్యుకేషన్ PDF లు అప్‌లోడ్ చేసి వెబ్‌సైట్‌ను అప్‌డేట్ చేయండి">
           <i data-lucide="upload-cloud" class="w-4 h-4 text-amber-300"></i>
@@ -352,6 +358,24 @@
       <a href="/pdf_upload_hub" class="bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-blue-400/50">
         <i data-lucide="upload-cloud" class="w-4 h-4 text-amber-300"></i>
         <span>📤 PDF అప్‌లోడ్ & స్టడీ హబ్</span>
+      </a>
+
+      <!-- Daily Telugu Editorial Analysis & Mains Answer Studio -->
+      <a href="/editorials_hub" class="bg-gradient-to-r from-red-700 to-rose-900 hover:from-red-600 hover:to-rose-800 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-rose-400/40">
+        <i data-lucide="newspaper" class="w-4 h-4 text-rose-300"></i>
+        <span>📰 ఎడిటోరియల్ & మెయిన్స్</span>
+      </a>
+
+      <!-- 1-Click Printable OMR Mock Test Paper (PDF) -->
+      <a href="/api/omr_test_print" target="_blank" class="bg-gradient-to-r from-emerald-700 to-teal-900 hover:from-emerald-600 hover:to-teal-800 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-emerald-400/40">
+        <i data-lucide="printer" class="w-4 h-4 text-emerald-300"></i>
+        <span>🖨️ OMR టెస్ట్ పేపర్ (PDF)</span>
+      </a>
+
+      <!-- Telegram Study Groups & Channels Auto-Broadcaster -->
+      <a href="/telegram_channels_hub" class="bg-gradient-to-r from-blue-700 to-cyan-900 hover:from-blue-600 hover:to-cyan-800 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-cyan-400/40">
+        <i data-lucide="send" class="w-4 h-4 text-cyan-300"></i>
+        <span>📢 టెలిగ్రామ్ ఛానల్స్ హబ్</span>
       </a>
 
       <!-- Offline PWA App Install Button -->
@@ -2824,7 +2848,47 @@
           పూర్తయింది
         </button>
       </div>
+    </div>
+  </div>
 
+  <!-- Bookmarks & Saved Offline Vault Modal -->
+  <div id="bookmarksModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div>
+          <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🔖</span> <span>నా బుక్‌మార్క్స్ & స్టడీ వాల్ట్ (Saved Items)</span>
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">మీరు భద్రపరుచుకున్న ముఖ్యమైన ఆర్టికల్స్, క్విజ్ ప్రశ్నలు & వన్‌లైనర్స్</p>
+        </div>
+        <button onclick="closeBookmarksModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-lg cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Filter Pills -->
+      <div class="flex items-center gap-2 pt-3 pb-2 overflow-x-auto text-xs font-bold">
+        <button onclick="filterBookmarks('all')" class="bm-filter-btn active px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-black cursor-pointer" data-filter="all">అన్నీ (<span id="bmAllCount">0</span>)</button>
+        <button onclick="filterBookmarks('article')" class="bm-filter-btn px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer" data-filter="article">📰 ఆర్టికల్స్</button>
+        <button onclick="filterBookmarks('quiz')" class="bm-filter-btn px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer" data-filter="quiz">📝 క్విజ్ బిట్స్</button>
+        <button onclick="filterBookmarks('oneliner')" class="bm-filter-btn px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer" data-filter="oneliner">⚡ వన్‌లైనర్స్</button>
+      </div>
+
+      <!-- Bookmarks List -->
+      <div id="bookmarksList" class="flex-1 overflow-y-auto space-y-3 py-3 pr-1 text-xs sm:text-sm">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs">
+        <button onclick="clearAllBookmarks()" class="text-rose-600 hover:text-rose-700 font-bold flex items-center gap-1 cursor-pointer">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          అన్నీ తొలగించు
+        </button>
+        <button onclick="closeBookmarksModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl cursor-pointer">
+          ముగించు
+        </button>
+      </div>
     </div>
   </div>
 

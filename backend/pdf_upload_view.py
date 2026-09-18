@@ -55,12 +55,15 @@ def render_pdf_upload_html():
                 </div>
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                     <a href="/pdfs/uploads/{m['filename']}" target="_blank" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-1.5 shadow-xs">
-                        <span>📖 ఓపెన్ / చదవండి</span>
+                        <span>📖 ఓపెన్</span>
                     </a>
-                    <a href="/pdfs/uploads/{m['filename']}" download class="bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center" title="డౌన్‌లోడ్">
+                    <a href="/api/omr_test_print?material_id={m['id']}" target="_blank" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1" title="ఈ మెటీరియల్ నుండి OMR మాక్ టెస్ట్ పేపర్ తయారు చేయండి">
+                        <span>🖨️ OMR</span>
+                    </a>
+                    <a href="/pdfs/uploads/{m['filename']}" download class="bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center" title="డౌన్‌లోడ్">
                         <span>📥</span>
                     </a>
-                    <button onclick="deleteMaterial({m['id']})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 py-2 px-3 rounded-xl text-xs font-bold transition" title="తొలగించు">
+                    <button onclick="deleteMaterial({m['id']})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 py-2 px-2.5 rounded-xl text-xs font-bold transition cursor-pointer" title="తొలగించు">
                         <span>🗑️</span>
                     </button>
                 </div>

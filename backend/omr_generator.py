@@ -75,8 +75,38 @@ def get_all_50_mock_questions():
     conn.close()
     return all_questions[:50]
 
-def generate_omr_test_html():
-    questions = get_all_50_mock_questions()
+def generate_omr_test_html(material_id=None):
+    if material_id:
+        conn = get_connection()
+        c = conn.cursor()
+        c.execute("SELECT * FROM uploaded_materials WHERE id = ?", (material_id,))
+        row = c.fetchone()
+        if row:
+            mat = dict(row)
+            c.execute("SELECT * FROM quiz_questions WHERE exam_tag LIKE ? OR category = ? ORDER BY id DESC LIMIT 50",
+                      (f"%{mat['title'][:20]}%", mat.get('category', '')))
+            questions = [dict(r) for r in c.fetchall()]
+            if len(questions) < 15:
+                c.execute("SELECT * FROM quiz_questions ORDER BY id DESC LIMIT 50")
+                for r in c.fetchall():
+                    rd = dict(r)
+                    if not any(q['question'] == rd['question'] for q in questions):
+                        questions.append(rd)
+                    if len(questions) >= 25:
+                        break
+            conn.close()
+            test_heading = f"లక్ష్య CA • {mat['title']} ప్రత్యేక OMR మాక్ టెస్ట్"
+            test_sub = f"అప్‌లోడ్ చేసిన స్టడీ మెటీరియల్ ఆధారిత పరీక్ష ({mat.get('category', 'విద్యా').upper()}) • {len(questions)} ప్రశ్నలు"
+        else:
+            conn.close()
+            questions = get_all_50_mock_questions()
+            test_heading = "లక్ష్య CA • గ్రాండ్ మాక్ టెస్ట్ పేపర్ & OMR షీట్"
+            test_sub = "APPSC, TSPSC & UPSC రియల్ ఎగ్జామ్ సిమ్యులేషన్ (50 ప్రశ్నలు)"
+    else:
+        questions = get_all_50_mock_questions()
+        test_heading = "లక్ష్య CA • గ్రాండ్ మాక్ టెస్ట్ పేపర్ & OMR షీట్"
+        test_sub = "APPSC, TSPSC & UPSC రియల్ ఎగ్జామ్ సిమ్యులేషన్ (50 ప్రశ్నలు)"
+
     total_q = len(questions)
 
     html = f"""<!DOCTYPE html>
@@ -84,7 +114,7 @@ def generate_omr_test_html():
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>లక్ష్య CA • గ్రాండ్ మాక్ టెస్ట్ పేపర్ & OMR షీట్</title>
+  <title>{test_heading}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700;800;900&family=Outfit:wght@400;600;700&display=swap">
   <style>
@@ -123,8 +153,8 @@ def generate_omr_test_html():
   <!-- Print Toolbar -->
   <div class="no-print max-w-4xl mx-auto mb-6 flex justify-between items-center bg-white p-4 rounded-xl shadow-md border border-slate-200">
     <div>
-      <h2 class="font-black text-slate-900 text-lg">📄 లక్ష్య గ్రాండ్ మాక్ టెస్ట్ & OMR షీట్</h2>
-      <p class="text-xs font-bold text-slate-600">APPSC, TSPSC & UPSC రియల్ ఎగ్జామ్ సిమ్యులేషన్ ({total_q} ప్రశ్నలు)</p>
+      <h2 class="font-black text-slate-900 text-lg">📄 {test_heading}</h2>
+      <p class="text-xs font-bold text-slate-600">{test_sub}</p>
     </div>
     <div class="flex gap-2">
       <button onclick="window.print()" class="bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm px-4 py-2 rounded-lg shadow transition">

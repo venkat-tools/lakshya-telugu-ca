@@ -485,9 +485,14 @@ function renderQuiz() {
         <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">
           ప్రశ్న ${index + 1}
         </span>
-        <span class="text-xs font-semibold text-slate-500">
-          🎯 ${q.exam_tag || "General Studies"}
-        </span>
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-slate-500">
+            🎯 ${q.exam_tag || "General Studies"}
+          </span>
+          <button type="button" onclick="toggleQuizBookmark(${q.id}, event)" class="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-amber-500 transition cursor-pointer" title="ఈ క్విజ్ ప్రశ్నను బుక్‌మార్క్ చేయండి">
+            <i data-lucide="${isBookmarked(q.id, 'quiz') ? 'bookmark-check' : 'bookmark'}" class="w-4 h-4 ${isBookmarked(q.id, 'quiz') ? 'text-amber-500' : ''}"></i>
+          </button>
+        </div>
       </div>
       
       <p class="text-sm sm:text-base font-bold text-slate-900 mb-4">
@@ -677,6 +682,9 @@ function renderOneLiners() {
       </div>
 
       <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+        <button type="button" onclick="toggleOneLinerBookmark(${item.id || ('ol_' + item.category)}, '${item.point.replace(/'/g, "\\'")}', '${item.category}', event)" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-amber-500 transition cursor-pointer" title="బుక్‌మార్క్ చేయండి">
+          <i data-lucide="${isBookmarked(item.id || ('ol_' + item.category), 'oneliner') ? 'bookmark-check' : 'bookmark'}" class="w-4 h-4 ${isBookmarked(item.id || ('ol_' + item.category), 'oneliner') ? 'text-amber-500' : ''}"></i>
+        </button>
         <button class="text-xs font-semibold text-blue-600 group-hover:text-blue-800 bg-blue-50 group-hover:bg-blue-100/90 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition border border-blue-100 shadow-2xs">
           <i data-lucide="book-open" class="w-3.5 h-3.5 text-blue-600"></i>
           <span>పూర్తి ఆర్టికల్</span>
@@ -4972,3 +4980,258 @@ if (document.readyState === "loading") {
 }
 
 
+
+
+// ==========================================
+// Bookmarks & Saved Offline Vault System
+// ==========================================
+const BM_KEY = "lakshya_bookmarks_v1";
+let currentBmFilter = "all";
+
+function getBookmarks() {
+  try {
+    return JSON.parse(localStorage.getItem(BM_KEY) || "[]");
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveBookmarks(list) {
+  try {
+    localStorage.setItem(BM_KEY, JSON.stringify(list));
+    updateBookmarkBadge();
+  } catch (e) {
+    console.error("Error saving bookmarks:", e);
+  }
+}
+
+function isBookmarked(id, type = null) {
+  const list = getBookmarks();
+  return list.some(b => String(b.id) === String(id) && (!type || b.type === type));
+}
+
+function updateBookmarkBadge() {
+  const count = getBookmarks().length;
+  const badge = document.getElementById("bookmarkCount");
+  if (badge) badge.textContent = count;
+  const allCount = document.getElementById("bmAllCount");
+  if (allCount) allCount.textContent = count;
+}
+
+function toggleBookmark(id, title, category, date) {
+  let list = getBookmarks();
+  const existingIdx = list.findIndex(b => b.type === "article" && String(b.id) === String(id));
+  if (existingIdx >= 0) {
+    list.splice(existingIdx, 1);
+    saveBookmarks(list);
+    showToast("ఆర్టికల్ బుక్‌మార్క్స్ నుండి తొలగించబడింది");
+  } else {
+    list.unshift({
+      id: String(id),
+      type: "article",
+      title: title || "కరెంట్ అఫైర్స్ ఆర్టికల్",
+      category: category || "national",
+      date: date || state.currentDate,
+      savedAt: new Date().toISOString()
+    });
+    saveBookmarks(list);
+    showToast("🔖 ఆర్టికల్ బుక్‌మార్క్స్‌లో సేవ్ చేయబడింది!");
+  }
+  renderArticles();
+  const modal = document.getElementById("bookmarksModal");
+  if (modal && !modal.classList.contains("hidden")) {
+    renderBookmarksList(currentBmFilter);
+  }
+}
+
+function toggleQuizBookmark(qid, event) {
+  if (event) event.stopPropagation();
+  let list = getBookmarks();
+  const existingIdx = list.findIndex(b => b.type === "quiz" && String(b.id) === String(qid));
+  if (existingIdx >= 0) {
+    list.splice(existingIdx, 1);
+    saveBookmarks(list);
+    showToast("క్విజ్ ప్రశ్న బుక్‌మార్క్స్ నుండి తొలగించబడింది");
+  } else {
+    const qObj = (state.quizData || []).find(q => String(q.id) === String(qid)) || {};
+    list.unshift({
+      id: String(qid),
+      type: "quiz",
+      title: qObj.question || "క్విజ్ ప్రశ్న",
+      category: qObj.exam_tag || "General Studies",
+      correct_option: qObj.correct_option || "",
+      explanation: qObj.explanation || "",
+      date: state.currentDate,
+      savedAt: new Date().toISOString()
+    });
+    saveBookmarks(list);
+    showToast("🔖 క్విజ్ ప్రశ్న బుక్‌మార్క్స్‌లో సేవ్ చేయబడింది!");
+  }
+  renderQuiz();
+  const modal = document.getElementById("bookmarksModal");
+  if (modal && !modal.classList.contains("hidden")) {
+    renderBookmarksList(currentBmFilter);
+  }
+}
+
+function toggleOneLinerBookmark(index, point, category, event) {
+  if (event) event.stopPropagation();
+  let list = getBookmarks();
+  const bookmarkId = `ol_${state.currentDate}_${index}`;
+  const existingIdx = list.findIndex(b => b.type === "oneliner" && b.id === bookmarkId);
+  if (existingIdx >= 0) {
+    list.splice(existingIdx, 1);
+    saveBookmarks(list);
+    showToast("వన్‌లైనర్ బుక్‌మార్క్స్ నుండి తొలగించబడింది");
+  } else {
+    list.unshift({
+      id: bookmarkId,
+      type: "oneliner",
+      title: point,
+      category: category || "general",
+      date: state.currentDate,
+      savedAt: new Date().toISOString()
+    });
+    saveBookmarks(list);
+    showToast("🔖 వన్‌లైనర్ బుక్‌మార్క్స్‌లో సేవ్ చేయబడింది!");
+  }
+  renderOneLiners();
+  const modal = document.getElementById("bookmarksModal");
+  if (modal && !modal.classList.contains("hidden")) {
+    renderBookmarksList(currentBmFilter);
+  }
+}
+
+function openBookmarksModal() {
+  const modal = document.getElementById("bookmarksModal");
+  if (!modal) return;
+  currentBmFilter = "all";
+  updateFilterButtons();
+  renderBookmarksList("all");
+  modal.classList.remove("hidden");
+  if (window.lucide) lucide.createIcons();
+}
+
+function closeBookmarksModal() {
+  const modal = document.getElementById("bookmarksModal");
+  if (modal) modal.classList.add("hidden");
+}
+
+function filterBookmarks(filter) {
+  currentBmFilter = filter;
+  updateFilterButtons();
+  renderBookmarksList(filter);
+}
+
+function updateFilterButtons() {
+  document.querySelectorAll(".bm-filter-btn").forEach(btn => {
+    if (btn.getAttribute("data-filter") === currentBmFilter) {
+      btn.classList.add("bg-amber-500", "text-slate-950", "font-black");
+      btn.classList.remove("bg-slate-100", "dark:bg-slate-800", "text-slate-700", "dark:text-slate-300");
+    } else {
+      btn.classList.remove("bg-amber-500", "text-slate-950", "font-black");
+      btn.classList.add("bg-slate-100", "dark:bg-slate-800", "text-slate-700", "dark:text-slate-300");
+    }
+  });
+}
+
+function removeBookmarkItem(id, type) {
+  let list = getBookmarks();
+  list = list.filter(b => !(String(b.id) === String(id) && b.type === type));
+  saveBookmarks(list);
+  showToast("బుక్‌మార్క్ తొలగించబడింది");
+  renderBookmarksList(currentBmFilter);
+  if (type === "article") renderArticles();
+  if (type === "quiz") renderQuiz();
+  if (type === "oneliner") renderOneLiners();
+}
+
+function clearAllBookmarks() {
+  if (!confirm("మీరు నిజంగా అన్ని బుక్‌మార్క్‌లను తొలగించాలనుకుంటున్నారా?")) return;
+  localStorage.removeItem(BM_KEY);
+  updateBookmarkBadge();
+  renderBookmarksList("all");
+  renderArticles();
+  renderQuiz();
+  renderOneLiners();
+  showToast("అన్ని బుక్‌మార్క్స్ క్లియర్ చేయబడ్డాయి");
+}
+
+function renderBookmarksList(filter) {
+  const container = document.getElementById("bookmarksList");
+  if (!container) return;
+  let items = getBookmarks();
+  if (filter && filter !== "all") {
+    items = items.filter(b => b.type === filter);
+  }
+
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-12 text-slate-400">
+        <div class="text-4xl mb-3">🔖</div>
+        <p class="font-bold text-slate-600 dark:text-slate-300 mb-1">ఇంకా ఎటువంటి బుక్‌మార్క్‌లు లేవు</p>
+        <p class="text-xs text-slate-400 max-w-xs mx-auto">ఆర్టికల్స్, క్విజ్ ప్రశ్నలు లేదా వన్‌లైనర్స్‌ను సేవ్ చేసుకోండి. అవి ఆఫ్‌లైన్‌లో కూడా భద్రంగా ఉంటాయి.</p>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  const typeConfig = {
+    article: { badge: "📰 ఆర్టికల్", class: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300" },
+    quiz: { badge: "📝 క్విజ్ బిట్", class: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300" },
+    oneliner: { badge: "⚡ వన్‌లైనర్", class: "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300" }
+  };
+
+  container.innerHTML = items.map(b => {
+    const cfg = typeConfig[b.type] || { badge: "🔖 నోట్", class: "bg-slate-100 text-slate-700" };
+    return `
+      <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex flex-col justify-between gap-2 shadow-2xs">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] font-black px-2 py-0.5 rounded-md ${cfg.class}">
+              ${cfg.badge}
+            </span>
+            ${b.date ? `<span class="text-[11px] text-slate-400 font-semibold">📅 ${b.date}</span>` : ''}
+          </div>
+          <button onclick="removeBookmarkItem('${b.id}', '${b.type}')" class="text-slate-400 hover:text-rose-600 p-1 rounded transition cursor-pointer" title="తొలగించు">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <p class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-relaxed">
+          ${b.title}
+        </p>
+        ${b.explanation ? `
+          <div class="text-[11px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-2 rounded-lg font-medium">
+            💡 సరైన సమాధానం: ఆప్షన్ ${b.correct_option || ''} | ${b.explanation}
+          </div>
+        ` : ''}
+        <div class="flex justify-end gap-2 pt-1 border-t border-slate-200/50 dark:border-slate-700/50">
+          <button onclick="navigator.clipboard.writeText('${(b.title + (b.explanation ? '\n' + b.explanation : '')).replace(/'/g, "\\\'")}'); showToast('కాపీ చేయబడింది!');" class="text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer">
+            <i data-lucide="copy" class="w-3 h-3"></i> కాపీ
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function initBookmarks() {
+  updateBookmarkBadge();
+}
+
+// Global attachment
+window.getBookmarks = getBookmarks;
+window.isBookmarked = isBookmarked;
+window.toggleBookmark = toggleBookmark;
+window.toggleQuizBookmark = toggleQuizBookmark;
+window.toggleOneLinerBookmark = toggleOneLinerBookmark;
+window.openBookmarksModal = openBookmarksModal;
+window.closeBookmarksModal = closeBookmarksModal;
+window.filterBookmarks = filterBookmarks;
+window.removeBookmarkItem = removeBookmarkItem;
+window.clearAllBookmarks = clearAllBookmarks;
+window.renderBookmarksList = renderBookmarksList;
+window.initBookmarks = initBookmarks;

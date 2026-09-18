@@ -273,6 +273,95 @@ def start_bot_polling():
                     )
                     send_telegram_message(upload_msg, token=token, chat_id=chat_id)
 
+                elif text in ["/editorial", "/editorials", "/mainsq"]:
+                    from editorials_data import get_latest_editorial
+                    ed = get_latest_editorial()
+                    ma = ed.get("model_answer", {})
+                    intro = ma.get("structure", {}).get("introduction", "")
+                    ed_msg = (
+                        f"📰 <b>డైలీ తెలుగు ఎడిటోరియల్ విశ్లేషణ & మెయిన్స్ మోడల్ సమాధానం</b>\n"
+                        f"📅 <b>తేదీ: {ed.get('date', '2026-09-18')}</b> | <b>{ed.get('newspaper')}</b>\n"
+                        f"───────────────────────\n\n"
+                        f"📌 <b>విషయం:</b> {ed.get('title')}\n\n"
+                        f"🎯 <b>ప్రిలిమ్స్ హై-యీల్డ్ ఫ్యాక్ట్స్:</b>\n"
+                        f"• {ed['prelims_facts'][0]}\n"
+                        f"• {ed['prelims_facts'][1]}\n\n"
+                        f"✍️ <b>నేటి మెయిన్స్ ప్రశ్న (Question of the Day):</b>\n"
+                        f"<i>{ed.get('practice_question')}</i>\n\n"
+                        f"💡 <b>పీఠిక ఫ్రేమ్‌వర్క్:</b>\n"
+                        f"<i>\"{intro[:180]}...\"</i>\n\n"
+                        f"🌐 <b>పూర్తి ఎడిటోరియల్ విశ్లేషణ & 15-మినిట్స్ ఆన్సర్ రైటింగ్ స్టూడియో:</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/editorials_hub\n\n"
+                        f"🖨️ <i>వెబ్‌సైట్‌లో సమగ్ర తెలుగు మోడల్ ఆన్సర్ చదువుకోవచ్చు & ప్రింట్ చేసుకోవచ్చు!</i>"
+                    )
+                    send_telegram_message(ed_msg, token=token, chat_id=chat_id)
+
+                elif text in ["/omr", "/omr_test", "/mocktest"]:
+                    omr_msg = (
+                        f"🖨️ <b>లక్ష్య OMR మాక్ టెస్ట్ పేపర్స్ & ఎగ్జామ్ సిమ్యులేటర్</b>\n"
+                        f"───────────────────────\n"
+                        f"APPSC, TSPSC మరియు UPSC ప్రిలిమ్స్ తరహాలో ప్రింటబుల్ టెస్ట్ పేపర్స్ & ఒరిజినల్ OMR షీట్లను డౌన్‌లోడ్ చేసుకోండి!\n\n"
+                        f"📝 <b>లభ్యమయ్యే టెస్ట్ పేపర్స్ (PDF):</b>\n"
+                        f"👉 <b>డైలీ 50-Qs గ్రాండ్ మాక్ టెస్ట్ & OMR:</b>\n"
+                        f"https://lakshya-telugu-ca.onrender.com/api/omr_test_print\n\n"
+                        f"👉 <b>APPSC గ్రూప్-2 (150 Qs) పూర్తి మాక్ టెస్ట్:</b>\n"
+                        f"https://lakshya-telugu-ca.onrender.com/omr_group2_test?mode=full\n\n"
+                        f"👉 <b>గ్రూప్-2 గత పరీక్షల ప్రశ్నలు (Official PYQs):</b>\n"
+                        f"https://lakshya-telugu-ca.onrender.com/omr_group2_test?mode=pyqs\n\n"
+                        f"💡 <i>చిట్కా: మీరు అప్‌లోడ్ చేసిన స్టడీ PDF లపై కూడా 1-క్లిక్‌తో OMR టెస్ట్ పేపర్ తయారు చేసుకోవచ్చు!</i>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/pdf_upload_hub"
+                    )
+                    send_telegram_message(omr_msg, token=token, chat_id=chat_id)
+
+                elif text == "/channels" or text == "/groups":
+                    ch_list = load_channels()
+                    ch_text = ""
+                    if ch_list:
+                        for idx, ch in enumerate(ch_list, 1):
+                            ch_text += f"{idx}. 📢 <b>{ch.get('title', ch.get('channel_id'))}</b> (<code>{ch.get('channel_id')}</code>)\n"
+                    else:
+                        ch_text = "<i>ఇంకా ఎలాంటి ఛానల్స్ నమోదు కాలేదు.</i>\n"
+
+                    ch_msg = (
+                        f"📢 <b>కనెక్ట్ అయిన టెలిగ్రామ్ స్టడీ గ్రూప్స్ & ఛానల్స్ ({len(ch_list)})</b>\n"
+                        f"───────────────────────\n"
+                        f"{ch_text}\n"
+                        f"➕ <b>కొత్త ఛానల్‌ను జోడించడానికి:</b>\n"
+                        f"1. మన బోట్ (@venkat_telugu_ca_bot) ని మీ ఛానల్/గ్రూప్‌లో అడ్మిన్‌గా యాడ్ చేయండి.\n"
+                        f"2. ఇక్కడ <code>/setchannel @your_channel_name</code> అని టైప్ చేయండి.\n\n"
+                        f"🌐 <b>వెబ్ డ్యాష్‌బోర్డ్ ద్వారా నిర్వహించడానికి:</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/telegram_channels_hub"
+                    )
+                    send_telegram_message(ch_msg, token=token, chat_id=chat_id)
+
+                elif text.startswith("/setchannel") or text.startswith("/addchannel"):
+                    parts = text.split()
+                    if len(parts) > 1:
+                        new_cid = parts[1].strip()
+                        new_title = " ".join(parts[2:]).strip() if len(parts) > 2 else new_cid
+                        add_channel(new_cid, new_title)
+                        succ_msg = (
+                            f"✅ <b>ఛానల్ విజయవంతంగా నమోదు చేయబడింది!</b>\n\n"
+                            f"📢 <b>ఛానల్ ID:</b> <code>{new_cid}</code>\n"
+                            f"🏷️ <b>పేరు:</b> {new_title}\n\n"
+                            f"ప్రతిరోజూ ఉదయం 7:00 గంటలకు పూర్తి ఈ-పేపర్ PDF, ముఖ్యాంశాలు మరియు క్విజ్ పోల్స్ ఈ ఛానల్‌కు స్వయంచాలకంగా పంపబడతాయి!"
+                        )
+                        send_telegram_message(succ_msg, token=token, chat_id=chat_id)
+                    else:
+                        send_telegram_message("దయచేసి ఛానల్ పేరును పేర్కొనండి: ఉదా: <code>/setchannel @my_study_channel</code>", token=token, chat_id=chat_id)
+
+                elif text == "/broadcast":
+                    admin_id = config.get("chat_id") or "5405953028"
+                    if str(chat_id) != str(admin_id) and str(chat_id) != "5405953028":
+                        send_telegram_message("⚠️ క్షమించండి, బ్రాడ్‌కాస్ట్ చేసే అధికారం కేవలం అడ్మిన్‌కు మాత్రమే ఉంది.", token=token, chat_id=chat_id)
+                    else:
+                        send_telegram_message("⏳ కనెక్ట్ అయిన అన్ని ఛానల్స్ మరియు సబ్‌స్క్రైబర్లకు బ్రాడ్‌కాస్ట్ ప్రారంభించబడింది...", token=token, chat_id=chat_id)
+                        res = broadcast_daily_digest()
+                        if res.get("success"):
+                            send_telegram_message(f"🎉 <b>బ్రాడ్‌కాస్ట్ విజయవంతమైంది!</b>\n{res.get('message')}", token=token, chat_id=chat_id)
+                        else:
+                            send_telegram_message(f"❌ బ్రాడ్‌కాస్ట్ లోపం: {res.get('error')}", token=token, chat_id=chat_id)
+
                 elif text == "/subscribe":
                     sub_msg = (
                         f"✅ <b>సబ్‌స్క్రిప్షన్ విజయవంతమైంది!</b> 🙏\n\n"
