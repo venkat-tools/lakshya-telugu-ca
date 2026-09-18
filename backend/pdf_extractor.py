@@ -158,7 +158,7 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
         raise RuntimeError(f"PDF ఫైల్ తెరవడంలో లోపం: {e}")
 
     extracted_pages = []
-    for page_idx in range(min(total_pages, 60)):  # Extract up to 60 pages
+    for page_idx in range(min(total_pages, 35)):  # Extract up to 35 high-yield pages for fast processing
         try:
             p_text = reader.pages[page_idx].extract_text()
             if p_text:

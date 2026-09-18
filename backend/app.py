@@ -52,6 +52,11 @@ FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "fr
 
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
 app.config['JSON_AS_ASCII'] = False  # Keep Telugu characters untranslated in JSON
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB upload limit
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return jsonify({"success": False, "error": "ఫైల్ పరిమాణం చాలా పెద్దది (గరిష్టంగా 50MB వరకు అనుమతి)."}), 413
 
 # Ensure DB has tables and initial seed data
 init_db()

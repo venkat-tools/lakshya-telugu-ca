@@ -289,7 +289,22 @@ def render_pdf_upload_html():
                     method: 'POST',
                     body: formData
                 }});
-                const data = await res.json();
+
+                let data;
+                const contentType = res.headers.get("content-type") || "";
+                if (contentType.includes("application/json")) {{
+                    data = await res.json();
+                }} else {{
+                    if (res.status === 502 || res.status === 503) {{
+                        throw new Error("సర్వర్ నూతన అప్‌డేట్‌తో రీస్టార్ట్ అవుతోంది. దయచేసి 30 సెకన్ల తర్వాత మళ్లీ అప్‌లోడ్ చేయండి.");
+                    }} else if (res.status === 504) {{
+                        throw new Error("ఫైల్ ప్రాసెస్ కావడానికి సమయం పట్టింది. దయచేసి తక్కువ పేజీలు గల PDF ని అప్‌లోడ్ చేయండి.");
+                    }} else if (res.status === 413) {{
+                        throw new Error("ఫైల్ పరిమాణం చాలా పెద్దది (గరిష్టంగా 50MB వరకు మాత్రమే).");
+                    }} else {{
+                        throw new Error("సర్వర్ నుండి సరైన సమాధానం రాలేదు (" + res.status + "). దయచేసి కొద్దిసేపటి తర్వాత మళ్లీ ప్రయత్నించండి.");
+                    }}
+                }}
 
                 if (data && data.success) {{
                     statusBox.className = 'mt-6 p-4 rounded-2xl border bg-emerald-50 border-emerald-300 text-emerald-950 text-xs leading-relaxed';
