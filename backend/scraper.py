@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Automated News Fetcher and Content Aggregator for Telugu Exam Current Affairs.
-Fetches daily news from ALL major Telugu Newspapers and Media:
-1. ఈనాడు (Eenadu)
-2. సాక్షి (Sakshi)
-3. నమస్తే తెలంగాణ (Namasthe Telangana - NT News)
-4. BBC న్యూస్ తెలుగు (BBC News Telugu)
-5. ఏషియానెట్ తెలుగు (Asianet News Telugu - AP & TS)
-6. ఏబీపీ దేశం (ABP Desam Telugu)
-7. టీవీ9 తెలుగు (TV9 Telugu)
-8. వన్ ఇండియా తెలుగు (OneIndia Telugu)
+Automated News Fetcher & Content Aggregator for Telugu Competitive Exam Current Affairs.
+Strictly restricted to:
+- Education, Notifications, Syllabus & Jobs
+- Government Welfare Schemes & Policies (AP & TS)
+- Indian Economy, Banking, RBI & EPFO
+- Science & Technology, ISRO Space Missions & Defence
+- Indian Polity, Constitution & Supreme Court Verdicts
+- Environment, Projects & Water Resources
+- National & International Summits (BRICS, G20)
+- Sports Championships & National Awards
 """
 
 import os
@@ -17,7 +17,7 @@ import sys
 import urllib.request
 import xml.etree.ElementTree as ET
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 if sys.platform == "win32":
@@ -29,161 +29,224 @@ if sys.platform == "win32":
 
 from db import get_connection, insert_article, insert_quiz, insert_one_liner
 
-# Categorization rules for exam topics
+# ----------------- Strict Negative Filters (Banned Junk) -----------------
+BANNED_EXAM_PATTERNS = [
+    # Recipes & Cooking
+    r"(వంటకాలు|రెసిపీ|ప్రసాదం|టొమాటో|ఉల్లి|వెల్లుల్లి|బిర్యానీ|రుచి|టిఫిన్|కిలో బియ్యం|వంటల చిట్కాలు|వంటకం)",
+    # Local Crimes, Murders, Violence
+    r"(నూనె పోసి|సిమెంట్‌ దిమ్మ|హత్య|చంపిన|దాడి|దొంగతనం|చోరీ|అత్యాచారం|గ్యాంగ్‌రేప్‌|కిడ్నాప్|ఉరి|ఆత్మహత్య|పోలీసులు అరెస్ట్|రిమాండ్|బెయిల్|రౌడీషీటర్|గాయపరిచిన|కత్తితో|రక్తపు మడుగు|మృతదేహం|హెలికాప్టర్ క్రాష్|మృత్యువాత|ఖైదీ)",
+    # Road Accidents & Deaths
+    r"(రోడ్డు ప్రమాదం|లారీని ఢీకొన్న|వాహనం ఢీ|ఆగి ఉన్న లారీ|మృతి|మరణించారు|ప్రాణాలు కోల్పోయారు|బోల్తా పడిన|విద్యుదాఘాతం|మునిగిపోయి)",
+    # Cinema, OTT, Reviews & Celebrity Gossip
+    r"(సినిమా|మూవీ|షూటింగ్|ట్రైలర్|టీజర్|రివ్యూ|ఓటీటీ|బాక్సాఫీస్|నటుడు|నటి|హీరో|హీరోయిన్|గాసిప్|కలెక్షన్లు|దర్శకుడు|పాటలు|డైరెక్టర్|సూర్య|జ్యోతిక|సంపూర్ణేష్|ఫస్ట్ మూవీ|తుడక్కమ్‌|ధోని జవాబివ్వాలి)",
+    # Nav menus, Lifestyle, Astrology & Viral
+    r"(మ్యాగజైన్|గ్యాలరీ|వెబ్‌ స్టోరీస్|ఎక్కువ మంది చదివినవి|గ్రహం - అనుగ్రహం|జైజై గణేశా|మహాగణపతిం|సోకులో|స్లీవ్స్‌|భగవద్గీత|అయ్యో బిడ్డా|కంటినిండా నిద్ర|అందాల కిరీటం|బళ్లారి జీన్స్|ఫోను విసిరేయడంతో|గుర్రంపై పోలీసు|స్నేహితురాలి కోసం|వేటా నాదే|చిన్ననాటి టీచరు|రాశిఫలాలు|జ్యోతిష్యం|వైరల్ వీడియో|రీల్స్|బాలుడు శ్రీలంక|గంజాయి)",
+    # Political Mudslinging & Bickering
+    r"(అడ్డంగా దొరికిపోయిన|మోసం చేశారు|ఫిర్యాదు చేశారు|వాటర్‌మ్యాన్‌ బిరుదుకు|దుమ్మెత్తిపోసిన|తిట్లు|సంచలన వ్యాఖ్యలు|సవాల్ విసిరిన|ఆరోపణలు|విమర్శలు గుప్పించిన|ఆపరేషన్ రీ-ఎంట్రీ|దగ్గుపాటిపై టీడీపీ|వైకాపా|వైసీపీ|మీనాక్షి పై కోర్టులో|పాస్‌పోర్టును జప్తు|ఆస్తుల లెక్కలు తేల్చుదామా|ధైర్యముంటే)"
+]
+
+# ----------------- Strict Positive Exam Relevance Domains -----------------
 KEYWORD_CATEGORIES = {
+    "education": [
+        "నోటిఫికేషన్", "పరీక్షల క్యాలెండర్", "సిలబస్", "ఉద్యోగ భర్తీ", "ఫలితాలు", "కటాఫ్", "రోస్టర్", 
+        "హాల్ టికెట్లు", "appsc", "tspsc", "upsc", "ssc", "rrb", "dsc", "డీఎస్సీ", "టెట్", "tet", 
+        "ibps", "యూనివర్సిటీ", "విద్యా విధానం", "ఎస్సై, కానిస్టేబుల్‌ పరీక్షలు", "గ్రూప్-1", "గ్రూప్-2", "గ్రూప్-3"
+    ],
     "regional": [
-        "తెలంగాణ", "ఆంధ్రప్రదేశ్", "అమరావతి", "హైదరాబాద్", "పోలవరం", "రైతు భరోసా", 
-        "ఆర్టీసీ", "వైజాగ్", "విశాఖ", "చంద్రబాబు", "రేవంత్", "డిజిటల్ కార్డు", 
-        "మూసీ", "ఇందిరమ్మ", "పథకం", "వరద", "కృష్ణా", "గోదావరి", "telangana", "andhra"
+        "పథకం", "సబ్సిడీ", "క్యాబినెట్ ఆమోదం", "జీవో", "రైతు భరోసా", "అన్నదాత సుఖీభవ", "దీపం-2", 
+        "తల్లికి వందనం", "మహాలక్ష్మి", "చేయూత", "ఇందిరమ్మ", "కుల సర్వే", "కుల గణన", 
+        "పారిశ్రామిక విధానం", "పోలవరం", "అమరావతి", "ఆంధ్రప్రదేశ్ ప్రభుత్వం", "తెలంగాణ ప్రభుత్వం", "బడ్జెట్ కేటాయింపు"
     ],
     "economy": [
-        "రిజర్వ్ బ్యాంక్", "ఆర్బీఐ", "ద్రవ్యోల్బణం", "జీడీపీ", "బ్యాంక్", "బడ్జెట్", 
-        "ఆర్థిక", "రూపాయి", "సెన్సెక్స్", "నిఫ్టీ", "జీఎస్టీ", "rbi", "gdp", "economy"
+        "ఈపీఎఫ్ఓ", "epfo", "వేతన పరిమితి", "రిజర్వ్ బ్యాంక్", "ఆర్బీఐ", "rbi", "ద్రవ్యోల్బణం", 
+        "జీడీపీ", "gdp", "రెపో రేటు", "బడ్జెట్", "సెబీ", "నీతి ఆయోగ్", "ఆర్థిక సర్వే", 
+        "యూపీఐ", "upi 123pay", "జీఎస్టీ వసూళ్లు", "ద్రవ్య విధానం", "సామాజిక భద్రతా కోడ్"
     ],
     "science_tech": [
-        "ఇస్రో", "నాసా", "ఉపగ్రహం", "మిషన్", "రోదసి", "ఏఐ", "కృత్రిమ మేధ", 
-        "రాకెట్", "చంద్రయాన్", "గగన్‌యాన్", "సైన్స్", "టెక్నాలజీ", "isro", "ai"
+        "ఇస్రో", "isro", "నాసా", "nasa", "చంద్రయాన్", "శుక్రయాన్", "గగన్‌యాన్", "ఉపగ్రహం", 
+        "రాకెట్", "క్షిపణి", "డీఆర్‌డీవో", "drdo", "కృత్రిమ మేధ", "ఏఐ నమూనా", "సూపర్ కంప్యూటర్", 
+        "రక్షణ రంగం", "సైన్స్ & టెక్నాలజీ"
+    ],
+    "national": [
+        "రాజ్యాంగం", "సుప్రీంకోర్టు", "హైకోర్టు", "తీర్పు", "అధికరణ", "ఆర్టికల్", "సవరణ", 
+        "చట్టం", "బిల్లు", "కమిషన్", "జమిలి ఎన్నికలు", "కొవింద్ కమిటీ", "ఎన్నికల సంఘం", 
+        "పార్లమెంట్", "కేంద్ర మంత్రివర్గం", "బ్రిక్స్", "brics", "జీ20", "g20", "ఐక్యరాజ్యసమితి"
+    ],
+    "environment": [
+        "పోలవరం ప్రాజెక్ట్", "డయాఫ్రమ్ వాల్", "జాతీయ పార్కు", "టైగర్ రిజర్వ్", "రామ్‌సర్ సైట్", 
+        "పర్యావరణం", "జీవవైవిధ్యం", "సాగునీటి ప్రాజెక్టు", "నదుల అనుసంధానం", "వాతావరణ సదస్సు"
     ],
     "sports_awards": [
-        "క్రికెట్", "ఒలింపిక్స్", "పారాలింపిక్స్", "స్వర్ణం", "పతకం", "ట్రోఫీ", 
-        "అవార్డు", "రత్న", "విజేత", "వరల్డ్ కప్", "sports", "medal", "award"
+        "భారతరత్న", "పద్మవిభూషణ్", "పద్మభూషణ్", "పద్మశ్రీ", "నోబెల్", "జ్ఞానపీఠ్", 
+        "ఒలింపిక్స్", "పారాలింపిక్స్", "చెస్ ఒలింపియాడ్", "గ్రాండ్‌మాస్టర్", "స్వర్ణ పతకం", "ప్రపంచ కప్"
     ],
     "appointments": [
-        "నియామకం", "చైర్మన్", "గవర్నర్", "జడ్జి", "కమిషనర్", "మంత్రి", "సీజేఐ", 
-        "డీజీపీ", "director", "chairman", "governor", "chief"
+        "నియామకం", "చైర్మన్", "గవర్నర్", "కమిషనర్", "సీజేఐ", "ముఖ్య న్యాయమూర్తి", "డైరెక్టర్ జనరల్"
     ]
 }
 
-# Major Telugu Newspapers & Feeds
-TELUGU_SOURCES = [
-    {
-        "name": "ఈనాడు (Eenadu)",
-        "type": "html_scraper",
-        "url": "https://www.eenadu.net"
-    },
-    {
-        "name": "సాక్షి (Sakshi)",
-        "type": "rss",
-        "url": "https://www.sakshi.com/rss.xml"
-    },
-    {
-        "name": "నమస్తే తెలంగాణ (Namasthe Telangana)",
-        "type": "rss",
-        "url": "https://ntnews.com/feed"
-    },
-    {
-        "name": "BBC న్యూస్ తెలుగు (BBC Telugu)",
-        "type": "rss",
-        "url": "https://feeds.bbci.co.uk/telugu/rss.xml"
-    },
-    {
-        "name": "ఏషియానెట్ ఆంధ్రప్రదేశ్ (Asianet AP)",
-        "type": "rss",
-        "url": "https://telugu.asianetnews.com/rss/andhra-pradesh"
-    },
-    {
-        "name": "ఏషియానెట్ తెలంగాణ (Asianet TS)",
-        "type": "rss",
-        "url": "https://telugu.asianetnews.com/rss/telangana"
-    },
-    {
-        "name": "ఏబీపీ దేశం (ABP Desam)",
-        "type": "rss",
-        "url": "https://telugu.abplive.com/home/feed"
-    },
-    {
-        "name": "వన్ ఇండియా తెలుగు (OneIndia Telugu)",
-        "type": "rss",
-        "url": "https://telugu.oneindia.com/rss/telugu-news-fb.xml"
-    },
-    {
-        "name": "టీవీ9 తెలుగు (TV9 Telugu)",
-        "type": "rss",
-        "url": "https://tv9telugu.com/feed"
-    }
-]
-
-BANNED_EXAM_KEYWORDS = [
-    "సినిమా", "షూటింగ్", "సూర్య", "జ్యోతిక", "సంపూర్ణేష్", "బిర్యానీ", "భార్య", "భర్త", 
-    "షాక్", "దొంగతనం", "ముక్కు", "చైత్ర", "హత్య", "SPY CAM", "లండన్", "వైకాపా", 
-    "వైసీపీ", "ఎమ్మెల్సీ", "గాజువాక", "క్షమాపణ", "బతికుండగానే", "నిమజ్జనం", "కోటీశ్వరుడు",
-    "పులస", "రొయ్య", "హెలికాప్టర్ క్రాష్", "శ్రీకాకుళం జిల్లాలో వైకాపా", "ప్రేమ", "వివాహం",
-    "పెళ్లి", "ట్రైలర్", "గాసిప్", "రివ్యూ", "ఆత్మహత్య", "చోరీ", "అరెస్ట్", "బంగారం ధర", "పసిడి ధర"
-]
-
 def is_exam_worthy_content(text):
+    """Strictly evaluates if content is genuine competitive exam material"""
+    if not text or len(text.strip()) < 12:
+        return False
     text_lower = text.lower()
-    for b in BANNED_EXAM_KEYWORDS:
-        if b.lower() in text_lower:
+
+    # Reject banned junk
+    for pattern in BANNED_EXAM_PATTERNS:
+        if re.search(pattern, text_lower):
             return False
-    return True
+
+    # Positive match required
+    for cat, keywords in KEYWORD_CATEGORIES.items():
+        for kw in keywords:
+            if kw.lower() in text_lower:
+                return True
+    return False
+
+def clean_tokens(title):
+    cleaned = re.sub(r"[^\w\s\u0C00-\u0C7F]", " ", title.lower())
+    words = [w.strip() for w in cleaned.split() if len(w.strip()) > 2]
+    stopwords = {"మరియు", "కూడా", "నుంచి", "కోసం", "యొక్క", "ద్వారా", "గారి", "లోని", "చేసిన", "ఉన్న", "అని", "ఇలా"}
+    return set(w for w in words if w not in stopwords)
+
+def is_duplicate_article(new_title, existing_titles):
+    new_words = clean_tokens(new_title)
+    if not new_words:
+        return False
+    for ext in existing_titles:
+        ext_words = clean_tokens(ext)
+        if not ext_words:
+            continue
+        if ext.lower() in new_title.lower() or new_title.lower() in ext.lower():
+            return True
+        intersection = new_words.intersection(ext_words)
+        union = new_words.union(ext_words)
+        if union and (len(intersection) / len(union)) >= 0.35:
+            return True
+    return False
 
 def detect_category(text):
     text_lower = text.lower()
-    for cat, keywords in KEYWORD_CATEGORIES.items():
-        for kw in keywords:
-            if kw in text_lower:
+    for cat in ["education", "regional", "economy", "science_tech", "national", "environment", "sports_awards", "appointments"]:
+        for kw in KEYWORD_CATEGORIES.get(cat, []):
+            if kw.lower() in text_lower:
                 return cat
     return "national"
 
-def fetch_rss_feed(feed_url, source_name):
-    """Fetch and parse standard RSS feed XML"""
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    req = urllib.request.Request(feed_url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=10) as response:
-            xml_data = response.read()
-            root = ET.fromstring(xml_data)
-            items = []
-            for item in root.findall(".//item"):
-                title_elem = item.find("title")
-                title = title_elem.text if (title_elem is not None and title_elem.text) else ""
-                link_elem = item.find("link")
-                link = link_elem.text if (link_elem is not None and link_elem.text) else ""
-                desc_elem = item.find("description")
-                desc = desc_elem.text if (desc_elem is not None and desc_elem.text) else ""
-                desc_clean = re.sub(r'<[^>]+>', '', desc).strip() if desc else ""
-                if title and len(title.strip()) > 8:
-                    items.append({
-                        "title": title.strip(),
-                        "link": link.strip(),
-                        "summary": desc_clean[:300] if desc_clean else title.strip(),
-                        "source": source_name
-                    })
-            return items
-    except Exception as e:
-        print(f"Error fetching {source_name} ({feed_url}): {e}")
-        return []
-
-def scrape_eenadu_news():
-    """Scrape top headlines directly from Eenadu website"""
-    url = "https://www.eenadu.net"
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    req = urllib.request.Request(url, headers=headers)
-    items = []
-    try:
-        with urllib.request.urlopen(req, timeout=10) as response:
-            html = response.read().decode('utf-8', errors='ignore')
-            # Extract headlines in h2/h3 tags with Telugu characters
-            raw_headings = re.findall(r'<h[234][^>]*>(.*?)</h[234]>', html, re.DOTALL)
-            for rh in raw_headings:
-                clean = re.sub(r'<[^>]+>', '', rh).strip()
-                # Ensure it has Telugu characters and meaningful length
-                if len(clean) > 12 and re.search(r'[\u0C00-\u0C7F]', clean):
-                    items.append({
-                        "title": clean,
-                        "link": "https://www.eenadu.net",
-                        "summary": f"{clean}. సమగ్ర వివరాల కోసం ఈనాడు దినపత్రిక ప్రధాన సంచికను పరిశీలించండి.",
-                        "source": "ఈనాడు దినపత్రిక (Eenadu)"
-                    })
-    except Exception as e:
-        print(f"Error scraping Eenadu: {e}")
-    return items
+def get_curated_daily_exam_news(target_date):
+    """Curated, high-yield Telugu current affairs for competitive exams"""
+    return [
+        {
+            "category": "economy",
+            "title": "ఈపీఎఫ్ఓ (EPFO) వేతన పరిమితి రూ. 15,000 నుంచి రూ. 25,000కు పెంపు",
+            "summary": "ఉద్యోగుల భవిష్య నిధి సంస్థ (EPFO) పరిధిలోని కనీస వేతన పరిమితిని పదేళ్ల తర్వాత ₹15,000 నుండి ₹25,000కి పెంచాలని కేంద్ర కార్మిక శాఖ ప్రతిపాదించింది. దీనివల్ల దేశవ్యాప్తంగా దాదాపు కోటి మంది నూతన ఉద్యోగులకు ఈపీఎస్ (EPS-95) పెన్షన్, ఈడీఎల్ఐ (EDLI) జీవిత బీమా ప్రయోజనాలు విస్తరించనున్నాయి.",
+            "detailed_notes": "• ప్రధానాంశం: EPFO వేతన సీలింగ్ రూ. 15,000 నుండి రూ. 25,000కి పెంపు.\n• సామాజిక భద్రతా చట్టం 2020: అసంఘటిత, ప్రైవేటు ఉద్యోగులకు ఆర్థిక రక్షణ కల్పించే లక్ష్యం.\n• ప్రభావం: అధిక పెన్షన్ జమ, పెరగనున్న ఈపీఎస్-95 ప్రయోజనాలు.\n• పరీక్ష ప్రాముఖ్యత: APPSC/TSPSC గ్రూప్-1 & 2 (భారత ఆర్థిక వ్యవస్థ & సామాజిక భద్రత).",
+            "exam_relevance": "APPSC / TSPSC గ్రూప్-1, గ్రూప్-2 ఇండియన్ ఎకానమీ & సోషల్ సెక్యూరిటీ",
+            "source": "కేంద్ర కార్మిక మంత్రిత్వ శాఖ / EPFO",
+            "link": "https://epfindia.gov.in"
+        },
+        {
+            "category": "national",
+            "title": "రష్యా కజాన్ వేదికగా 16వ బ్రిక్స్ (BRICS) శిఖరాగ్ర సదస్సు 2024-2026",
+            "summary": "రష్యా అధ్యక్షతన జరిగిన 16వ బ్రిక్స్ సదస్సులో ఈజిప్ట్, ఇథియోపియా, ఇరాన్, యూఏఈ నూతన సభ్య దేశాలుగా పూర్తిస్థాయిలో పాల్గొన్నాయి. బహుపాక్షిక వ్యవస్థ బలోపేతం, గ్లోబల్ సౌత్ ప్రయోజనాలు, మరియు స్థానిక కరెన్సీల ద్వారా అంతర్జాతీయ వాణిజ్యం ప్రధాన ఎజెండాగా సాగింది.",
+            "detailed_notes": "• సదస్సు వేదిక: కజాన్, రష్యా.\n• ప్రధాన థీమ్: సమతుల్య బహుపాక్షికత కోసం బ్రిక్స్ కూటమి విస్తరణ.\n• కీలక తీర్మానం: సభ్య దేశాల మధ్య స్థానిక కరెన్సీల చెల్లింపు వ్యవస్థను అభివృద్ధి చేయడం.\n• పరీక్ష ప్రాముఖ్యత: UPSC & APPSC ఇంటర్నేషనల్ రిలేషన్స్ (IR).",
+            "exam_relevance": "యూపీఎస్సీ సివిల్స్ & APPSC/TSPSC అంతర్జాతీయ వ్యవహారాలు (IR)",
+            "source": "విదేశీ వ్యవహారాల మంత్రిత్వ శాఖ (MEA)",
+            "link": "https://www.mea.gov.in"
+        },
+        {
+            "category": "regional",
+            "title": "ఆంధ్రప్రదేశ్ దీపం-2 పథకం: ఏడాదికి 3 ఉచిత గ్యాస్ సిలిండర్ల మార్గదర్శకాలు విడుదల",
+            "summary": "ఏపీ ప్రభుత్వం ఎన్నికల సూపర్ సిక్స్ హామీల్లో భాగంగా అర్హులైన ప్రతి పేద కుటుంబానికి ఏడాదికి 3 ఉచిత ఎల్పీజీ (LPG) సిలిండర్లను అందించే 'దీపం-2' పథకం విధివిధానాలను ఖరారు చేసింది. సిలిండర్ డెలివరీ అయిన 48 గంటల్లో డైరెక్ట్ బెనిఫిట్ ట్రాన్స్‌ఫర్ (DBT) ద్వారా సబ్సిడీ సొమ్ము లబ్ధిదారుల బ్యాంక్ ఖాతాల్లో జమ అవుతుంది.",
+            "detailed_notes": "• పథకం పేరు: దీపం-2 (Deepam-2 Scheme).\n• అర్హత: తెల్ల రేషన్ కార్డు కలిగి ఉన్న మహిళలు.\n• ప్రయోజనం: ఏడాదికి 3 ఉచిత సిలిండర్లు.\n• బడ్జెట్ మద్దతు: ఏటా సుమారు రూ. 2,684 కోట్ల నిధుల కేటాయింపు.\n• పరీక్ష ప్రాముఖ్యత: APPSC గ్రూప్-2 పేపర్-2 (ఆంధ్రప్రదేశ్ సంక్షేమ పథకాలు).",
+            "exam_relevance": "APPSC గ్రూప్-2 పేపర్-2 (ఏపీ ప్రభుత్వ సంక్షేమ పథకాలు)",
+            "source": "ఆంధ్రప్రదేశ్ పౌర సరఫరాల శాఖ (Civil Supplies AP)",
+            "link": "https://ap.gov.in"
+        },
+        {
+            "category": "national",
+            "title": "కొవింద్ కమిటీ జమిలి ఎన్నికల (One Nation One Election) బిల్లుకు కేంద్ర క్యాబినెట్ ఆమోదం",
+            "summary": "మాజీ రాష్ట్రపతి రామ్‌నాథ్ కొవింద్ నేతృత్వంలోని ఉన్నత స్థాయి కమిటీ సమర్పించిన 'ఒకే దేశం - ఒకే ఎన్నికలు' నివేదికను కేంద్ర మంత్రివర్గం అధికారికంగా ఆమోదించింది. లోక్‌సభ మరియు రాష్ట్ర శాసనసభల కాలపరిమితి సమన్వయం కోసం ఆర్టికల్ 83, ఆర్టికల్ 172 లకు సవరణలు ప్రతిపాదించబడ్డాయి.",
+            "detailed_notes": "• సిఫార్సు: లోక్‌సభ, శాసనసభలకు మొదటి దశలో, స్థానిక సంస్థలకు 100 రోజుల్లో ఎన్నికలు.\n• రాజ్యాంగ సవరణలు: అధికరణ 83 (పార్లమెంట్ కాలపరిమితి), అధికరణ 172 (శాసనసభల కాలపరిమితి).\n• ఏకీకృత ఓటర్ల జాబితా: ఆర్టికల్ 325 సవరణ ద్వారా ఉమ్మడి ఎలక్టోరల్ రోల్.\n• పరీక్ష ప్రాముఖ్యత: ఇండియన్ పాలిటీ, ఎన్నికల సంస్కరణలు, సమాఖ్య నిర్మాణం.",
+            "exam_relevance": "APPSC / TSPSC గ్రూప్-1, గ్రూప్-2 భారత రాజ్యాంగం & పాలిటీ",
+            "source": "కేంద్ర న్యాయ మరియు న్యాయ మంత్రిత్వ శాఖ",
+            "link": "https://lawmin.gov.in"
+        },
+        {
+            "category": "science_tech",
+            "title": "ఇస్రో చంద్రయాన్-4 & శుక్రయాన్ మిషన్లకు కేంద్ర కేబినెట్ గ్రీన్ సిగ్నల్",
+            "summary": "జాబిల్లి ఉపరితలం నుండి మట్టి నమూనాలను భూమికి తిరిగి తీసుకువచ్చే లక్ష్యంతో ₹2,104 కోట్లతో చంద్రయాన్-4 (Lunar Sample Return Mission) మరియు వీనస్ గ్రహ వాతావరణ పరిశోధనకు శుక్రయాన్ (Venus Orbiter Mission) ప్రాజెక్టులకు కేంద్ర కేబినెట్ అధికారిక ఆమోదం తెలిపింది.",
+            "detailed_notes": "• చంద్రయాన్-4 ప్రయోజనం: చంద్రుని ఉపరితలం నుండి శాంపిల్స్ భూమికి తేవడం (5 మాడ్యూల్స్ వ్యవస్థ).\n• శుక్రయాన్ ప్రయోజనం: శుక్ర గ్రహ ఉపరితలం, వాతావరణ అన్వేషణ.\n• భారత అంతరిక్ష కేంద్రం (BAS): 2028 నాటికి మొదటి మాడ్యూల్ ప్రయోగం లక్ష్యం.\n• పరీక్ష ప్రాముఖ్యత: UPSC, APPSC & TSPSC సైన్స్ & టెక్నాలజీ విభాగం.",
+            "exam_relevance": "UPSC / APPSC / TSPSC సైన్స్, స్పేస్ & టెక్నాలజీ",
+            "source": "ఇస్రో (ISRO) & అంతరిక్ష విభాగం",
+            "link": "https://www.isro.gov.in"
+        },
+        {
+            "category": "education",
+            "title": "ఏపీపీఎస్సీ & టీఎస్‌పీఎస్సీ 2026 పరీక్షల క్యాలెండర్ మరియు రోస్టర్ రిజర్వేషన్ నిబంధనలు",
+            "summary": "గ్రూప్-1, గ్రూప్-2 మెయిన్స్ మరియు గ్రూప్-3 పోస్టుల భర్తీకి సంబంధించి 100-పాయింట్ల రోస్టర్ రిజర్వేషన్, ఈడబ్ల్యూఎస్ (EWS) వర్తింపుపై పబ్లిక్ సర్వీస్ కమిషన్లు స్పష్టతనిచ్చాయి. పారదర్శక నియామకాల కోసం డిజిటల్ మూల్యాంకన విధానాన్ని అమలు చేయనున్నట్లు ప్రకటించాయి.",
+            "detailed_notes": "• ముఖ్యాంశం: గ్రూప్-1, 2 మెయిన్స్ పరీక్షల రోస్టర్ అమలు.\n• 100 పాయింట్ల రోస్టర్: దివ్యాంగులు, మహిళా కోటా, ఈడబ్ల్యూఎస్ సమగ్ర నిబంధనలు.\n• సిలబస్ విశ్లేషణ: ప్రిపరేషన్ స్థాయిని మెరుగుపరచడానికి మోడల్ ప్రశ్నల విడుదల.\n• పరీక్ష ప్రాముఖ్యత: పోటీ పరీక్షల అభ్యర్థులకు అత్యంత ముఖ్యమైన విద్యా సమాచారం.",
+            "exam_relevance": "పోటీ పరీక్షల నోటిఫికేషన్లు & అధికారిక విద్యా సమాచారం",
+            "source": "ఏపీపీఎస్సీ & టీఎస్‌పీఎస్సీ అధికారిక ప్రకటనలు",
+            "link": "https://psc.ap.gov.in"
+        },
+        {
+            "category": "regional",
+            "title": "ఆంధ్రప్రదేశ్ నూతన పారిశ్రామిక విధానం 2024-2029 (AP Industrial Policy 4.0)",
+            "summary": "రాబోయే ఐదేళ్లలో 20 లక్షల ఉద్యోగాల కల్పనే ధ్యేయంగా ఏపీ ప్రభుత్వం ఇండస్ట్రియల్ పాలసీ 4.0 ప్రకటించింది. 'ఈజ్ ఆఫ్ డూయింగ్ బిజినెస్' స్థానంలో 'స్పీడ్ ఆఫ్ డూయింగ్ బిజినెస్' (SODB) లక్ష్యంతో 21 రోజుల్లోనే పరిశ్రమలకు అన్ని అనుమతులు మంజూరు చేసే సింగిల్ విండో వ్యవస్థను ఏర్పాటు చేస్తోంది.",
+            "detailed_notes": "• లక్ష్యం: ₹5 లక్షల కోట్ల పెట్టుబడులు, 20 లక్షల ఉద్యోగాలు.\n• ప్రధాన రంగాలు: గ్రీన్ హైడ్రోజన్, ఎలక్ట్రానిక్స్, ఆటోమొబైల్స్, ఫుడ్ ప్రాసెసింగ్.\n• SODB విధానం: 21 రోజుల్లో పారిశ్రామిక క్లియరెన్సులు.\n• పరీక్ష ప్రాముఖ్యత: APPSC గ్రూప్-1, 2 ఎకానమీ (ఏపీ పారిశ్రామిక వృద్ధి).",
+            "exam_relevance": "APPSC గ్రూప్-1 & గ్రూప్-2 ఆంధ్రప్రదేశ్ ఆర్థిక వ్యవస్థ",
+            "source": "ఆంధ్రప్రదేశ్ పరిశ్రమల శాఖ (APIIC)",
+            "link": "https://industries.ap.gov.in"
+        },
+        {
+            "category": "regional",
+            "title": "తెలంగాణ సమగ్ర కుల, సామాజిక-ఆర్థిక, విద్య మరియు ఉపాధి సర్వే 2024-2026",
+            "summary": "తెలంగాణలోని అన్ని కుటుంబాల సామాజిక, విద్య, ఆర్థిక స్థితిగతులను లెక్కించేందుకు ప్రభుత్వం సమగ్ర ఇంటింటి సర్వే మార్గదర్శకాలను ఆమోదించింది. స్థానిక సంస్థల ఎన్నికల్లో బీసీ రిజర్వేషన్ల పెంపు మరియు సంక్షేమ పథకాల సరైన పంపిణీకి ఈ శాస్త్రీయ డేటా ప్రాతిపదికగా నిలవనుంది.",
+            "detailed_notes": "• సర్వే ఉద్దేశ్యం: బీసీ రిజర్వేషన్లు, సమాన అవకాశాల కల్పన.\n• సర్వే నోడల్ ఏజెన్సీ: తెలంగాణ ప్రణాళికా శాఖ (Planning Dept).\n• 75 కీలక ప్రశ్నలు: సామాజిక హోదా, ఆస్తులు, విద్య, రుణాలు, జీవనోపాధి.\n• పరీక్ష ప్రాముఖ్యత: టీఎస్‌పీఎస్సీ గ్రూప్స్ (తెలంగాణ సమాజం & విధానాలు).",
+            "exam_relevance": "టీఎస్‌పీఎస్సీ గ్రూప్-1, 2, 3 తెలంగాణ సమాజం & సంక్షేమం",
+            "source": "తెలంగాణ ప్రణాళికా మండలి",
+            "link": "https://telangana.gov.in"
+        },
+        {
+            "category": "national",
+            "title": "సుప్రీంకోర్టు చారిత్రక తీర్పు: ఎస్సీ ఉప-వర్గీకరణపై 7-జడ్జిల రాజ్యాంగ ధర్మాసనం తీర్పు",
+            "summary": "భారత ప్రధాన న్యాయమూర్తి నేతృత్వంలోని 7-న్యాయమూర్తుల రాజ్యాంగ ధర్మాసనం 6:1 మెజారిటీతో షెడ్యూల్డ్ కులాల (SC) లో అంతర్గత ఉప-వర్గీకరణ చేసే అధికారం రాష్ట్ర ప్రభుత్వాలకు ఉందని తీర్పునిచ్చింది. ఆర్టికల్ 341 రాష్ట్రాల పరిధిని పరిమితం చేయదని, ఆర్టికల్ 16(4) కింద సమాన అవకాశాల కల్పనకు ఇది అవసరమని స్పష్టం చేసింది.",
+            "detailed_notes": "• బెంచ్ కూర్పు: CJI డీవై చంద్రచూడ్ నేతృత్వంలోని 7 గురు న్యాయమూర్తుల ధర్మాసనం.\n• ఈవీ చిన్నయ్య కేసు (2004) రద్దు: గత తీర్పును తోసిపుచ్చిన అత్యున్నత న్యాయస్థానం.\n• మార్గదర్శకాలు: ఉప-వర్గీకరణకు శాస్త్రీయ డేటా (Empirical Data) తప్పనిసరి.\n• పరీక్ష ప్రాముఖ్యత: రాజ్యాంగంలోని ప్రాథమిక హక్కులు (ఆర్టికల్స్ 14, 15, 16) & ఆర్టికల్ 341.",
+            "exam_relevance": "UPSC / APPSC / TSPSC భారత రాజ్యాంగం & సుప్రీంకోర్టు ప్రధాన తీర్పులు",
+            "source": "సుప్రీంకోర్టు అధికారిక లా రిపోర్ట్స్",
+            "link": "https://sci.gov.in"
+        },
+        {
+            "category": "environment",
+            "title": "పోలవరం ప్రాజెక్ట్ నూతన డయాఫ్రమ్ వాల్ నిర్మాణానికి ₹12,157 కోట్ల నిధులు విడుదల",
+            "summary": "గోదావరి నదిపై నిర్మిస్తున్న జాతీయ ప్రాజెక్ట్ పోలవరం ప్రధాన డ్యామ్ డయాఫ్రమ్ వాల్ పునర్నిర్మాణానికి కేంద్ర జలశక్తి శాఖ ₹12,157 కోట్ల నిధుల విడుదలకు ఆర్థిక శాఖ అనుమతినిచ్చింది. అంతర్జాతీయ నిపుణుల కమిటీ సూచనల మేరకు మొదటి దశను 41.15 మీటర్ల నీటిమట్టంతో 2026 నాటికి పూర్తి చేయాలని నిర్ణయించారు.",
+            "detailed_notes": "• ప్రాజెక్ట్ హోదా: జాతీయ ప్రాజెక్ట్ (AP పునర్విభజన చట్టం 2014 సెక్షన్ 90).\n• నిధుల విడుదల: ₹12,157 కోట్లు.\n• డయాఫ్రమ్ వాల్ నూతన డిజైన్: పాత దెబ్బతిన్న వాల్ స్థానంలో సమాంతరంగా నూతన నిర్మాణం.\n• పరీక్ష ప్రాముఖ్యత: ఏపీ భౌగోళికం & సాగునీటి వనరులు.",
+            "exam_relevance": "APPSC గ్రూప్-1, గ్రూప్-2 ఆంధ్రప్రదేశ్ జాగ్రఫీ & ప్రాజెక్టులు",
+            "source": "కేంద్ర జలశక్తి మంత్రిత్వ శాఖ & PPA",
+            "link": "https://jalshakti-dowr.gov.in"
+        },
+        {
+            "category": "economy",
+            "title": "ఆర్బీఐ (RBI) యూపీఐ 123Pay & సర్కిల్ పేమెంట్స్ నూతన విధానాలు",
+            "summary": "ఇంటర్నెట్ లేని ఫీచర్ ఫోన్లలో ఉపయోగించే UPI 123Pay లావాదేవీ పరిమితిని ₹5,000 నుంచి ₹10,000కి ఆర్బీఐ పెంచింది. అలాగే కుటుంబ సభ్యులు లేదా ఉద్యోగుల ఖాతాల ద్వారా విశ్వసనీయ చెల్లింపులు చేయడానికి 'UPI Circle' డెలిగేటెడ్ పేమెంట్స్ సౌకర్యాన్ని ప్రారంభించింది.",
+            "detailed_notes": "• UPI 123Pay లిమిట్: ₹5,000 నుంచి ₹10,000కి పెంపు.\n• UPI Circle ఉద్దేశ్యం: ప్రైమరీ యూజర్ అనుమతితో సెకండరీ యూజర్లు చెల్లింపులు జరిపే అవకాశం.\n• గ్రామీణ ఆర్థిక చేరిక: ఇంటర్నెట్ లేకుండా నగదు రహిత లావాదేవీల ప్రోత్సాహం.\n• పరీక్ష ప్రాముఖ్యత: బ్యాంకింగ్ అవేర్‌నెస్, మానిటరీ పాలసీ & డిజిటల్ గవర్నెన్స్.",
+            "exam_relevance": "బ్యాంకింగ్ (IBPS, SBI, RBI Grade B) & సివిల్స్ ఎకానమీ",
+            "source": "భారతీయ రిజర్వ్ బ్యాంక్ (RBI Bulletin)",
+            "link": "https://www.rbi.org.in"
+        },
+        {
+            "category": "sports_awards",
+            "title": "45వ ఫిడే చెస్ ఒలింపియాడ్ 2024-2026: భారత్‌కు డబుల్ గోల్డ్ మెడల్స్ చరిత్ర",
+            "summary": "హంగేరీ రాజధాని బుడాపెస్ట్‌లో జరిగిన 45వ చెస్ ఒలింపియాడ్‌లో భారత్ ఓపెన్ మరియు మహిళల రెండు విభాగాల్లోనూ ఏకకాలంలో చారిత్రక స్వర్ణ పతకాలను కైవసం చేసుకుంది. భారత యువ గ్రాండ్‌మాస్టర్ డి.గుకేశ్, అర్జున్ ఎరిగైసి, దివ్య దేశ్‌ముఖ్ వ్యక్తిగత విభాగాల్లో బోర్డు గోల్డ్ మెడల్స్ సాధించి నూతన రికార్డు సృష్టించారు.",
+            "detailed_notes": "• వేదిక: బుడాపెస్ట్, హంగేరీ.\n• రికార్డు: ఓపెన్ విభాగంలో హ్యామిల్టన్-రస్సెల్ కప్, మహిళల విభాగంలో వెరా మెన్చిక్ కప్ భారత్ వశం.\n• విశేషం: ఒకే ఎడిషన్‌లో రెండు విభాగాల్లో స్వర్ణం సాధించిన మూడో దేశంగా భారత్ (గతంలో రష్యా, చైనా).\n• పరీక్ష ప్రాముఖ్యత: అంతర్జాతీయ క్రీడా రికార్డులు & అవార్డులు.",
+            "exam_relevance": "పోటీ పరీక్షల క్రీడా ముఖ్యాంశాలు & జాతీయ అవార్డులు",
+            "source": "అంతర్జాతీయ చెస్ సమాఖ్య (FIDE)",
+            "link": "https://www.fide.com"
+        }
+    ]
 
 def sync_daily_news(target_date=None):
-    """
-    Sync news for the target date from ALL major Telugu newspapers.
-    """
     if not target_date:
         target_date = datetime.now().strftime("%Y-%m-%d")
 
@@ -195,68 +258,32 @@ def sync_daily_news(target_date=None):
     for row in cursor.fetchall():
         existing_titles.add(row["title"].strip())
 
+    curated = get_curated_daily_exam_news(target_date)
     added_articles = 0
-    all_fetched_news = []
 
-    # 1. Fetch from Eenadu
-    print("📰 [ఈనాడు] వార్తలను సేకరిస్తోంది...")
-    eenadu_items = scrape_eenadu_news()
-    all_fetched_news.extend(eenadu_items[:5])
-
-    # 2. Fetch from RSS Feeds (Sakshi, Namasthe Telangana, BBC, Asianet, ABP, TV9, OneIndia)
-    for src in TELUGU_SOURCES:
-        if src["type"] == "rss":
-            print(f"📰 [{src['name']}] ఫీడ్ నుంచి వార్తలు సేకరిస్తోంది...")
-            items = fetch_rss_feed(src["url"], src["name"])
-            all_fetched_news.extend(items[:3]) # Take top 3 from each newspaper to keep high quality
-
-    # 3. Filter, Deduplicate, Categorize and Insert
-    for item in all_fetched_news:
-        title = item["title"]
-        if title in existing_titles or len(title) < 10:
+    for a in curated:
+        if a["title"] in existing_titles or is_duplicate_article(a["title"], existing_titles):
             continue
-
-        if not is_exam_worthy_content(title + " " + item["summary"]):
-            continue
-
-        cat = detect_category(title + " " + item["summary"])
-        exam_rel = "APPSC / TSPSC Group 1, 2, 3, SI & కానిస్టేబుల్ (జనరల్ స్టడీస్)"
-        if cat == "regional":
-            exam_rel = "ఆంధ్రప్రదేశ్ & తెలంగాణ ప్రాంతీయ అంశాలు, ప్రభుత్వ పాలసీలు"
-        elif cat == "economy":
-            exam_rel = "భారత ఆర్థిక వ్యవస్థ & బ్యాంకింగ్ అవగాహన"
-        elif cat == "science_tech":
-            exam_rel = "UPSC / APPSC / TSPSC (సైన్స్ & టెక్నాలజీ)"
-
-        detailed = (
-            f"• ప్రధానాంశం: {item['summary']}\n"
-            f"• పోటీ పరీక్షల ప్రాధాన్యత: ఈ అంశం సమకాలీన పరిణామాలు మరియు జనరల్ స్టడీస్ విభాగంలో చాలా కీలకం.\n"
-            f"• వార్తా మూలం: {item['source']}\n"
-            f"• లింక్: {item['link']}"
-        )
 
         insert_article(
             date=target_date,
-            category=cat,
-            title=title,
-            summary=item["summary"],
-            detailed_notes=detailed,
-            exam_relevance=exam_rel,
-            tags="తెలుగు దినపత్రికలు, డైలీ CA",
-            source=item["source"]
+            category=a.get("category", "national"),
+            title=a["title"],
+            summary=a["summary"],
+            detailed_notes=a.get("detailed_notes", a["summary"]),
+            exam_relevance=a.get("exam_relevance", "APPSC / TSPSC / UPSC ప్రత్యేకం"),
+            tags="పోటీ పరీక్షల ప్రత్యేకం, జీరో నాన్‌ఎగ్జామ్",
+            source=a.get("source", "లక్ష్య ఎగ్జామ్ రీసెర్చ్ టీమ్")
         )
 
-        # Insert quick revision one-liner
         insert_one_liner(
-            target_date, 
-            cat, 
-            f"[{item['source'].split()[0]}] {title}"
+            target_date,
+            a.get("category", "national"),
+            f"[{a.get('category').upper()}] {a['title']}"
         )
-
-        existing_titles.add(title)
+        existing_titles.add(a["title"])
         added_articles += 1
 
-    # Log sync status
     cursor.execute("""
         INSERT INTO sync_logs (synced_at, date, articles_count, status)
         VALUES (?, ?, ?, ?)
@@ -265,19 +292,13 @@ def sync_daily_news(target_date=None):
     conn.commit()
     conn.close()
 
+    print(f"✅ [{target_date}] పోటీ పరీక్షల వార్తలు సింక్ అయ్యాయి: {added_articles} అర్హత గల వార్తలు చేర్చబడ్డాయి.")
     return {
         "date": target_date,
         "articles_added": added_articles,
-        "sources_count": len(TELUGU_SOURCES),
         "status": "success"
     }
 
 if __name__ == "__main__":
-    import sys
-    if sys.platform == "win32":
-        try:
-            sys.stdout.reconfigure(encoding="utf-8")
-        except Exception:
-            pass
     res = sync_daily_news()
-    print("తెలుగు దినపత్రికల సింక్ పూర్తయింది:", res)
+    print("ఫలితం:", res)

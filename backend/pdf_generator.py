@@ -111,28 +111,20 @@ OFFICIAL_TELUGU_EPAPERS = [
 ]
 
 CATEGORY_LABELS = {
-    "national": "🏛️ జాతీయ అంశాలు & రాజ్యాంగం (National Affairs & Polity)",
-    "regional": "🌾 ఆంధ్రప్రదేశ్ & తెలంగాణ పాలసీలు (AP & TS Schemes & Policies)",
-    "economy": "📈 ఆర్థిక రంగం & బ్యాంకింగ్ (Economy & Banking)",
+    "education": "🎓 విద్యా, ఉద్యోగాలు & నోటిఫికేషన్లు (Education & Job Notifications)",
+    "regional": "🌾 ఆంధ్రప్రదేశ్ & తెలంగాణ ప్రభుత్వ పథకాలు (AP & TS Schemes & Policies)",
+    "economy": "📈 ఆర్థిక రంగం, బ్యాంకింగ్ & EPFO (Economy & Banking)",
+    "national": "🏛️ జాతీయ అంశాలు, రాజ్యాంగం & పాలిటీ (National Affairs & Polity)",
     "science_tech": "🚀 సైన్స్, టెక్నాలజీ, ఇస్రో & రక్షణ (Science, Tech & Defence)",
+    "environment": "🌍 పర్యావరణం & సాగునీటి ప్రాజెక్టులు (Environment & Projects)",
     "sports_awards": "🏆 క్రీడలు & అవార్డులు (Sports & Awards)",
-    "appointments": "👤 ప్రముఖ నియామకాలు (Constitutional & Key Appointments)"
+    "appointments": "👤 ప్రముఖ నియామకాలు & కమిషన్లు (Key Appointments & Commissions)"
 }
 
-BANNED_EXAM_JUNK = [
-    "సినిమా", "షూటింగ్", "సూర్య", "జ్యోతిక", "సంపూర్ణేష్", "బిర్యానీ", "భార్య", "భర్త", 
-    "షాక్", "దొంగతనం", "ముక్కు", "చైత్ర", "హత్య", "SPY CAM", "లండన్", "వైకాపా", 
-    "వైసీపీ", "ఎమ్మెల్సీ", "గాజువాక", "క్షమాపణ", "బతికుండగానే", "నిమజ్జనం", "కోటీశ్వరుడు",
-    "పులస", "రొయ్య", "హెలికాప్టర్ క్రాష్", "శ్రీకాకుళం జిల్లాలో వైకాపా", "ప్రేమ", "వివాహం",
-    "పెళ్లి", "ట్రైలర్", "గాసిప్", "రివ్యూ", "ఆత్మహత్య", "చోరీ", "అరెస్ట్"
-]
-
 def is_exam_worthy(art):
-    text = (art.get("title", "") + " " + art.get("summary", "")).lower()
-    for junk in BANNED_EXAM_JUNK:
-        if junk.lower() in text:
-            return False
-    return True
+    from scraper import is_exam_worthy_content
+    text = (art.get("title", "") + " " + art.get("summary", "")).strip()
+    return is_exam_worthy_content(text)
 
 def format_notes_html(notes):
     if not notes:
@@ -161,15 +153,24 @@ def render_epaper_html(date=None):
         dates = get_available_dates()
         date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
 
+    from scraper import is_duplicate_article
     raw_articles = get_articles(date=date)
-    # Strictly filter for competitive exam high-yield content
-    articles = [a for a in raw_articles if is_exam_worthy(a)]
+    articles = []
+    seen_titles = set()
+    for a in raw_articles:
+        if is_exam_worthy(a) and not is_duplicate_article(a["title"], seen_titles):
+            articles.append(a)
+            seen_titles.add(a["title"])
     
     raw_one_liners = get_one_liners_by_date(date=date)
-    one_liners = [
-        ol for ol in raw_one_liners 
-        if not any(junk.lower() in ol.get("point", "").lower() for junk in BANNED_EXAM_JUNK)
-    ]
+    one_liners = []
+    seen_ol = set()
+    for ol in raw_one_liners:
+        p = ol.get("point", "")
+        from scraper import is_exam_worthy_content
+        if is_exam_worthy_content(p) and not is_duplicate_article(p, seen_ol):
+            one_liners.append(ol)
+            seen_ol.add(p)
     quizzes = get_quiz_by_date(date=date)
 
     # Group articles by category
