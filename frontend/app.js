@@ -81,6 +81,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   initTabsHideFeature();
   await loadAvailableDates();
   await refreshCurrentView();
+  loadMaterials();
+  if (window.location.hash === "#materials") {
+    switchTab("materials");
+  }
   if (window.lucide) lucide.createIcons();
 
   // Register PWA Service Worker
@@ -218,6 +222,10 @@ function switchTab(tabName) {
     document.getElementById("flashcardsSection").classList.remove("hidden");
     catFilterBar.classList.add("hidden");
     loadFlashcards();
+  } else if (tabName === "materials") {
+    document.getElementById("materialsSection").classList.remove("hidden");
+    catFilterBar.classList.add("hidden");
+    loadMaterials();
   }
 
   if (window.lucide) lucide.createIcons();
@@ -5341,4 +5349,229 @@ window.addEventListener('offline', () => {
 window.addEventListener('DOMContentLoaded', () => {
   updateNetworkStatus();
 });
+
+// ==========================================
+// 📚 UPLOADED STUDY MATERIALS & PDF VIEWER MODULE
+// ==========================================
+state.uploadedMaterials = [];
+state.currentMaterialCategory = "all";
+
+async function loadMaterials(category) {
+  try {
+    const res = await fetch(`${API_BASE}/api/uploaded_materials`);
+    const data = await res.json();
+    if (data.success && Array.isArray(data.materials)) {
+      state.uploadedMaterials = data.materials;
+      const countEl = document.getElementById("tabCountMaterials");
+      if (countEl) countEl.textContent = data.materials.length;
+      const countAllEl = document.getElementById("matCountAll");
+      if (countAllEl) countAllEl.textContent = data.materials.length;
+      
+      renderMaterialsGrid(state.uploadedMaterials, category || state.currentMaterialCategory);
+    }
+  } catch (err) {
+    console.error("Error loading uploaded materials:", err);
+  }
+}
+
+function renderMaterialsGrid(materials, categoryFilter = "all") {
+  const grid = document.getElementById("materialsGrid");
+  const noMsg = document.getElementById("noMaterialsMessage");
+  if (!grid) return;
+
+  grid.innerHTML = "";
+  const filtered = (categoryFilter === "all" || !categoryFilter)
+    ? materials
+    : materials.filter(m => (m.category === categoryFilter) || (categoryFilter === "national" && m.category === "education"));
+
+  if (filtered.length === 0) {
+    if (noMsg) noMsg.classList.remove("hidden");
+    return;
+  }
+  if (noMsg) noMsg.classList.add("hidden");
+
+  const catColors = {
+    national: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800",
+    regional: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800",
+    history: "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800",
+    economy: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800",
+    science_tech: "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-950/50 dark:text-cyan-300 dark:border-cyan-800",
+    education: "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800"
+  };
+
+  filtered.forEach(m => {
+    const card = document.createElement("div");
+    card.className = "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 card-shadow flex flex-col justify-between hover:shadow-lg transition-all border-t-4 border-t-amber-500 relative";
+    
+    const catClass = catColors[m.category] || catColors["education"];
+    const catName = m.category_name || "పోటీ పరీక్షలు";
+    const sizeStr = m.file_size_formatted || `${Math.round((m.file_size || 0) / 1024)} KB`;
+    const dateStr = (m.uploaded_at || "").split(" ")[0] || "2026-09";
+    const artsCount = m.articles_created || 0;
+    const quizCount = m.quizzes_created || 0;
+    const summarySnippet = (m.extracted_summary || "").substring(0, 140).trim();
+
+    card.innerHTML = `
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="text-[11px] font-bold px-2.5 py-1 rounded-md border uppercase tracking-wider ${catClass}">
+            ${catName}
+          </span>
+          <span class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold flex items-center gap-1">
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+            ${dateStr}
+          </span>
+        </div>
+
+        <h3 class="text-base font-black text-slate-900 dark:text-white leading-snug mb-2 line-clamp-2" title="${m.title}">
+          ${m.title}
+        </h3>
+
+        ${summarySnippet ? `<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-3 leading-relaxed">${summarySnippet}...</p>` : ""}
+
+        <div class="grid grid-cols-2 gap-2 py-2.5 px-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl mb-4 text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700/50">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="file-text" class="w-4 h-4 text-amber-500"></i>
+            <span>${m.total_pages || 1} పేజీలు (${sizeStr})</span>
+          </div>
+          <div class="flex items-center gap-1.5 justify-end">
+            <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold text-[10px]">
+              📰 ${artsCount} వార్తలు | 📝 ${quizCount} Qs
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+        <div class="flex items-center gap-2">
+          <button onclick="openPdfViewer('${encodeURIComponent(m.title)}', '${m.pdf_url}')" class="flex-1 py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+            <span>ఆన్‌లైన్ చదవండి</span>
+          </button>
+          <a href="${m.pdf_url}" download class="py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-1 transition" title="డైరెక్ట్ PDF డౌన్‌లోడ్">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>డౌన్‌లోడ్</span>
+          </a>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/omr_test/${m.id}" class="flex-1 py-1.5 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] flex items-center justify-center gap-1 transition border border-indigo-200 dark:border-indigo-800">
+            <i data-lucide="award" class="w-3 h-3 text-indigo-500"></i>
+            <span>1-Click OMR టెస్ట్</span>
+          </a>
+          <button onclick="syncMaterial(${m.id})" class="py-1.5 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[11px] flex items-center gap-1 transition" title="ఈ PDF నుండి వెబ్‌సైట్ వార్తలు & క్విజ్ రీ-సింక్ చేయండి">
+            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+            <span>రీ-సింక్</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    grid.appendChild(card);
+  });
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function filterMaterialsByCategory(category) {
+  state.currentMaterialCategory = category;
+  document.querySelectorAll(".mat-cat-pill").forEach(btn => {
+    const fn = btn.getAttribute("onclick") || "";
+    if (fn.includes(`'${category}'`)) {
+      btn.classList.add("active", "bg-amber-600", "text-white");
+      btn.classList.remove("bg-slate-100", "dark:bg-slate-800", "text-slate-700", "dark:text-slate-300");
+    } else {
+      btn.classList.remove("active", "bg-amber-600", "text-white");
+      btn.classList.add("bg-slate-100", "dark:bg-slate-800", "text-slate-700", "dark:text-slate-300");
+    }
+  });
+  renderMaterialsGrid(state.uploadedMaterials, category);
+}
+
+function searchMaterials(q) {
+  if (!q || !q.trim()) {
+    renderMaterialsGrid(state.uploadedMaterials, state.currentMaterialCategory);
+    return;
+  }
+  const term = q.trim().toLowerCase();
+  const filtered = state.uploadedMaterials.filter(m => 
+    (m.title && m.title.toLowerCase().includes(term)) ||
+    (m.extracted_summary && m.extracted_summary.toLowerCase().includes(term)) ||
+    (m.filename && m.filename.toLowerCase().includes(term))
+  );
+  renderMaterialsGrid(filtered, "all");
+}
+
+function openPdfViewer(encodedTitle, url) {
+  const modal = document.getElementById("pdfViewerModal");
+  const titleEl = document.getElementById("pdfViewerModalTitle");
+  const iframe = document.getElementById("pdfViewerIframe");
+  const downloadBtn = document.getElementById("pdfViewerDownloadBtn");
+
+  if (!modal || !iframe) return;
+  const title = decodeURIComponent(encodedTitle);
+  if (titleEl) titleEl.textContent = title;
+  if (downloadBtn) {
+    downloadBtn.href = url;
+    downloadBtn.setAttribute("download", title + ".pdf");
+  }
+  iframe.src = url;
+  modal.classList.remove("hidden");
+  if (window.lucide) lucide.createIcons();
+}
+
+function closePdfViewer() {
+  const modal = document.getElementById("pdfViewerModal");
+  const iframe = document.getElementById("pdfViewerIframe");
+  if (iframe) iframe.src = "";
+  if (modal) modal.classList.add("hidden");
+}
+
+async function syncMaterial(mid) {
+  try {
+    if (typeof showToast === 'function') showToast("⏳ PDF నుండి వెబ్‌సైట్ అప్‌డేట్ అవుతోంది...");
+    const res = await fetch(`${API_BASE}/api/uploaded_materials/${mid}/sync`, { method: "POST" });
+    const data = await res.json();
+    if (data.success) {
+      if (typeof showToast === 'function') {
+        showToast(`✅ ${data.message || 'మెటీరియల్ విజయవంతంగా వెబ్‌సైట్‌లో అప్‌డేట్ చేయబడింది!'}`);
+      }
+      await loadMaterials();
+      await refreshCurrentView();
+    } else {
+      if (typeof showToast === 'function') showToast(`❌ సింక్ లోపం: ${data.error || 'తెలియని లోపం'}`);
+    }
+  } catch (err) {
+    console.error("Error syncing material:", err);
+  }
+}
+
+async function syncAllMaterials() {
+  const btn = document.getElementById("resyncAllBtn");
+  if (btn) btn.disabled = true;
+  try {
+    if (typeof showToast === 'function') showToast("⏳ అన్ని PDF ల నుండి వెబ్‌సైట్‌ను రీ-సింక్ చేస్తున్నాం...");
+    const res = await fetch(`${API_BASE}/api/uploaded_materials/sync_all`, { method: "POST" });
+    const data = await res.json();
+    if (data.success) {
+      if (typeof showToast === 'function') {
+        showToast(`🎉 మొత్తం ${data.total} PDF లు విజయవంతంగా వెబ్‌సైట్‌లో అప్‌డేట్ అయ్యాయి!`);
+      }
+      await loadMaterials();
+      await refreshCurrentView();
+    }
+  } catch (err) {
+    console.error("Error syncing all materials:", err);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+window.loadMaterials = loadMaterials;
+window.renderMaterialsGrid = renderMaterialsGrid;
+window.filterMaterialsByCategory = filterMaterialsByCategory;
+window.searchMaterials = searchMaterials;
+window.openPdfViewer = openPdfViewer;
+window.closePdfViewer = closePdfViewer;
+window.syncMaterial = syncMaterial;
+window.syncAllMaterials = syncAllMaterials;
 

@@ -124,6 +124,7 @@
           <button type="button" onclick="switchTab('articles')" class="compact-nav-btn active px-2.5 py-1 rounded-md bg-blue-600 text-white font-bold transition">📰 వార్తలు</button>
           <button type="button" onclick="switchTab('quiz')" class="compact-nav-btn px-2.5 py-1 rounded-md text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold transition">📝 క్విజ్</button>
           <button type="button" onclick="switchTab('oneliners')" class="compact-nav-btn px-2.5 py-1 rounded-md text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold transition">⚡ వన్‌లైనర్స్</button>
+          <button type="button" onclick="switchTab('materials')" class="compact-nav-btn px-2.5 py-1 rounded-md text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold transition">📚 స్టడీ PDF లు</button>
         </div>
 
         <!-- Print / PDF Download Button -->
@@ -547,6 +548,11 @@
         <i data-lucide="target" class="w-4 h-4 text-purple-600"></i>
         <span>సబ్జెక్ట్ మాక్ టెస్ట్స్</span>
         <span class="ml-1 px-1.5 py-0.2 text-xs rounded-full bg-purple-100 text-purple-700 font-bold">EXAM</span>
+      </button>
+      <button class="nav-tab px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-600 hover:text-amber-600 flex items-center space-x-2 whitespace-nowrap" data-tab="materials">
+        <i data-lucide="file-text" class="w-4 h-4 text-amber-500"></i>
+        <span>📚 స్టడీ PDF లు (Study Materials)</span>
+        <span id="tabCountMaterials" class="ml-1 px-1.5 py-0.2 text-xs rounded-full bg-amber-100 text-amber-800 font-bold">0</span>
       </button>
       <a href="/flashcards_deck" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-600 hover:text-purple-600 flex items-center space-x-2 whitespace-nowrap transition">
         <i data-lucide="layers" class="w-4 h-4 text-amber-500"></i>
@@ -1174,7 +1180,94 @@
       </div>
     </section>
 
+    <!-- ================= TAB 6: UPLOADED STUDY MATERIALS & PDFS ================= -->
+    <section id="materialsSection" class="tab-content hidden">
+      <!-- Header Banner -->
+      <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-700 text-white rounded-2xl p-5 sm:p-6 mb-6 shadow-xl relative overflow-hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-white/20 text-white uppercase tracking-wider backdrop-blur-xs">📚 STUDY MATERIALS & EXAM NOTES</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-300 text-slate-950">LIVE SYNCED</span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-black mt-2 flex items-center gap-2">
+              <span>అప్‌లోడ్ చేసిన స్టడీ మెటీరియల్స్ & ప్రామాణిక PDF లు</span>
+            </h3>
+            <p class="text-xs sm:text-sm text-amber-100 mt-1 max-w-2xl">
+              టెలిగ్రామ్ బోట్ మరియు వెబ్‌సైట్ ద్వారా అప్‌లోడ్ చేయబడిన నోట్స్, మైండ్‌మ్యాప్‌లు మరియు కరెంట్ అఫైర్స్ PDF లు. ఇక్కడ నేరుగా చదువుకోవచ్చు, డౌన్‌లోడ్ చేసుకోవచ్చు లేదా 1-క్లిక్ OMR మాక్ టెస్ట్ రాసుకోవచ్చు!
+            </p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0 flex-wrap">
+            <button onclick="syncAllMaterials()" id="resyncAllBtn" class="px-4 py-2 rounded-xl bg-white text-slate-900 hover:bg-amber-50 font-black text-xs sm:text-sm flex items-center gap-1.5 transition shadow-md cursor-pointer" title="అన్ని PDF ల నుండి వెబ్‌సైట్ ఆర్టికల్స్ & క్విజ్‌లను తిరిగి రీ-సింక్ చేయండి">
+              <i data-lucide="refresh-cw" class="w-4 h-4 text-amber-600"></i>
+              <span>మొత్తం రీ-సింక్ చేయి (Re-sync All)</span>
+            </button>
+            <a href="/pdf_upload_hub" class="px-4 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-900 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 transition border border-white/20 shadow-md">
+              <i data-lucide="upload-cloud" class="w-4 h-4 text-amber-300"></i>
+              <span>కొత్త PDF అప్‌లోడ్ చేయి</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter and Search Bar -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 mb-6 card-shadow flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-bold text-slate-500 mr-1">విభాగం:</span>
+          <button onclick="filterMaterialsByCategory('all')" class="mat-cat-pill active text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-600 text-white transition shadow-2xs">అన్నీ (<span id="matCountAll">0</span>)</button>
+          <button onclick="filterMaterialsByCategory('national')" class="mat-cat-pill text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition">🏛️ జాతీయం / CA</button>
+          <button onclick="filterMaterialsByCategory('regional')" class="mat-cat-pill text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition">🌾 AP & TS పథకాలు</button>
+          <button onclick="filterMaterialsByCategory('history')" class="mat-cat-pill text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition">🏛️ చరిత్ర & ఉద్యమం</button>
+          <button onclick="filterMaterialsByCategory('economy')" class="mat-cat-pill text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition">📈 ఆర్థికం & బడ్జెట్</button>
+          <button onclick="filterMaterialsByCategory('education')" class="mat-cat-pill text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition">📚 ఎడ్యుకేషన్ & సిలబస్</button>
+        </div>
+
+        <div class="relative w-full md:w-64">
+          <input type="text" id="materialsSearchInput" oninput="searchMaterials(this.value)" placeholder="PDF లలో వెతకండి..." class="w-full text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-8 pr-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-amber-500">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5"></i>
+        </div>
+      </div>
+
+      <!-- Materials Cards Grid -->
+      <div id="materialsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Populated via loadMaterials() in app.js -->
+      </div>
+
+      <!-- No materials placeholder -->
+      <div id="noMaterialsMessage" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+        <i data-lucide="file-x" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3"></i>
+        <h4 class="text-base font-bold text-slate-700 dark:text-slate-300">ఈ విభాగంలో స్టడీ మెటీరియల్స్ కనబడలేదు</h4>
+        <p class="text-xs text-slate-500 mt-1">టెలిగ్రామ్ బోట్‌లో PDF పంపడం ద్వారా లేదా పైనున్న 'కొత్త PDF అప్‌లోడ్ చేయి' బటన్ ద్వారా నేరుగా అప్‌లోడ్ చేయవచ్చు.</p>
+      </div>
+    </section>
+
   </main>
+
+  <!-- PDF In-Browser Embedded Viewer Modal -->
+  <div id="pdfViewerModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-5xl h-[92vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/80">
+        <div class="flex items-center space-x-2">
+          <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-600 flex items-center justify-center">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+          </span>
+          <h4 id="pdfViewerModalTitle" class="text-sm sm:text-base font-bold text-slate-900 dark:text-white line-clamp-1">PDF చదవండి</h4>
+        </div>
+        <div class="flex items-center gap-2">
+          <a id="pdfViewerDownloadBtn" href="#" download class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>డౌన్‌లోడ్</span>
+          </a>
+          <button onclick="closePdfViewer()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      <div class="flex-1 w-full bg-slate-100 dark:bg-slate-950 relative">
+        <iframe id="pdfViewerIframe" src="" class="w-full h-full border-none" title="PDF Document Viewer"></iframe>
+      </div>
+    </div>
+  </div>
 
   <!-- Telegram Configuration Modal -->
   <div id="telegramModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">

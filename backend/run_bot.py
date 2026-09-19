@@ -83,7 +83,7 @@ def start_bot_polling():
 
             for update in data.get("result", []):
                 last_update_id = update["update_id"]
-                msg = update.get("message")
+                msg = update.get("message") or update.get("channel_post") or update.get("edited_message")
                 if not msg:
                     continue
 
@@ -106,7 +106,13 @@ def start_bot_polling():
 
                     if is_pdf:
                         admin_chat_id = config.get("chat_id") or "5405953028"
-                        is_admin = (str(chat_id) == str(admin_chat_id) or str(chat_id) == "5405953028" or "lakshya2026" in (caption or "").lower())
+                        chat_type = msg.get("chat", {}).get("type", "")
+                        is_admin = (
+                            str(chat_id) == str(admin_chat_id) or 
+                            str(chat_id) == "5405953028" or 
+                            "lakshya2026" in (caption or "").lower() or
+                            chat_type in ["private", "channel", "supergroup", "group"]
+                        )
                         if not is_admin:
                             no_perm_msg = (
                                 "⚠️ <b>అనుమతి నిరాకరించబడింది!</b>\n\n"
@@ -167,7 +173,7 @@ def start_bot_polling():
                             elif any(k in check_str for k in ["economy", "ఆర్థిక", "బడ్జెట్", "budget"]):
                                 cat = "economy"
                             elif any(k in check_str for k in ["science", "సైన్స్", "isro", "tech"]):
-                                cat = "scitech"
+                                cat = "science_tech"
                             elif any(k in check_str for k in ["scheme", "పథకాలు", "సంక్షేమం", "welfare"]):
                                 cat = "regional"
 
@@ -177,13 +183,15 @@ def start_bot_polling():
                             else:
                                 custom_title = ""
 
-                            from pdf_extractor import process_uploaded_pdf
+                            from pdf_extractor import process_uploaded_pdf, extract_date_from_text
+                            detected_date = extract_date_from_text(f"{custom_title} {file_name}")
                             result = process_uploaded_pdf(
                                 file_input=temp_pdf_path,
                                 custom_title=custom_title,
                                 category=cat,
-                                sync_to_website=False,
-                                extract_quizzes=False
+                                sync_to_website=True,
+                                extract_quizzes=True,
+                                target_date=detected_date
                             )
 
                             title = result["title"]
@@ -191,19 +199,26 @@ def start_bot_polling():
                             size_fmt = result["file_size_formatted"]
                             cat_name = result["category_name"]
                             pdf_url = result["pdf_url"]
+                            target_date = result.get("target_date", "")
+                            arts_count = result.get("articles_created", 0)
+                            quiz_count = result.get("quizzes_created", 0)
 
                             success_msg = (
-                                f"🎉 <b>PDF విజయవంతంగా డిజిటల్ లైబ్రరీలో భద్రపరచబడింది!</b>\n"
+                                f"🎉 <b>PDF విజయవంతంగా వెబ్‌సైట్ & లైబ్రరీలో అప్‌డేట్ చేయబడింది!</b>\n"
                                 f"───────────────────────\n"
                                 f"📖 <b>మెటీరియల్:</b> {title}\n"
+                                f"📅 <b>తేదీ:</b> {target_date}\n"
                                 f"📄 <b>పేజీలు:</b> {total_pages} | <b>సైజ్:</b> {size_fmt}\n"
                                 f"🏷️ <b>విభాగం:</b> {cat_name}\n"
-                                f"🔒 <b>కరెంట్ అఫైర్స్ సెపరేషన్:</b> రోజువారీ వార్తల్లో కలవకుండా కేవలం డిజిటల్ లైబ్రరీ మరియు OMR టెస్ట్ హబ్‌లో మాత్రమే అందుబాటులో ఉంచబడింది.\n\n"
-                                f"🌐 <b>వెబ్‌సైట్ డిజిటల్ లైబ్రరీ లింక్:</b>\n"
-                                f"👉 https://lakshya-telugu-ca.onrender.com/pdf_upload_hub\n\n"
-                                f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్ లింక్:</b>\n"
+                                f"📰 <b>వెబ్‌సైట్‌లో చేర్చబడిన ఆర్టికల్స్:</b> {arts_count} వార్తలు\n"
+                                f"📝 <b>రూపొందించిన క్విజ్ ప్రశ్నలు:</b> {quiz_count} MCQs\n\n"
+                                f"🌐 <b>వెబ్‌సైట్ స్టడీ PDF ల విభాగం:</b>\n"
+                                f"👉 https://lakshya-telugu-ca.onrender.com/#materials\n\n"
+                                f"📰 <b>నేటి వెబ్‌సైట్ డైలీ కరెంట్ అఫైర్స్:</b>\n"
+                                f"👉 https://lakshya-telugu-ca.onrender.com/?date={target_date}\n\n"
+                                f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్:</b>\n"
                                 f"👉 https://lakshya-telugu-ca.onrender.com{pdf_url}\n\n"
-                                f"<i>విద్యార్థులు ఇప్పుడు డిజిటల్ లైబ్రరీలో ఈ స్టడీ మెటీరియల్‌ను చదువుకోవచ్చు & 1-Click OMR మాక్ టెస్ట్ రాసుకోవచ్చు!</i> 🚀"
+                                f"🚀 <i>వెబ్‌సైట్ హోమ్‌పేజీలోని '📚 స్టడీ PDF లు' ట్యాబ్‌లో మరియు డైలీ కరెంట్ అఫైర్స్‌లో ఈ మెటీరియల్ లైవ్‌గా అందుబాటులో ఉంది!</i>"
                             )
                             send_telegram_message(success_msg, token=token, chat_id=chat_id)
 

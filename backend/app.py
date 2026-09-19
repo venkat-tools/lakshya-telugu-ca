@@ -1800,9 +1800,9 @@ def api_upload_pdf():
     # Students and teachers can upload study PDFs freely without admin pin
     title = request.form.get("title", "").strip()
     category = request.form.get("category", "education").strip()
-    # Default to 0 so uploads do not pollute daily current affairs feed
-    sync_articles = request.form.get("sync_articles", "0") == "1"
-    sync_quizzes = request.form.get("sync_quizzes", "0") == "1"
+    # Default to 1 so uploaded PDFs automatically update the website!
+    sync_articles = request.form.get("sync_articles", "1") == "1"
+    sync_quizzes = request.form.get("sync_quizzes", "1") == "1"
 
     try:
         from pdf_extractor import process_uploaded_pdf
@@ -1813,17 +1813,55 @@ def api_upload_pdf():
             sync_to_website=sync_articles,
             extract_quizzes=sync_quizzes
         )
-        return jsonify({"success": True, "message": "PDF విజయవంతంగా డిజిటల్ లైబ్రరీలో భద్రపరచబడింది!", "data": res})
+        return jsonify({"success": True, "message": "PDF విజయవంతంగా డిజిటల్ లైబ్రరీ & వెబ్‌సైట్‌లో అప్‌డేట్ చేయబడింది!", "data": res})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/api/uploaded_materials", methods=["GET"])
 @app.route("/api/pdf_materials", methods=["GET"])
 def api_uploaded_materials():
-    from db import get_uploaded_materials
+    from db import get_uploaded_materials, sanitize_legacy_uploaded_materials
+    # Quick sanitization check to ensure clean titles
+    try:
+        sanitize_legacy_uploaded_materials()
+    except Exception:
+        pass
+
+    from pdf_extractor import CATEGORY_NAMES
     category = request.args.get("category")
     materials = get_uploaded_materials(category=category)
-    return jsonify({"success": True, "materials": materials})
+    
+    # Enrich fields for frontend display
+    formatted = []
+    for m in materials:
+        m_dict = dict(m)
+        sz = m_dict.get("file_size") or 0
+        if sz > 1024 * 1024:
+            m_dict["file_size_formatted"] = f"{round(sz / (1024 * 1024), 2)} MB"
+        else:
+            m_dict["file_size_formatted"] = f"{round(sz / 1024, 1)} KB"
+        fn = m_dict.get("filename", "")
+        m_dict["pdf_url"] = f"/pdfs/uploads/{fn}"
+        cat_key = m_dict.get("category", "education")
+        m_dict["category_name"] = CATEGORY_NAMES.get(cat_key, "పోటీ పరీక్షలు")
+        formatted.append(m_dict)
+
+    return jsonify({"success": True, "materials": formatted, "total": len(formatted)})
+
+@app.route("/api/uploaded_materials/<int:mid>/sync", methods=["GET", "POST"])
+def api_sync_single_material(mid):
+    """Syncs/re-extracts articles and quizzes from an uploaded PDF into the website"""
+    from pdf_extractor import reprocess_and_sync_material
+    target_date = request.args.get("date")
+    res = reprocess_and_sync_material(mid, target_date=target_date)
+    return jsonify(res)
+
+@app.route("/api/uploaded_materials/sync_all", methods=["GET", "POST"])
+def api_sync_all_materials():
+    """Syncs/re-extracts all uploaded PDFs into website articles and quizzes"""
+    from pdf_extractor import reprocess_all_materials
+    res = reprocess_all_materials()
+    return jsonify(res)
 
 @app.route("/api/uploaded_materials/<int:mid>", methods=["DELETE", "POST"])
 def api_delete_uploaded_material(mid):

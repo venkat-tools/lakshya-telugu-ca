@@ -361,8 +361,8 @@ def purge_all_uploaded_materials():
     conn.close()
     return count
 
-def update_uploaded_material(material_id, title=None, category=None, extracted_summary=None):
-    """Updates title, category, or summary for an uploaded material"""
+def update_uploaded_material(material_id, title=None, category=None, extracted_summary=None, articles_created=None, quizzes_created=None):
+    """Updates title, category, summary, articles_created, or quizzes_created for an uploaded material"""
     conn = get_connection()
     cursor = conn.cursor()
     fields = []
@@ -376,6 +376,12 @@ def update_uploaded_material(material_id, title=None, category=None, extracted_s
     if extracted_summary is not None:
         fields.append("extracted_summary = ?")
         params.append(extracted_summary)
+    if articles_created is not None:
+        fields.append("articles_created = ?")
+        params.append(articles_created)
+    if quizzes_created is not None:
+        fields.append("quizzes_created = ?")
+        params.append(quizzes_created)
     if not fields:
         conn.close()
         return False
@@ -406,7 +412,7 @@ def sanitize_legacy_uploaded_materials():
             summary = r["extracted_summary"] or ""
             
             # 1. Chunduru Maaranakaanda / K. Balagopal legacy PDF
-            if "Chunduru" in fn or "Balagopal" in fn or "^Œo" in title or "K«∞O" in summary:
+            if "Chunduru" in fn or "Balagopal" in fn or "^Œo" in title or "K«∞O" in summary or "చుండూరు" in fn:
                 new_title = "చుండూరు మారణకాండ - జస్టిస్ గంగాధరరావు నివేదిక (కె. బాలగోపాల్)"
                 new_summary = (
                     "చుండూరు మారణకాండ - జస్టిస్ గంగాధరరావు న్యాయవిచారణ నివేదిక విశ్లేషణ (రచయిత: కె. బాలగోపాల్):\n"
@@ -420,8 +426,38 @@ def sanitize_legacy_uploaded_materials():
                     "UPDATE uploaded_materials SET title = ?, category = ?, extracted_summary = ? WHERE id = ?",
                     (new_title, "history", new_summary, mid)
                 )
-            # 2. General legacy font mojibake
-            elif is_legacy_telugu_font(title) or is_legacy_telugu_font(summary[:100]):
+            # 2. PM Vishwakarma
+            elif "Vishwakarma" in fn:
+                cursor.execute(
+                    "UPDATE uploaded_materials SET title = ?, category = ? WHERE id = ?",
+                    ("పీఎం విశ్వకర్మ యోజన - సమగ్ర సమాచారం & పథకం గైడ్", "regional", mid)
+                )
+            # 3. TS History Mindmap
+            elif "TS_HISTORY" in fn.upper() or "TS HISTORY" in fn.upper():
+                cursor.execute(
+                    "UPDATE uploaded_materials SET title = ?, category = ? WHERE id = ?",
+                    ("తెలంగాణ చరిత్ర సమగ్ర మైండ్‌మ్యాప్ (TS History Mindmap)", "history", mid)
+                )
+            # 4. Movement Mindmap
+            elif "MOVEMENT" in fn.upper():
+                cursor.execute(
+                    "UPDATE uploaded_materials SET title = ?, category = ? WHERE id = ?",
+                    ("తెలంగాణ ఉద్యమ చరిత్ర మైండ్‌మ్యాప్ (Movement Mindmap)", "history", mid)
+                )
+            # 5. 19 September CivicCentreIAS APPSC Current Affairs
+            elif "CivicCentreIAS" in fn or "19_September" in fn:
+                cursor.execute(
+                    "UPDATE uploaded_materials SET title = ?, category = ? WHERE id = ?",
+                    ("APPSC డైలీ కరెంట్ అఫైర్స్ & ప్రాక్టీస్ టెస్ట్ (19 సెప్టెంబర్ 2026)", "national", mid)
+                )
+            # 6. 18 September Descriptive Notes
+            elif "SEPTEMBER_18" in fn.upper() or "Daily_C.A._DISCRIPTIVE" in fn:
+                cursor.execute(
+                    "UPDATE uploaded_materials SET title = ?, category = ? WHERE id = ?",
+                    ("డైలీ కరెంట్ అఫైర్స్ డిస్క్రిప్టివ్ నోట్స్ (18 సెప్టెంబర్ 2026)", "national", mid)
+                )
+            # 7. General legacy font mojibake or question marks
+            elif is_legacy_telugu_font(title) or is_legacy_telugu_font(summary[:100]) or title.count("?") > 2 or "\ufffd" in title:
                 clean_name = fn.replace("_", " ")
                 clean_name = re.sub(r"^\d{8}_\d{6}_(?:tg_\d+_)?", "", clean_name)
                 clean_name = re.sub(r"\.[a-zA-Z0-9]+$", "", clean_name).strip()
