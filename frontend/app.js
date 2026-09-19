@@ -5300,3 +5300,45 @@ window.removeBookmarkItem = removeBookmarkItem;
 window.clearAllBookmarks = clearAllBookmarks;
 window.renderBookmarksList = renderBookmarksList;
 window.initBookmarks = initBookmarks;
+
+// PWA Service Worker Registration & Offline Network Status Indicator
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => {
+        console.log('[Lakshya PWA] Service Worker registered with scope:', reg.scope);
+      })
+      .catch(err => {
+        console.warn('[Lakshya PWA] Registration failed:', err);
+      });
+  });
+}
+
+function updateNetworkStatus() {
+  const banner = document.getElementById('offlineStatusBanner');
+  if (!banner) return;
+  if (!navigator.onLine) {
+    banner.classList.remove('hidden');
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+window.addEventListener('online', () => {
+  updateNetworkStatus();
+  if (typeof showToast === 'function') {
+    showToast('🟢 మీరు తిరిగి ఆన్‌లైన్‌లోకి వచ్చారు!');
+  }
+});
+
+window.addEventListener('offline', () => {
+  updateNetworkStatus();
+  if (typeof showToast === 'function') {
+    showToast('📡 మీరు ఆఫ్‌లైన్‌లో ఉన్నారు. సేవ్‌డ్ డేటా అందుబాటులో ఉంది.');
+  }
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  updateNetworkStatus();
+});
+

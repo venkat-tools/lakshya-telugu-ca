@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Automatic Daily Morning Scheduler for Telugu Current Affairs.
-Runs daily at the configured time (e.g. 07:00 AM),
-fetches latest news, creates MCQs, and broadcasts to Telegram.
+Automatic Dual-Slot Daily Scheduler for Telugu Current Affairs (IST Timezone).
+Slot 1: Morning 07:00 AM IST (News Sync, E-Paper PDF, Capsule PDF & Digest Broadcast)
+Slot 2: Evening 07:00 PM IST (Interactive Quiz Polls & Daily Live CBT Mock Test Broadcast)
 """
 
 import os
@@ -11,7 +11,7 @@ import time
 import threading
 from datetime import datetime, timezone, timedelta
 from scraper import sync_daily_news
-from telegram_bot import broadcast_daily_digest, load_config as load_tg_config
+from telegram_bot import broadcast_daily_digest, broadcast_evening_quiz_polls, load_config as load_tg_config
 
 # India Standard Time (IST is UTC + 5:30)
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -27,45 +27,58 @@ def get_ist_today():
 SCHEDULER_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "scheduler_config.json")
 
 def load_scheduler_config():
-    if os.path.exists(SCHEDULER_CONFIG_PATH):
-        try:
-            with open(SCHEDULER_CONFIG_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return {
+    cfg = {
         "enabled": True,
+        "morning_time": "07:00",
+        "evening_time": "19:00",
         "scheduled_time": "07:00",
         "auto_telegram": True,
+        "last_morning_run_date": None,
+        "last_evening_run_date": None,
         "last_run_date": None,
         "last_status": "Idle"
     }
+    if os.path.exists(SCHEDULER_CONFIG_PATH):
+        try:
+            with open(SCHEDULER_CONFIG_PATH, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+                cfg.update(loaded)
+                # Backward compatibility
+                if "scheduled_time" in loaded and "morning_time" not in loaded:
+                    cfg["morning_time"] = loaded["scheduled_time"]
+                return cfg
+        except Exception:
+            pass
+    return cfg
 
-def save_scheduler_config(enabled=True, scheduled_time="07:00", auto_telegram=True):
+def save_scheduler_config(enabled=True, morning_time="07:00", evening_time="19:00", scheduled_time=None, auto_telegram=True):
     cfg = load_scheduler_config()
     cfg["enabled"] = bool(enabled)
-    cfg["scheduled_time"] = str(scheduled_time).strip()
+    cfg["morning_time"] = str(morning_time or scheduled_time or "07:00").strip()
+    cfg["scheduled_time"] = cfg["morning_time"]
+    cfg["evening_time"] = str(evening_time or "19:00").strip()
     cfg["auto_telegram"] = bool(auto_telegram)
     cfg["updated_at"] = get_ist_now().isoformat()
     with open(SCHEDULER_CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(cfg, f, ensure_ascii=False, indent=2)
     return cfg
 
-def run_daily_job(date=None):
+def run_morning_job(date=None):
     """
-    Executes the morning job:
-    1. Syncs news for today (or specified date) in IST
+    Slot 1: Morning Job (07:00 AM IST)
+    1. Syncs news for today in IST
     2. Ensures 5 exam MCQs are ready
-    3. Broadcasts to Telegram if enabled
+    3. Generates Today's E-Paper PDF & Daily CA Capsule PDF
+    4. Broadcasts Morning Digest & PDFs to Telegram
     """
     target_date = date or get_ist_today()
     now_ist = get_ist_now()
-    print(f"⏰ [{now_ist.strftime('%H:%M:%S')} IST] డైలీ మార్నింగ్ షెడ్యూలర్ రన్ అవుతోంది... ({target_date})")
+    print(f"⏰ [{now_ist.strftime('%H:%M:%S')} IST] 🌅 డైలీ మార్నింగ్ షెడ్యూలర్ రన్ అవుతోంది... ({target_date})")
     
     cfg = load_scheduler_config()
-    results = {}
+    results = {"slot": "morning", "date": target_date}
     
-    # Step 1: Sync News
+    # 1. Sync News
     try:
         sync_res = sync_daily_news(target_date=target_date)
         results["sync"] = sync_res
@@ -74,7 +87,7 @@ def run_daily_job(date=None):
         results["sync_error"] = str(e)
         print(f"❌ వార్తల సేకరణలో లోపం: {e}")
 
-    # Step 2: Ensure 5 MCQs
+    # 2. Ensure 5 MCQs
     try:
         from quiz_generator import ensure_daily_quizzes
         quizzes = ensure_daily_quizzes(target_date)
@@ -84,7 +97,7 @@ def run_daily_job(date=None):
         results["quiz_error"] = str(e)
         print(f"❌ క్విజ్ తయారీలో లోపం: {e}")
 
-    # Step 2b: Generate Today's Fresh E-Paper PDF
+    # 3. Generate Today's Fresh E-Paper PDF
     try:
         from pdf_generator import generate_epaper_pdf
         pdf_path = generate_epaper_pdf(target_date, force_refresh=True)
@@ -94,7 +107,7 @@ def run_daily_job(date=None):
         results["pdf_error"] = str(e)
         print(f"❌ PDF తయారీలో లోపం: {e}")
 
-    # Step 2c: Generate Today's Fresh Daily CA & Quiz Capsule PDF
+    # 4. Generate Today's Fresh Daily CA & Quiz Capsule PDF
     try:
         from daily_ca_quiz_pdf import generate_ca_quiz_pdf
         ca_quiz_pdf_path = generate_ca_quiz_pdf(target_date, force_refresh=True)
@@ -104,14 +117,14 @@ def run_daily_job(date=None):
         results["ca_quiz_pdf_error"] = str(e)
         print(f"❌ డైలీ CA & క్విజ్ PDF తయారీలో లోపం: {e}")
 
-    # Step 3: Send to Telegram
+    # 5. Send to Telegram (Morning Digest)
     if cfg.get("auto_telegram", True):
         tg_cfg = load_tg_config()
         if tg_cfg.get("bot_token") and tg_cfg.get("chat_id"):
             try:
                 tg_res = broadcast_daily_digest(date=target_date)
                 results["telegram"] = tg_res
-                print(f"✅ టెలిగ్రామ్ బ్రాడ్‌కాస్ట్ పూర్తయింది: {tg_res.get('quizzes_sent', 0)} క్విజ్ పోల్స్ పంపబడ్డాయి.")
+                print(f"✅ మార్నింగ్ టెలిగ్రామ్ బ్రాడ్‌కాస్ట్ పూర్తయింది.")
             except Exception as e:
                 results["telegram_error"] = str(e)
                 print(f"❌ టెలిగ్రామ్ బ్రాడ్‌కాస్ట్‌లో లోపం: {e}")
@@ -119,31 +132,69 @@ def run_daily_job(date=None):
             results["telegram_status"] = "Telegram not configured"
 
     # Update config
+    cfg["last_morning_run_date"] = target_date
     cfg["last_run_date"] = target_date
-    cfg["last_run_time"] = now_ist.strftime("%Y-%m-%d %H:%M:%S IST")
-    cfg["last_status"] = "Success"
+    cfg["last_morning_run_time"] = now_ist.strftime("%Y-%m-%d %H:%M:%S IST")
+    cfg["last_status"] = "Morning Run Success"
     with open(SCHEDULER_CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(cfg, f, ensure_ascii=False, indent=2)
 
     return results
 
-def scheduler_worker():
-    """Background daemon loop checking IST time every 30 seconds"""
-    print("⏰ ఆటోమేటిక్ మార్నింగ్ షెడ్యూలర్ బ్యాక్‌గ్రౌండ్ థ్రెడ్ ప్రారంభమైంది (IST Timezone).")
+def run_evening_job(date=None):
+    """
+    Slot 2: Evening Job (07:00 PM / 19:00 IST)
+    1. Broadcasts Interactive Quiz Polls
+    2. Sends Daily Live CBT Mock Test link & Schemes Handbook link
+    """
+    target_date = date or get_ist_today()
+    now_ist = get_ist_now()
+    print(f"⏰ [{now_ist.strftime('%H:%M:%S')} IST] 🌙 డైలీ ఈవెనింగ్ షెడ్యూలర్ రన్ అవుతోంది... ({target_date})")
     
-    # Startup catch-up: if server boots and it's already past scheduled_time, or news not synced yet today
-    time.sleep(5)  # Wait 5 seconds for DB and Flask app to stabilize
+    cfg = load_scheduler_config()
+    results = {"slot": "evening", "date": target_date}
+
+    if cfg.get("auto_telegram", True):
+        tg_cfg = load_tg_config()
+        if tg_cfg.get("bot_token") and tg_cfg.get("chat_id"):
+            try:
+                tg_res = broadcast_evening_quiz_polls(date=target_date)
+                results["telegram"] = tg_res
+                print(f"✅ ఈవెనింగ్ క్విజ్ పోల్స్ బ్రాడ్‌కాస్ట్ పూర్తయింది: {tg_res.get('quizzes_sent', 0)} పోల్స్ పంపబడ్డాయి.")
+            except Exception as e:
+                results["telegram_error"] = str(e)
+                print(f"❌ ఈవెనింగ్ బ్రాడ్‌కాస్ట్‌లో లోపం: {e}")
+        else:
+            results["telegram_status"] = "Telegram not configured"
+
+    cfg["last_evening_run_date"] = target_date
+    cfg["last_evening_run_time"] = now_ist.strftime("%Y-%m-%d %H:%M:%S IST")
+    cfg["last_status"] = "Evening Run Success"
+    with open(SCHEDULER_CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, ensure_ascii=False, indent=2)
+
+    return results
+
+def run_daily_job(date=None):
+    """Executes morning cycle (backward compatible)"""
+    return run_morning_job(date=date)
+
+def scheduler_worker():
+    """Background daemon loop checking IST time every 30 seconds for Dual Slots"""
+    print("⏰ ఆటోమేటిక్ డ్యూయల్-స్లాట్ షెడ్యూలర్ ప్రారంభమైంది (Morning 07:00 AM & Evening 07:00 PM IST).")
+    
+    time.sleep(5)
     try:
         cfg = load_scheduler_config()
         now_ist = get_ist_now()
-        target_time = cfg.get("scheduled_time", "07:00")
+        morning_target = cfg.get("morning_time", "07:00")
         current_hm = now_ist.strftime("%H:%M")
         today_str = now_ist.strftime("%Y-%m-%d")
         
         if cfg.get("enabled", True):
-            if current_hm >= target_time and cfg.get("last_run_date") != today_str:
-                print(f"🚀 [Startup Catch-up] నేటి ({today_str}) మార్నింగ్ జాబ్ ఇంకా రన్ కాలేదు. వెంటనే రన్ చేస్తున్నాం...")
-                run_daily_job(today_str)
+            if current_hm >= morning_target and cfg.get("last_morning_run_date") != today_str:
+                print(f"🚀 [Startup Catch-up] నేటి ({today_str}) మార్నింగ్ జాబ్ వెంటనే రన్ చేస్తున్నాం...")
+                run_morning_job(today_str)
     except Exception as e:
         print(f"Startup catch-up error: {e}")
 
@@ -151,14 +202,21 @@ def scheduler_worker():
         try:
             cfg = load_scheduler_config()
             if cfg.get("enabled", True):
-                target_time = cfg.get("scheduled_time", "07:00")
+                morning_time = cfg.get("morning_time", "07:00")
+                evening_time = cfg.get("evening_time", "19:00")
                 now_ist = get_ist_now()
                 current_hm = now_ist.strftime("%H:%M")
                 today_str = now_ist.strftime("%Y-%m-%d")
 
-                # If current IST time is at or past target time and hasn't run today yet
-                if current_hm >= target_time and cfg.get("last_run_date") != today_str:
-                    run_daily_job(today_str)
+                # Morning slot check
+                if current_hm >= morning_time and current_hm < evening_time:
+                    if cfg.get("last_morning_run_date") != today_str:
+                        run_morning_job(today_str)
+
+                # Evening slot check
+                if current_hm >= evening_time:
+                    if cfg.get("last_evening_run_date") != today_str:
+                        run_evening_job(today_str)
 
             time.sleep(30)
         except Exception as e:
@@ -171,6 +229,8 @@ def start_scheduler_thread():
     return t
 
 if __name__ == "__main__":
-    print("టెస్టింగ్ డైలీ జాబ్...")
-    res = run_daily_job()
-    print("ఫలితం:", res)
+    print("టెస్టింగ్ మార్నింగ్ & ఈవెనింగ్ జాబ్స్...")
+    res_m = run_morning_job()
+    print("మార్నింగ్ రన్ ఫలితం:", res_m)
+    res_e = run_evening_job()
+    print("ఈవెనింగ్ రన్ ఫలితం:", res_e)

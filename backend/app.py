@@ -446,6 +446,20 @@ def api_telegram_send_monthly():
     res = send_monthly_magazine_telegram(month=month, token=token, chat_id=chat_id)
     return jsonify(res)
 
+@app.route("/api/telegram/broadcast_evening_polls", methods=["POST", "GET"])
+def api_telegram_broadcast_evening():
+    from telegram_bot import broadcast_evening_quiz_polls
+    try:
+        data = request.get_json(silent=True) or {}
+    except Exception:
+        data = {}
+    date = request.args.get("date") or data.get("date")
+    token = request.args.get("bot_token") or data.get("bot_token")
+    chat_id = request.args.get("chat_id") or data.get("chat_id")
+    res = broadcast_evening_quiz_polls(date=date, token=token, chat_id=chat_id)
+    return jsonify(res)
+
+
 @app.route("/api/epaper/pdf", methods=["GET"])
 def api_epaper_pdf():
     date = request.args.get("date")
@@ -491,6 +505,28 @@ def api_ca_quiz_pdf():
         download_name=f"Lakshya_Daily_CA_Quiz_{date}.pdf"
     )
 
+@app.route("/api/schemes/pdf", methods=["GET"])
+@app.route("/api/schemes/download", methods=["GET"])
+def api_schemes_pdf():
+    as_download = request.args.get("download", "0") == "1" or request.path.endswith("/download")
+    pdf_path = os.path.join(FRONTEND_DIR, "pdfs", "ap_ts_schemes_master_guide_2026.pdf")
+    if not os.path.exists(pdf_path) or os.path.getsize(pdf_path) < 1000:
+        try:
+            from compile_schemes_handbook_pdf import generate_schemes_handbook
+            generated = generate_schemes_handbook()
+            if generated and os.path.exists(generated):
+                pdf_path = generated
+        except Exception as e:
+            print("Error generating schemes PDF on demand:", e)
+    if not os.path.exists(pdf_path):
+        return jsonify({"success": False, "error": "పథకాల మాస్టర్ గైడ్ PDF అందుబాటులో లేదు."}), 404
+    return send_from_directory(
+        os.path.dirname(pdf_path),
+        os.path.basename(pdf_path),
+        as_attachment=as_download,
+        download_name="Lakshya_AP_TS_Welfare_Schemes_Master_Handbook_2026.pdf",
+        mimetype="application/pdf"
+    )
 
 @app.route("/api/magazine/pdf", methods=["GET"])
 @app.route("/api/magazine/download", methods=["GET"])
@@ -646,9 +682,10 @@ def api_scheduler_config():
     if request.method == "POST":
         data = request.json or {}
         enabled = data.get("enabled", True)
-        time_val = data.get("scheduled_time", "07:00")
+        morning_val = data.get("morning_time") or data.get("scheduled_time", "07:00")
+        evening_val = data.get("evening_time", "19:00")
         auto_tg = data.get("auto_telegram", True)
-        cfg = save_scheduler_config(enabled=enabled, scheduled_time=time_val, auto_telegram=auto_tg)
+        cfg = save_scheduler_config(enabled=enabled, morning_time=morning_val, evening_time=evening_val, auto_telegram=auto_tg)
         return jsonify({"success": True, "message": "షెడ్యూలర్ సెట్టింగ్స్ సేవ్ చేయబడ్డాయి!", "config": cfg})
     
     cfg = load_scheduler_config()
@@ -657,7 +694,13 @@ def api_scheduler_config():
 @app.route("/api/scheduler/trigger", methods=["POST", "GET"])
 def api_scheduler_trigger():
     res = run_daily_job()
-    return jsonify({"success": True, "message": "డైలీ జాబ్ విజయవంతంగా రన్ అయింది!", "result": res})
+    return jsonify({"success": True, "message": "మార్నింగ్ డైలీ జాబ్ విజయవంతంగా రన్ అయింది!", "result": res})
+
+@app.route("/api/scheduler/trigger_evening", methods=["POST", "GET"])
+def api_scheduler_trigger_evening():
+    from scheduler import run_evening_job
+    res = run_evening_job()
+    return jsonify({"success": True, "message": "ఈవెనింగ్ క్విజ్ జాబ్ విజయవంతంగా రన్ అయింది!", "result": res})
 
 # ----------------- Subject-wise Mock Tests Endpoints (Feature 4) -----------------
 @app.route("/api/mock_tests", methods=["GET"])
@@ -1058,6 +1101,7 @@ def api_mains_questions():
 
 # ----------------- Printable Handbooks & Multi-Exam OMR -----------------
 @app.route("/schemes_handbook", methods=["GET"])
+@app.route("/schemes", methods=["GET"])
 def schemes_handbook_view():
     from appsc_handbooks import render_schemes_handbook_html
     return render_schemes_handbook_html()
@@ -1275,6 +1319,7 @@ def doubt_solver_view():
 
 # ----------------- Live Daily Mock Test & State Leaderboard Endpoints -----------------
 @app.route("/api/live_test/today", methods=["GET"])
+@app.route("/api/live_test", methods=["GET"])
 def api_live_test_today():
     from daily_live_test_data import get_live_test_questions
     qs = get_live_test_questions()
@@ -1320,6 +1365,7 @@ def api_live_test_leaderboard():
     })
 
 @app.route("/daily_live_test", methods=["GET"])
+@app.route("/live_test", methods=["GET"])
 def daily_live_test_view():
     from flask import make_response
     from daily_live_test_view import render_daily_live_test_html

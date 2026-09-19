@@ -1,5 +1,5 @@
-// Lakshya PWA Service Worker (Stale-While-Revalidate & Offline Kit)
-const CACHE_NAME = 'lakshya-pwa-v4';
+// Lakshya PWA Service Worker (Stale-While-Revalidate & Enhanced Offline Kit)
+const CACHE_NAME = 'lakshya-pwa-v5';
 const OFFLINE_URL = '/';
 
 const CORE_PRECACHE = [
@@ -10,6 +10,14 @@ const CORE_PRECACHE = [
   '/manifest.json',
   '/icon.svg',
   '/lakshya_logo.jpg',
+  '/daily_live_test',
+  '/schemes_handbook',
+  '/api/schemes/pdf',
+  '/api/live_test',
+  '/api/dates',
+  '/api/articles',
+  '/api/quiz',
+  '/api/one_liners',
   '/map_pointing_atlas',
   '/sc_judgments_hub',
   '/group2_paper2_master',
@@ -33,7 +41,7 @@ const CORE_PRECACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Lakshya PWA] Precaching offline study resources...');
+      console.log('[Lakshya PWA v5] Precaching offline study resources & live CBT...');
       return cache.addAll(CORE_PRECACHE).catch(err => console.warn('[PWA] Precache warning:', err));
     }).then(() => self.skipWaiting())
   );
@@ -59,11 +67,10 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // For API and HTML pages: Network first, fallback to cache
+  // Network first, fallback to cache for all routes and dynamic data
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        // Cache successful GET responses
         if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -75,11 +82,10 @@ self.addEventListener('fetch', (event) => {
       .catch(async () => {
         const cached = await caches.match(event.request);
         if (cached) return cached;
-        // If requesting an HTML navigation, fallback to root
         if (event.request.mode === 'navigate') {
           return caches.match(OFFLINE_URL);
         }
-        return new Response('ఆఫ్‌లైన్‌లో ఉన్నారు. దయచేసి నెట్‌వర్క్ కనెక్షన్ సరిచూసుకోండి.', {
+        return new Response('ఆఫ్‌లైన్‌లో ఉన్నారు. సేవ్ చేసిన మెటీరియల్స్ అందుబాటులో ఉన్నాయి.', {
           status: 503,
           statusText: 'Offline',
           headers: { 'Content-Type': 'text/plain; charset=utf-8' }

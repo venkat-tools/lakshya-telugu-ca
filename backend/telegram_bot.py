@@ -540,6 +540,75 @@ def broadcast_daily_digest(date=None, token=None, chat_id=None):
     }
 
 
+def broadcast_evening_quiz_polls(date=None, token=None, chat_id=None):
+    """
+    Evening Slot (07:00 PM IST):
+    Broadcasts interactive Quiz Polls, Daily Live CBT Mock Test invite,
+    and Schemes Handbook guide to Telegram subscribers and channels.
+    """
+    if not date:
+        dates = get_available_dates()
+        date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
+
+    from quiz_generator import ensure_daily_quizzes
+    quizzes = ensure_daily_quizzes(date)
+
+    if not quizzes:
+        return {"success": False, "error": f"{date} తేదీకి క్విజ్ ప్రశ్నలు సిద్ధంగా లేవు."}
+
+    msg = (
+        f"🌙 <b>లక్ష్య ఈవెనింగ్ క్విజ్ టైమ్ & లైవ్ మాక్ టెస్ట్ (CBT)</b>\n"
+        f"📅 <b>తేదీ: {date}</b>\n"
+        f"───────────────────────\n\n"
+        f"ఈరోజు చదివిన కరెంట్ అఫైర్స్ మరియు జనరల్ స్టడీస్‌పై మీ పట్టును పరీక్షించుకోండి! 🎯\n\n"
+        f"🚀 <b>డైలీ ఆన్‌లైన్ లైవ్ CBT మాక్ టెస్ట్ (15-నిమిషాల టైమర్):</b>\n"
+        f"• 20 ప్రశ్నలు (5 డైలీ CA + 15 GS ప్రశ్నలు)\n"
+        f"• -0.33 నెగెటివ్ మార్కింగ్ & తక్షణ స్కోర్‌కార్డ్\n"
+        f"👉 <b>లైవ్ టెస్ట్ లింక్:</b> https://lakshya-telugu-ca.onrender.com/daily_live_test\n\n"
+        f"🏛️ <b>AP & TS సంక్షేమ పథకాలు 2026 మాస్టర్ గైడ్:</b>\n"
+        f"👉 https://lakshya-telugu-ca.onrender.com/schemes_handbook\n\n"
+        f"క్రింది 5 డైలీ క్విజ్ పోల్స్‌కు ఓటు వేసి తక్షణమే సరైన సమాధానం తెలుసుకోండి! 👇"
+    )
+
+    if chat_id:
+        target_chats = [str(chat_id)]
+    else:
+        all_targets = set(load_subscribers())
+        for ch in load_channels():
+            if ch.get("channel_id"):
+                all_targets.add(str(ch["channel_id"]))
+        cfg = load_config()
+        if cfg.get("chat_id"):
+            all_targets.add(str(cfg["chat_id"]))
+        target_chats = list(all_targets)
+
+    option_map = {"A": 0, "B": 1, "C": 2, "D": 3}
+    sent_polls = 0
+
+    for cid in target_chats:
+        send_telegram_message(msg, token=token, chat_id=cid)
+        for q in quizzes[:5]:
+            correct_idx = option_map.get(q.get("correct_option", "A").upper(), 0)
+            opts = [q["option_a"], q["option_b"], q["option_c"], q["option_d"]]
+            poll_res = send_telegram_quiz_poll(
+                question=f"❓ [డైలీ క్విజ్ {date}] {q['question']}"[:255],
+                options=[o[:100] for o in opts],
+                correct_index=correct_idx,
+                explanation=q.get("explanation", "")[:200],
+                token=token,
+                chat_id=cid
+            )
+            if poll_res.get("success"):
+                sent_polls += 1
+
+    return {
+        "success": True,
+        "message": f"{date} నాటి సాయంత్రం క్విజ్ పోల్స్ మరియు లైవ్ టెస్ట్ ఆహ్వానం {len(target_chats)} మందికి టెలిగ్రామ్‌కు విజయవంతంగా పంపబడ్డాయి!",
+        "quizzes_sent": sent_polls,
+        "subscribers_count": len(target_chats)
+    }
+
+
 def send_monthly_magazine_telegram(month="2026-09", token=None, chat_id=None):
     """Send pre-compiled Monthly Current Affairs Magazine PDF to Telegram"""
     from magazine import generate_magazine_pdf
