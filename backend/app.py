@@ -463,11 +463,12 @@ def api_telegram_broadcast_evening():
 @app.route("/api/epaper/pdf", methods=["GET"])
 def api_epaper_pdf():
     date = request.args.get("date")
+    refresh = request.args.get("refresh") in ["1", "true", "yes"]
     if not date:
         dates = get_available_dates()
         date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
     
-    pdf_path = generate_epaper_pdf(date=date)
+    pdf_path = generate_epaper_pdf(date=date, force_refresh=refresh)
     if not pdf_path or not os.path.exists(pdf_path):
         fallback_today = os.path.join(FRONTEND_DIR, "pdfs", "daily_epaper_today.pdf")
         if os.path.exists(fallback_today):
@@ -486,11 +487,12 @@ def api_epaper_pdf():
 @app.route("/api/ca_quiz/download", methods=["GET"])
 def api_ca_quiz_pdf():
     date = request.args.get("date")
+    refresh = request.args.get("refresh") in ["1", "true", "yes"]
     if not date:
         dates = get_available_dates()
         date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
     
-    pdf_path = generate_ca_quiz_pdf(date=date)
+    pdf_path = generate_ca_quiz_pdf(date=date, force_refresh=refresh)
     if not pdf_path or not os.path.exists(pdf_path):
         fallback_today = os.path.join(FRONTEND_DIR, "pdfs", "daily_ca_quiz_today.pdf")
         if os.path.exists(fallback_today):

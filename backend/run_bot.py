@@ -212,13 +212,13 @@ def start_bot_polling():
                                 f"🏷️ <b>విభాగం:</b> {cat_name}\n"
                                 f"📰 <b>వెబ్‌సైట్‌లో చేర్చబడిన ఆర్టికల్స్:</b> {arts_count} వార్తలు\n"
                                 f"📝 <b>రూపొందించిన క్విజ్ ప్రశ్నలు:</b> {quiz_count} MCQs\n\n"
+                                f"📰 <b>లక్ష్య డైలీ ఈ-పేపర్ PDF (అప్‌డేటెడ్):</b>\n"
+                                f"👉 https://lakshya-telugu-ca.onrender.com/api/epaper/pdf?date={target_date}\n\n"
+                                f"📑 <b>లక్ష్య డైలీ CA & క్విజ్ క్యాప్సూల్ PDF:</b>\n"
+                                f"👉 https://lakshya-telugu-ca.onrender.com/api/ca_quiz/pdf?date={target_date}\n\n"
                                 f"🌐 <b>వెబ్‌సైట్ స్టడీ PDF ల విభాగం:</b>\n"
                                 f"👉 https://lakshya-telugu-ca.onrender.com/#materials\n\n"
-                                f"📰 <b>నేటి వెబ్‌సైట్ డైలీ కరెంట్ అఫైర్స్:</b>\n"
-                                f"👉 https://lakshya-telugu-ca.onrender.com/?date={target_date}\n\n"
-                                f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్:</b>\n"
-                                f"👉 https://lakshya-telugu-ca.onrender.com{pdf_url}\n\n"
-                                f"🚀 <i>వెబ్‌సైట్ హోమ్‌పేజీలోని '📚 స్టడీ PDF లు' ట్యాబ్‌లో మరియు డైలీ కరెంట్ అఫైర్స్‌లో ఈ మెటీరియల్ లైవ్‌గా అందుబాటులో ఉంది!</i>"
+                                f"🚀 <i>మీరు అప్‌లోడ్ చేసిన మెటీరియల్ సారాంశం & క్విజ్‌లు నేరుగా మన లక్ష్య డైలీ కరెంట్ అఫైర్స్ & లక్ష్య PDF లలో కలిసిపోయాయి!</i>"
                             )
                             send_telegram_message(success_msg, token=token, chat_id=chat_id)
 

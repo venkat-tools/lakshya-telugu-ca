@@ -537,6 +537,19 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
 
     pdf_web_url = f"/pdfs/uploads/{dest_filename}"
 
+    if sync_to_website and articles_count > 0:
+        import threading
+        def _refresh_daily_pdfs(dt):
+            try:
+                from pdf_generator import generate_epaper_pdf
+                from daily_ca_quiz_pdf import generate_ca_quiz_pdf
+                generate_epaper_pdf(date=dt, force_refresh=True)
+                generate_ca_quiz_pdf(date=dt, force_refresh=True)
+                print(f"✅ [PDF Sync] లక్ష్య డైలీ ఈ-పేపర్ & క్యాప్సూల్ PDF లు ({dt}) అప్‌డేట్ చేయబడ్డాయి.")
+            except Exception as pe:
+                print(f"PDF regeneration error for {dt}: {pe}")
+        threading.Thread(target=_refresh_daily_pdfs, args=(target_date,), daemon=True).start()
+
     return {
         "success": True,
         "material_id": mid,
@@ -786,6 +799,19 @@ def reprocess_and_sync_material(mid, target_date=None):
         articles_created=articles_count,
         quizzes_created=quizzes_count
     )
+
+    if articles_count > 0:
+        import threading
+        def _refresh_daily_pdfs(dt):
+            try:
+                from pdf_generator import generate_epaper_pdf
+                from daily_ca_quiz_pdf import generate_ca_quiz_pdf
+                generate_epaper_pdf(date=dt, force_refresh=True)
+                generate_ca_quiz_pdf(date=dt, force_refresh=True)
+                print(f"✅ [PDF Sync] లక్ష్య డైలీ ఈ-పేపర్ & క్యాప్సూల్ PDF లు ({dt}) అప్‌డేట్ చేయబడ్డాయి.")
+            except Exception as pe:
+                print(f"PDF regeneration error for {dt}: {pe}")
+        threading.Thread(target=_refresh_daily_pdfs, args=(target_date,), daemon=True).start()
 
     return {
         "success": True,

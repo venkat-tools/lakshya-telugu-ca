@@ -131,8 +131,19 @@ def is_exam_worthy(art):
             return False
     except Exception:
         pass
-    from scraper import is_exam_worthy_content
+
     text = (art.get("title", "") + " " + art.get("summary", "")).strip()
+    src = art.get("source", "")
+    # Uploaded study materials and current affairs PDFs are curated for competitive exams
+    if src.startswith("PDF:") or "స్టడీ" in art.get("tags", ""):
+        from scraper import BANNED_EXAM_PATTERNS
+        import re
+        t_low = text.lower()
+        if any(re.search(p, t_low) for p in BANNED_EXAM_PATTERNS):
+            return False
+        return len(text) >= 12
+
+    from scraper import is_exam_worthy_content
     return is_exam_worthy_content(text)
 
 def format_notes_html(notes):
@@ -170,8 +181,8 @@ def render_epaper_html(date=None):
         src = a.get("source", "")
         tags = a.get("tags", "")
         cat = a.get("category", "")
-        # Strictly exclude user-uploaded study materials from daily e-paper
-        if src.startswith("PDF:") or "యూజర్ అప్‌లోడ్" in tags or cat == "study_material":
+        # Only exclude general static books/archives that are not daily current affairs
+        if cat in ["study_material", "history"] and "కరెంట్ అఫైర్స్" not in tags and "Current Affairs" not in src:
             continue
         if is_exam_worthy(a) and not is_duplicate_article(a["title"], seen_titles):
             articles.append(a)
@@ -182,14 +193,14 @@ def render_epaper_html(date=None):
     seen_ol = set()
     for ol in raw_one_liners:
         p = ol.get("point", "")
-        if any(bad in p for bad in ["విషయ సూచిక", "అప్‌లోడ్", "PDF:", "Target groups", "SP_REDDY"]):
+        if any(bad in p for bad in ["విషయ సూచిక", "అధ్యాయం", "Target groups", "SP_REDDY"]):
             continue
         from scraper import is_exam_worthy_content
         if is_exam_worthy_content(p) and not is_duplicate_article(p, seen_ol):
             one_liners.append(ol)
             seen_ol.add(p)
     raw_quizzes = get_quiz_by_date(date=date)
-    quizzes = [q for q in raw_quizzes if "ఇటీవల అప్‌లోడ్ చేసిన స్టడీ మెటీరియల్" not in q.get("question", "") and not (q.get("exam_tag") or "").startswith("PDF")]
+    quizzes = [q for q in raw_quizzes if "విషయ సూచిక" not in q.get("question", "")]
 
     # Group articles by category
     by_cat = {}
