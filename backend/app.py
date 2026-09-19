@@ -522,6 +522,27 @@ def api_magazine_pdf():
         mimetype="application/pdf"
     )
 
+@app.route("/api/weekly/pdf", methods=["GET"])
+@app.route("/api/weekly/download", methods=["GET"])
+def api_weekly_pdf():
+    end_date = request.args.get("end") or request.args.get("date")
+    as_download = request.args.get("download", "0") == "1" or request.path.endswith("/download")
+    from magazine import generate_weekly_pdf
+    pdf_path = generate_weekly_pdf(end_date=end_date)
+    if not pdf_path or not os.path.exists(pdf_path):
+        fallback = os.path.join(FRONTEND_DIR, "pdfs", "weekly_capsule_current.pdf")
+        if os.path.exists(fallback):
+            pdf_path = fallback
+        else:
+            return jsonify({"success": False, "error": "వీక్లీ బుక్‌లెట్ PDF సిద్ధంగా లేదు."}), 404
+    return send_from_directory(
+        os.path.dirname(pdf_path),
+        os.path.basename(pdf_path),
+        as_attachment=as_download,
+        download_name="Lakshya_Weekly_Capsule_Current.pdf",
+        mimetype="application/pdf"
+    )
+
 
 @app.route("/api/audio/daily_bulletin", methods=["GET"])
 def api_audio_daily_bulletin():

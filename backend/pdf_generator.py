@@ -121,6 +121,8 @@ CATEGORY_LABELS = {
     "appointments": "👤 ప్రముఖ నియామకాలు & కమిషన్లు (Key Appointments & Commissions)"
 }
 
+BANNED_EXAM_JUNK = ["రెసిపీ", "వంటకాలు", "సినిమా", "గాసిప్", "హత్య", "ఆత్మహత్య", "వివాదం", "బ్రేకింగ్"]
+
 def is_exam_worthy(art):
     from scraper import is_exam_worthy_content
     text = (art.get("title", "") + " " + art.get("summary", "")).strip()

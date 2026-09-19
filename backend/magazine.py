@@ -10,7 +10,7 @@ Supports both:
 
 import os
 from datetime import datetime, timedelta
-from db import get_connection
+from db import get_connection, get_available_dates
 
 MONTH_NAMES_TELUGU = {
     "01": "జనవరి", "02": "ఫిబ్రవరి", "03": "మార్చి", "04": "ఏప్రిల్",
@@ -97,8 +97,18 @@ def fetch_period_data(period_type="monthly", year_month=None, start_date=None, e
     conn.close()
 
     # Filter and deduplicate for high-yield exam quality
-    from pdf_generator import is_exam_worthy, BANNED_EXAM_JUNK
-    
+    try:
+        from scraper import is_exam_worthy_content
+    except Exception:
+        def is_exam_worthy_content(t):
+            return True
+
+    try:
+        from pdf_generator import is_exam_worthy
+    except Exception:
+        def is_exam_worthy(a):
+            return is_exam_worthy_content(a.get("title", ""))
+
     seen_titles = set()
     clean_articles = []
     for a in articles:
@@ -107,16 +117,47 @@ def fetch_period_data(period_type="monthly", year_month=None, start_date=None, e
             seen_titles.add(norm)
             clean_articles.append(a)
     
+    # Fallback to recent articles if range has too few
+    if len(clean_articles) < 5:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM articles ORDER BY date DESC, id DESC LIMIT 35")
+        for a in [dict(row) for row in cursor.fetchall()]:
+            norm = a.get("title", "").strip().lower()
+            if norm not in seen_titles and is_exam_worthy(a):
+                seen_titles.add(norm)
+                clean_articles.append(a)
+        conn.close()
+
     # Cap to top 40 high-yield articles
     clean_articles = clean_articles[:40]
+
+    if not quizzes:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM quiz_questions ORDER BY date DESC, id DESC LIMIT 20")
+        quizzes = [dict(row) for row in cursor.fetchall()]
+        conn.close()
 
     seen_ol = set()
     clean_one_liners = []
     for ol in one_liners:
         norm = ol.get("point", "").strip().lower()
-        if norm not in seen_ol and not any(j in norm for j in BANNED_EXAM_JUNK):
+        if norm not in seen_ol and is_exam_worthy_content(norm):
             seen_ol.add(norm)
             clean_one_liners.append(ol)
+
+    if len(clean_one_liners) < 5:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM one_liners ORDER BY date DESC, id DESC LIMIT 30")
+        for ol in [dict(row) for row in cursor.fetchall()]:
+            norm = ol.get("point", "").strip().lower()
+            if norm not in seen_ol and is_exam_worthy_content(norm):
+                seen_ol.add(norm)
+                clean_one_liners.append(ol)
+        conn.close()
+
     clean_one_liners = clean_one_liners[:50]
 
     return clean_articles, quizzes, clean_one_liners, period_title, sub_title
@@ -386,4 +427,65 @@ def generate_magazine_pdf(year_month="2026-09", force_refresh=False):
         return out_pdf_path
     if os.path.exists(static_pdf_path) and os.path.getsize(static_pdf_path) > 1000:
         return static_pdf_path
+    return None
+
+def generate_weekly_pdf(end_date=None, force_refresh=False):
+    """
+    Renders the Weekly Booklet HTML and compiles it to a high-resolution PDF.
+    """
+    import subprocess
+    from pdf_generator import get_browser_executable, PDF_CACHE_DIR
+    
+    if not end_date:
+        dates = get_available_dates()
+        end_date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
+    
+    start_dt = datetime.strptime(end_date, "%Y-%m-%d") - timedelta(days=6)
+    start_date = start_dt.strftime("%Y-%m-%d")
+    
+    pdf_filename = f"Lakshya_Weekly_Capsule_{start_date}_to_{end_date}.pdf"
+    out_pdf_path = os.path.join(PDF_CACHE_DIR, pdf_filename)
+    static_pdf_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "pdfs", pdf_filename)
+    fallback_weekly = os.path.join(os.path.dirname(__file__), "..", "frontend", "pdfs", "weekly_capsule_current.pdf")
+
+    if os.path.exists(out_pdf_path) and not force_refresh and os.path.getsize(out_pdf_path) > 1000:
+        return out_pdf_path
+    if os.path.exists(static_pdf_path) and not force_refresh and os.path.getsize(static_pdf_path) > 1000:
+        return static_pdf_path
+
+    browser_exe = get_browser_executable()
+    if browser_exe:
+        html_content = render_magazine_html(period_type="weekly", start_date=start_date, end_date=end_date)
+        temp_html_path = os.path.join(PDF_CACHE_DIR, f"temp_weekly_{end_date}.html")
+        try:
+            with open(temp_html_path, "w", encoding="utf-8") as f:
+                f.write(html_content)
+
+            file_uri = f"file:///{temp_html_path.replace(os.sep, '/')}"
+            cmd = f'"{browser_exe}" --headless --disable-gpu --no-pdf-header-footer --print-to-pdf="{out_pdf_path}" "{file_uri}"'
+            subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=60)
+
+            if os.path.exists(out_pdf_path) and os.path.getsize(out_pdf_path) > 1000:
+                import shutil
+                try:
+                    os.makedirs(os.path.dirname(static_pdf_path), exist_ok=True)
+                    shutil.copy2(out_pdf_path, static_pdf_path)
+                    shutil.copy2(out_pdf_path, fallback_weekly)
+                except Exception as cp_err:
+                    print(f"Error copying weekly PDF to frontend: {cp_err}")
+        except Exception as e:
+            print(f"Weekly PDF generation error: {e}")
+        finally:
+            if os.path.exists(temp_html_path):
+                try:
+                    os.remove(temp_html_path)
+                except Exception:
+                    pass
+
+    if os.path.exists(out_pdf_path) and os.path.getsize(out_pdf_path) > 1000:
+        return out_pdf_path
+    if os.path.exists(static_pdf_path) and os.path.getsize(static_pdf_path) > 1000:
+        return static_pdf_path
+    if os.path.exists(fallback_weekly) and os.path.getsize(fallback_weekly) > 1000:
+        return fallback_weekly
     return None
