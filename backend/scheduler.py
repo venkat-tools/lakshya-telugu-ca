@@ -94,6 +94,16 @@ def run_daily_job(date=None):
         results["pdf_error"] = str(e)
         print(f"❌ PDF తయారీలో లోపం: {e}")
 
+    # Step 2c: Generate Today's Fresh Daily CA & Quiz Capsule PDF
+    try:
+        from daily_ca_quiz_pdf import generate_ca_quiz_pdf
+        ca_quiz_pdf_path = generate_ca_quiz_pdf(target_date, force_refresh=True)
+        results["ca_quiz_pdf"] = ca_quiz_pdf_path
+        print(f"✅ నేటి ({target_date}) డైలీ CA & క్విజ్ క్యాప్సూల్ PDF సిద్ధమైంది: {ca_quiz_pdf_path}")
+    except Exception as e:
+        results["ca_quiz_pdf_error"] = str(e)
+        print(f"❌ డైలీ CA & క్విజ్ PDF తయారీలో లోపం: {e}")
+
     # Step 3: Send to Telegram
     if cfg.get("auto_telegram", True):
         tg_cfg = load_tg_config()

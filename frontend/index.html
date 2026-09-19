@@ -126,6 +126,12 @@
           <span class="hidden sm:inline">నోట్స్ PDF</span>
         </button>
 
+        <!-- Dedicated Daily Current Affairs & Quiz Capsule PDF Button -->
+        <a id="headerDailyCaQuizPdfBtn" href="/api/ca_quiz/pdf" download class="bg-gradient-to-r from-amber-500 via-orange-600 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-amber-300/40" title="నేటి కరెంట్ అఫైర్స్ & ప్రాక్టీస్ క్విజ్ బుక్‌లెట్ PDF డౌన్‌లోడ్ చేసుకోండి">
+          <i data-lucide="award" class="w-4 h-4 text-yellow-200"></i>
+          <span>📑 డైలీ CA & క్విజ్ PDF</span>
+        </a>
+
         <!-- Bookmarks / Saved Items Button -->
         <button id="openBookmarksModalBtn" onclick="openBookmarksModal()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-amber-300/50 cursor-pointer" title="మీరు సేవ్ చేసుకున్న ముఖ్యమైన బిట్స్ & ఆర్టికల్స్ (Bookmarks)">
           <i data-lucide="bookmark" class="w-4 h-4 text-slate-950"></i>
@@ -167,6 +173,12 @@
         <i data-lucide="book-marked" class="w-4 h-4"></i>
         <span>బుక్‌లెట్స్ (PDF)</span>
       </button>
+
+      <!-- Dedicated Daily Current Affairs & Quiz Booklet -->
+      <a href="/api/ca_quiz/pdf" download class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-emerald-400/40" title="నేటి కరెంట్ అఫైర్స్ & ప్రాక్టీస్ క్విజ్ బుక్‌లెట్ PDF">
+        <i data-lucide="award" class="w-4 h-4 text-amber-300"></i>
+        <span>🎯 డైలీ CA & క్విజ్ బుక్‌లెట్ (PDF)</span>
+      </a>
 
       <!-- Monthly Current Affairs Magazine (PDF & Online) -->
       <a href="/api/magazine/pdf?download=1" download class="bg-gradient-to-r from-purple-800 to-indigo-800 hover:from-purple-700 hover:to-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black flex items-center space-x-1.5 transition shadow-sm border border-purple-400/40">
@@ -1290,6 +1302,39 @@
 
       <!-- Modal Body (Scrollable) -->
       <div class="overflow-y-auto space-y-4 pr-1">
+
+        <!-- 🌟 PRIMARY FEATURE: Dedicated Daily Current Affairs & Exam Practice Quiz Capsule PDF Card 🌟 -->
+        <div class="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950 text-white p-4 sm:p-5 rounded-2xl shadow-xl border-2 border-emerald-500/80">
+          <div class="flex justify-between items-start mb-2">
+            <span class="bg-emerald-400 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              ⭐ స్టడీ మెటీరియల్ బుక్‌లెట్ (No E-News Ads)
+            </span>
+            <span class="text-xs text-emerald-200 font-bold" id="caQuizModalDate">తేదీ: నేడు</span>
+          </div>
+          <h4 class="text-lg sm:text-xl font-black mb-1 text-white flex items-center gap-2">
+            <span>📚 లక్ష్య డైలీ కరెంట్ అఫైర్స్ & క్విజ్ క్యాప్సూల్</span>
+            <span class="bg-emerald-500/30 text-emerald-300 text-[11px] px-2 py-0.5 rounded-md border border-emerald-400/40 font-bold">బుక్‌లెట్ PDF</span>
+          </h4>
+          <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+            ఈ-న్యూస్ లేఅవుట్ లేకుండా, కేవలం పోటీ పరీక్షల కోసం సిలబస్ వారీగా ముఖ్యాంశాలు (Key Points), స్పీడ్ రివిజన్ వన్-లైనర్స్, 5 ప్రాక్టీస్ MCQs (OMR తో) మరియు సమగ్ర వివరణలతో కూడిన ప్రత్యేక స్టడీ బుక్‌లెట్ PDF.
+          </p>
+          
+          <div class="flex flex-wrap gap-2.5">
+            <a id="caQuizDownloadLink" href="/api/ca_quiz/pdf" download class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>డైలీ CA & క్విజ్ PDF డౌన్‌లోడ్</span>
+            </a>
+            <button id="caQuizSendTelegramBtn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>టెలిగ్రామ్‌కు PDF పంపండి</span>
+            </button>
+            <a id="caQuizViewWebLink" href="/ca_quiz" target="_blank" class="bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+              <i data-lucide="external-link" class="w-4 h-4"></i>
+              <span>బ్రౌజర్‌లో చదవండి</span>
+            </a>
+          </div>
+          <div id="caQuizTgStatus" class="mt-2 text-xs font-semibold text-amber-300 hidden"></div>
+        </div>
 
         <!-- 1. Lakshya Compiled Daily E-Paper Card -->
         <div class="bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-950 text-white p-4 sm:p-5 rounded-2xl shadow-lg border border-blue-800">

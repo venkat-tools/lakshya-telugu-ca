@@ -122,6 +122,8 @@ function setupEventListeners() {
   dateSelect.addEventListener("change", async (e) => {
     state.currentDate = e.target.value;
     document.getElementById("printDate").textContent = `తేదీ: ${state.currentDate}`;
+    const headerCaBtn = document.getElementById("headerDailyCaQuizPdfBtn");
+    if (headerCaBtn) headerCaBtn.href = `/api/ca_quiz/pdf?date=${state.currentDate}`;
     state.quizAnswers = {};
     await refreshCurrentView();
   });
@@ -236,6 +238,8 @@ async function loadAvailableDates() {
       });
       state.currentDate = data.dates[0];
       document.getElementById("printDate").textContent = `తేదీ: ${state.currentDate}`;
+      const headerCaBtn = document.getElementById("headerDailyCaQuizPdfBtn");
+      if (headerCaBtn) headerCaBtn.href = `/api/ca_quiz/pdf?date=${state.currentDate}`;
     }
   } catch (err) {
     console.error("Error loading dates:", err);
@@ -1261,6 +1265,13 @@ function initEpaperModal() {
   const viewWebLink = document.getElementById("epaperViewWebLink");
   const tgStatus = document.getElementById("epaperTgStatus");
 
+  // Dedicated Daily CA & Quiz Capsule Controls
+  const caDateSpan = document.getElementById("caQuizModalDate");
+  const caDownloadLink = document.getElementById("caQuizDownloadLink");
+  const caViewWebLink = document.getElementById("caQuizViewWebLink");
+  const caSendTgBtn = document.getElementById("caQuizSendTelegramBtn");
+  const caTgStatus = document.getElementById("caQuizTgStatus");
+
   if (!modal || !openBtn) return;
 
   openBtn.addEventListener("click", () => {
@@ -1272,6 +1283,15 @@ function initEpaperModal() {
       tgStatus.classList.add("hidden");
       tgStatus.textContent = "";
     }
+
+    if (caDateSpan) caDateSpan.textContent = `తేదీ: ${activeDate}`;
+    if (caDownloadLink) caDownloadLink.href = `/api/ca_quiz/pdf?date=${activeDate}`;
+    if (caViewWebLink) caViewWebLink.href = `/ca_quiz?date=${activeDate}`;
+    if (caTgStatus) {
+      caTgStatus.classList.add("hidden");
+      caTgStatus.textContent = "";
+    }
+
     modal.classList.remove("hidden");
     if (window.lucide) lucide.createIcons();
   });
@@ -1286,6 +1306,7 @@ function initEpaperModal() {
     if (e.target === modal) modal.classList.add("hidden");
   });
 
+  // Daily E-Paper Telegram Send
   if (sendTgBtn) {
     sendTgBtn.addEventListener("click", async () => {
       const activeDate = state.currentDate || new Date().toISOString().split("T")[0];
@@ -1324,6 +1345,50 @@ function initEpaperModal() {
       } finally {
         sendTgBtn.disabled = false;
         sendTgBtn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i><span>టెలిగ్రామ్‌కు PDF పంపండి</span>`;
+        if (window.lucide) lucide.createIcons();
+      }
+    });
+  }
+
+  // Dedicated Daily CA & Quiz Capsule Telegram Send
+  if (caSendTgBtn) {
+    caSendTgBtn.addEventListener("click", async () => {
+      const activeDate = state.currentDate || new Date().toISOString().split("T")[0];
+      caSendTgBtn.disabled = true;
+      caSendTgBtn.innerHTML = `<span class="animate-spin mr-1">⏳</span><span>టెలిగ్రామ్‌కు పంపుతోంది...</span>`;
+      if (caTgStatus) {
+        caTgStatus.classList.remove("hidden");
+        caTgStatus.textContent = "⏳ స్టడీ క్యాప్సూల్ PDF జనరేట్ చేసి టెలిగ్రామ్‌కు అప్‌లోడ్ చేస్తోంది...";
+        caTgStatus.className = "mt-2 text-xs font-semibold text-amber-300";
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/telegram/send_ca_quiz_pdf`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ date: activeDate })
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (caTgStatus) {
+            caTgStatus.textContent = "✅ డైలీ CA & క్విజ్ క్యాప్సూల్ PDF టెలిగ్రామ్‌కు విజయవంతంగా చేరింది!";
+            caTgStatus.className = "mt-2 text-xs font-semibold text-emerald-300";
+          }
+          showToast("డైలీ CA & క్విజ్ బుక్‌లెట్ PDF టెలిగ్రామ్‌కు పంపబడింది!");
+        } else {
+          if (caTgStatus) {
+            caTgStatus.textContent = `⚠️ ఎర్రర్: ${data.error || 'పంపడం విఫలమైంది'}`;
+            caTgStatus.className = "mt-2 text-xs font-semibold text-rose-300";
+          }
+        }
+      } catch (err) {
+        if (caTgStatus) {
+          caTgStatus.textContent = "⚠️ సర్వర్ కనెక్షన్ లోపం.";
+          caTgStatus.className = "mt-2 text-xs font-semibold text-rose-300";
+        }
+      } finally {
+        caSendTgBtn.disabled = false;
+        caSendTgBtn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i><span>టెలిగ్రామ్‌కు PDF పంపండి</span>`;
         if (window.lucide) lucide.createIcons();
       }
     });

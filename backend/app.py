@@ -37,6 +37,7 @@ from telegram_bot import load_config, save_config, send_telegram_message, broadc
 from scheduler import start_scheduler_thread, load_scheduler_config, save_scheduler_config, run_daily_job
 from magazine import render_magazine_html
 from pdf_generator import render_epaper_html, generate_epaper_pdf, OFFICIAL_TELUGU_EPAPERS
+from daily_ca_quiz_pdf import render_ca_quiz_html, generate_ca_quiz_pdf
 from mock_tests_data import SUBJECT_MOCK_TESTS
 from omr_generator import generate_omr_test_html, get_all_50_mock_questions, generate_group2_omr_test_html
 from appsc_group2_data import (
@@ -78,9 +79,10 @@ def ensure_today_synced():
                 ensure_daily_quizzes(date=today_ist)
                 try:
                     generate_epaper_pdf(today_ist, force_refresh=True)
+                    generate_ca_quiz_pdf(today_ist, force_refresh=True)
                 except Exception as pdf_e:
                     print(f"Startup PDF compilation error: {pdf_e}")
-                print(f"✅ [Startup Auto-Sync] నేటి ({today_ist}) వార్తలు, క్విజ్ మరియు ఈ-పేపర్ PDF విజయవంతంగా సిద్ధమయ్యాయి.")
+                print(f"✅ [Startup Auto-Sync] నేటి ({today_ist}) వార్తలు, క్విజ్, ఈ-పేపర్ మరియు డైలీ CA & క్విజ్ క్యాప్సూల్ PDF లు సిద్ధమయ్యాయి.")
         threading.Thread(target=_sync_worker, daemon=True).start()
     except Exception as e:
         print("Startup sync error:", e)
@@ -181,6 +183,16 @@ def epaper_view():
         dates = get_available_dates()
         date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
     return render_epaper_html(date=date)
+
+@app.route("/ca_quiz")
+@app.route("/api/ca_quiz")
+@app.route("/api/ca_quiz/view")
+def ca_quiz_view():
+    date = request.args.get("date")
+    if not date:
+        dates = get_available_dates()
+        date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
+    return render_ca_quiz_html(date=date)
 
 @app.route("/<path:path>")
 def serve_static(path):
@@ -383,6 +395,19 @@ def api_telegram_send_epaper_pdf():
     res = send_daily_epaper_pdf(date=date, token=token, chat_id=chat_id)
     return jsonify(res)
 
+@app.route("/api/telegram/send_ca_quiz_pdf", methods=["POST", "GET"])
+def api_telegram_send_ca_quiz_pdf():
+    from telegram_bot import send_daily_ca_quiz_pdf
+    try:
+        data = request.get_json(silent=True) or {}
+    except Exception:
+        data = {}
+    date = request.args.get("date") or data.get("date")
+    token = request.args.get("bot_token") or data.get("bot_token")
+    chat_id = request.args.get("chat_id") or data.get("chat_id")
+    res = send_daily_ca_quiz_pdf(date=date, token=token, chat_id=chat_id)
+    return jsonify(res)
+
 
 @app.route("/api/telegram/channels", methods=["GET", "POST", "DELETE"])
 def api_telegram_channels():
@@ -436,6 +461,29 @@ def api_epaper_pdf():
         os.path.basename(pdf_path),
         as_attachment=True,
         download_name=f"Lakshya_Telugu_EPaper_{date}.pdf"
+    )
+
+@app.route("/api/ca_quiz/pdf", methods=["GET"])
+@app.route("/api/ca_quiz/download", methods=["GET"])
+def api_ca_quiz_pdf():
+    date = request.args.get("date")
+    if not date:
+        dates = get_available_dates()
+        date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
+    
+    pdf_path = generate_ca_quiz_pdf(date=date)
+    if not pdf_path or not os.path.exists(pdf_path):
+        fallback_today = os.path.join(FRONTEND_DIR, "pdfs", "daily_ca_quiz_today.pdf")
+        if os.path.exists(fallback_today):
+            pdf_path = fallback_today
+        else:
+            return jsonify({"success": False, "error": "డైలీ CA & క్విజ్ PDF జనరేట్ చేయడం సాధ్యపడలేదు."}), 500
+    
+    return send_from_directory(
+        os.path.dirname(pdf_path),
+        os.path.basename(pdf_path),
+        as_attachment=True,
+        download_name=f"Lakshya_Daily_CA_Quiz_{date}.pdf"
     )
 
 

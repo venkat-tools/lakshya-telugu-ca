@@ -340,6 +340,60 @@ def send_daily_epaper_pdf(date=None, token=None, chat_id=None):
 
     return res
 
+def send_daily_ca_quiz_pdf(date=None, token=None, chat_id=None):
+    """Generate and send today's Dedicated Daily CA & Practice Quiz Capsule PDF to Telegram"""
+    from daily_ca_quiz_pdf import generate_ca_quiz_pdf
+    if not date:
+        dates = get_available_dates()
+        date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
+
+    caption = (
+        f"📚 <b>లక్ష్య డైలీ కరెంట్ అఫైర్స్ & ప్రాక్టీస్ క్విజ్ క్యాప్సూల్</b>\n"
+        f"📅 <b>తేదీ: {date}</b>\n"
+        f"───────────────────────\n\n"
+        f"🎯 <b>పోటీ పరీక్షల హ్యాండ్‌బుక్ స్టడీ మెటీరియల్ ఫార్మాట్ (Zero Ads, Single Column):</b>\n"
+        f"1️⃣ <b>సబ్జెక్ట్ వైజ్ స్టడీ నోట్స్:</b> కీ ఎగ్జామ్ పాయింటర్లు & సిలబస్ విశ్లేషణ\n"
+        f"2️⃣ <b>స్పీడ్ రివిజన్ వన్-లైనర్స్:</b> చివరి నిమిషం ప్రిపరేషన్ బుల్లెట్లు\n"
+        f"3️⃣ <b>డైలీ ప్రాక్టీస్ క్విజ్:</b> APPSC/TSPSC నూతన మోడల్ ప్రశ్నలు + OMR సర్కిల్స్\n"
+        f"4️⃣ <b>కీ & సమగ్ర వివరణలు:</b> ప్రతి ప్రశ్నకు బ్యాక్‌గ్రౌండ్ & సిలబస్ లింకేజ్\n\n"
+        f"📥 <b>డైరెక్ట్ PDF డౌన్‌లోడ్ లింక్:</b>\n"
+        f"👉 https://lakshya-telugu-ca.onrender.com/api/ca_quiz/pdf?date={date}\n"
+        f"🌐 <b>ఆన్‌లైన్ క్యాప్సూల్ రీడర్:</b>\n"
+        f"👉 https://lakshya-telugu-ca.onrender.com/ca_quiz?date={date}\n\n"
+        f"🏆 <i>గ్రూప్-1, గ్రూప్-2, పోలీస్, డీఎస్సీ, బ్యాంకింగ్ అభ్యర్థులకు అత్యుత్తమ రివిజన్ స్టడీ మెటీరియల్</i>"
+    )
+
+    pdf_path = generate_ca_quiz_pdf(date=date)
+    if not pdf_path or not os.path.exists(pdf_path):
+        fallback_msg = (
+            f"📚 <b>లక్ష్య డైలీ కరెంట్ అఫైర్స్ & క్విజ్ క్యాప్సూల్ (PDF) - {date}</b>\n\n"
+            f"📥 <b>నేటి స్టడీ మెటీరియల్ PDF డౌన్‌లోడ్ లింక్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/api/ca_quiz/pdf?date={date}\n\n"
+            f"📖 <b>ఆన్‌లైన్ క్యాప్సూల్ రీడర్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/ca_quiz?date={date}"
+        )
+        return send_telegram_message(fallback_msg, token=token, chat_id=chat_id)
+
+    res = send_telegram_document(
+        file_path=pdf_path,
+        caption=caption,
+        filename=f"Lakshya_Daily_CA_Quiz_{date}.pdf",
+        token=token,
+        chat_id=chat_id
+    )
+
+    if not res.get("success"):
+        fallback_msg = (
+            f"📚 <b>లక్ష్య డైలీ కరెంట్ అఫైర్స్ & క్విజ్ క్యాప్సూల్ (PDF) - {date}</b>\n\n"
+            f"📥 <b>నేటి స్టడీ మెటీరియల్ PDF డౌన్‌లోడ్ లింక్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/api/ca_quiz/pdf?date={date}\n\n"
+            f"📖 <b>ఆన్‌లైన్ క్యాప్సూల్ రీడర్:</b>\n"
+            f"👉 https://lakshya-telugu-ca.onrender.com/ca_quiz?date={date}"
+        )
+        send_telegram_message(fallback_msg, token=token, chat_id=chat_id)
+
+    return res
+
 def send_epapers_directory(date=None, token=None, chat_id=None):
     """Send official Telugu E-Papers directory links to Telegram"""
     from pdf_generator import OFFICIAL_TELUGU_EPAPERS
@@ -470,9 +524,14 @@ def broadcast_daily_digest(date=None, token=None, chat_id=None):
         if pdf_res.get("success"):
             pdf_sent_count += 1
 
+        # 4. Send Dedicated Daily CA & Quiz Capsule PDF Document
+        ca_quiz_res = send_daily_ca_quiz_pdf(date=date, token=token, chat_id=cid)
+        if ca_quiz_res.get("success"):
+            pdf_sent_count += 1
+
     return {
         "success": True,
-        "message": f"{date} నాటి డైజెస్ట్, క్విజ్ పోల్స్ మరియు ఈ-పేపర్ PDF {len(target_chats)} మందికి టెలిగ్రామ్‌కు విజయవంతంగా పంపబడ్డాయి!",
+        "message": f"{date} నాటి డైజెస్ట్, క్విజ్ పోల్స్, ఈ-పేపర్ మరియు డైలీ CA & క్విజ్ బుక్‌లెట్ PDF {len(target_chats)} మందికి టెలిగ్రామ్‌కు విజయవంతంగా పంపబడ్డాయి!",
         "articles_sent": len(articles),
         "quizzes_sent": sent_polls,
         "pdf_sent": pdf_sent_count > 0,
