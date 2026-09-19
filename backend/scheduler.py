@@ -84,6 +84,16 @@ def run_daily_job(date=None):
         results["quiz_error"] = str(e)
         print(f"❌ క్విజ్ తయారీలో లోపం: {e}")
 
+    # Step 2b: Generate Today's Fresh E-Paper PDF
+    try:
+        from pdf_generator import generate_epaper_pdf
+        pdf_path = generate_epaper_pdf(target_date, force_refresh=True)
+        results["pdf"] = pdf_path
+        print(f"✅ నేటి ({target_date}) ఈ-పేపర్ PDF సిద్ధమైంది: {pdf_path}")
+    except Exception as e:
+        results["pdf_error"] = str(e)
+        print(f"❌ PDF తయారీలో లోపం: {e}")
+
     # Step 3: Send to Telegram
     if cfg.get("auto_telegram", True):
         tg_cfg = load_tg_config()

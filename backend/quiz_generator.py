@@ -5,6 +5,14 @@ Generates 5 fresh, exam-standard MCQs based on the day's articles
 and persists them into the database for tests, web UI, and Telegram polls.
 """
 
+import sys
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 from db import get_connection, insert_quiz, get_quiz_by_date, get_articles
 
 CURATED_DAILY_QUIZZES = {
@@ -254,25 +262,85 @@ def ensure_daily_quizzes(date="2026-09-15"):
         # Generate questions from available articles of that date
         articles = get_articles(date=date)
         questions_to_add = []
+        options_keys = ["A", "B", "C", "D"]
+
+        category_templates = {
+            "education": {
+                "stem": "పోటీ పరీక్షల నోటిఫికేషన్లు & విద్యా నిబంధనల ప్రకారం క్రింది ప్రకటనలలో సరైనది ఏది?",
+                "d1": "ఈ పరీక్షల ప్రక్రియను మరియు ఉద్యోగ నియామకాలను ప్రభుత్వం శాశ్వతంగా నిలిపివేసింది.",
+                "d2": "కేవలం ప్రైవేట్ విశ్వవిద్యాలయాల్లో చదివిన అభ్యర్థులకు మాత్రమే ఈ నోటిఫికేషన్ వర్తిస్తుంది.",
+                "d3": "ఇందులో ఎలాంటి రిజర్వేషన్లు లేదా రోస్టర్ విధానం వర్తించదు."
+            },
+            "regional": {
+                "stem": "ప్రభుత్వ సంక్షేమ పథకాలు, బడ్జెట్ మరియు పాలసీల మార్గదర్శకాల ప్రకారం క్రింది ప్రకటనలలో సరైనది ఏది?",
+                "d1": "ఈ పథకానికి రాష్ట్ర ప్రభుత్వం ఎలాంటి బడ్జెట్ నిధులు కేటాయించలేదు.",
+                "d2": "కేవలం పట్టణ ప్రాంతాలలోని సంపన్న వర్గాల వారికి మాత్రమే ఈ పథకం వర్తిస్తుంది.",
+                "d3": "ప్రభుత్వ మార్గదర్శకాల ప్రకారం ఈ పథకం కేవలం ఒక నెల పాటు మాత్రమే అమలులో ఉంటుంది."
+            },
+            "economy": {
+                "stem": "భారత ఆర్థిక వ్యవస్థ, ద్రవ్య విధానం (Monetary Policy) & బ్యాంకింగ్ మార్గదర్శకాలకు సంబంధించి సరైన ప్రకటన ఏది?",
+                "d1": "వడ్డీ రేట్లను మరియు డిపాజిట్ల నిబంధనలను బ్యాంకులు స్వతంత్రంగా నిర్ణయిస్తాయి, ఆర్బీఐకి ఎటువంటి పాత్ర ఉండదు.",
+                "d2": "ద్రవ్యోల్బణం పెరిగినప్పుడు సాధారణంగా రుణాలపై వడ్డీ రేట్లను కేంద్ర ప్రభుత్వం పూర్తిగా రద్దు చేస్తుంది.",
+                "d3": "ఈ నిర్ణయం వల్ల కేవలం విదేశీ బహుళజాతి కంపెనీలకు మాత్రమే ప్రయోజనం చేకూరుతుంది."
+            },
+            "science_tech": {
+                "stem": "సైన్స్, అంతరిక్ష పరిశోధనలు (ISRO/NASA) & సాంకేతిక ఆవిష్కరణలకు సంబంధించి క్రింది వాటిలో సరైనది ఏది?",
+                "d1": "ఈ ప్రాజెక్టును అంతర్జాతీయ నిపుణులు పూర్తిగా తిరస్కరించి ప్రయోగాన్ని నిలిపివేశారు.",
+                "d2": "ఈ పరిశోధన కేవలం భూగర్భ జలాల అన్వేషణకు మాత్రమే పరిమితమైనది.",
+                "d3": "ఈ సాంకేతికత భవిష్యత్ మానవ మనుగడకు మరియు అంతరిక్ష అన్వేషణకు ఎటువంటి ప్రయోజనం చేకూర్చదు."
+            },
+            "national": {
+                "stem": "భారత రాజ్యాంగం, న్యాయస్థానాల తీర్పులు & పాలిటీ నిబంధనల ప్రకారం క్రింది వాటిలో సరైన ప్రకటన ఏది?",
+                "d1": "హైకోర్టు లేదా సుప్రీంకోర్టు తీర్పులు ప్రజాప్రతినిధులపై ఎటువంటి చట్టపరమైన ప్రభావం చూపవు.",
+                "d2": "ఈ విషయమై భారత రాజ్యాంగంలో ఎటువంటి అధికారిక నిబంధనలు లేదా అధికరణలు లేవు.",
+                "d3": "ఈ కేసులో కేవలం రాష్ట్రపతి మాత్రమే అంతిమ తీర్పు వెల్లడించే సంపూర్ణ అధికారం కలిగి ఉంటారు."
+            },
+            "sports_awards": {
+                "stem": "జాతీయ, అంతర్జాతీయ క్రీడా పోటీలు & రికార్డులకు సంబంధించి క్రింది ప్రకటనలలో సరైనది ఏది?",
+                "d1": "ఈ టోర్నమెంట్‌లో భారత క్రీడాకారులు ఒక్క పతకం కూడా సాధించకుండానే నిష్క్రమించారు.",
+                "d2": "అంతర్జాతీయ క్రీడా సమాఖ్య ఈ పోటీల ఫలితాలను అధికారికంగా గుర్తించలేదు.",
+                "d3": "ఈ క్రీడా పోటీలు ప్రతి పదేళ్లకోసారి మాత్రమే నిర్వహించబడతాయి."
+            }
+        }
+
         for idx, art in enumerate(articles[:5]):
-            title = art.get("title", "")
+            title = art.get("title", "").strip()
+            summary = art.get("summary", "").strip()
             cat = art.get("category", "national")
             exam_tag = art.get("exam_relevance", "APPSC / TSPSC Group 1 & 2")
+            
+            tmpl = category_templates.get(cat, category_templates["national"])
+            question_text = f"నేటి వార్తాంశం '{title}' నేపథ్యంలో — {tmpl['stem']}"
+            correct_stmt = f"{summary[:110]}..." if len(summary) > 110 else summary
+
+            # Rotate correct option among A, B, C, D to prevent predictable 'A' answers
+            target_correct_opt = options_keys[idx % 4]
+            distractors = [tmpl["d1"], tmpl["d2"], tmpl["d3"]]
+
+            opts = {}
+            d_idx = 0
+            for opt_key in options_keys:
+                if opt_key == target_correct_opt:
+                    opts[f"option_{opt_key.lower()}"] = correct_stmt
+                else:
+                    opts[f"option_{opt_key.lower()}"] = distractors[d_idx]
+                    d_idx += 1
+
             questions_to_add.append({
                 "category": cat,
-                "question": f"నేటి వార్తాంశం '{title}'కు సంబంధించి పోటీ పరీక్షల కోణంలో సరైన ప్రకటన ఏది?",
-                "option_a": f"{art.get('summary', '')[:90]}...",
-                "option_b": "ఈ అంశం కేవలం విదేశీ వాణిజ్యానికి మాత్రమే సంబంధించినది.",
-                "option_c": "ఈ విషయమై కేంద్ర లేదా రాష్ట్ర ప్రభుత్వాల నుండి ఎటువంటి నిర్ణయం తీసుకోబడలేదు.",
-                "option_d": "పైవేవీ కావు.",
-                "correct_option": "A",
-                "explanation": f"{title} అనే అంశం ప్రస్తుత సమకాలీన పరిణామాలలో చాలా ముఖ్యమైనది. {art.get('summary', '')[:120]}...",
+                "question": question_text,
+                "option_a": opts["option_a"],
+                "option_b": opts["option_b"],
+                "option_c": opts["option_c"],
+                "option_d": opts["option_d"],
+                "correct_option": target_correct_opt,
+                "explanation": f"సరైన వివరణ: '{title}' అనే సమకాలీన అంశం ప్రకారం — {summary[:160]}... పోటీ పరీక్షల సిలబస్‌లో ఈ పరిణామం చాలా ముఖ్యమైనది.",
                 "exam_tag": exam_tag
             })
         
-        # If not enough articles, use 2026-09-15 template questions
+        # If not enough articles, supplement from 2026-09-15
         if len(questions_to_add) < 5:
-            questions_to_add.extend(CURATED_DAILY_QUIZZES["2026-09-15"][:5 - len(questions_to_add)])
+            questions_to_add.extend(CURATED_DAILY_QUIZZES.get("2026-09-15", [])[:5 - len(questions_to_add)])
 
     for q in questions_to_add:
         insert_quiz(

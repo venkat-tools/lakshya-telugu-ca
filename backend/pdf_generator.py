@@ -501,9 +501,22 @@ def generate_epaper_pdf(date=None, force_refresh=False):
     to produce an exact, high-resolution Daily E-Paper PDF.
     Returns the absolute path to the generated PDF file.
     """
+    today_str = datetime.now().strftime("%Y-%m-%d")
     if not date:
         dates = get_available_dates()
-        date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
+        date = dates[0] if dates else today_str
+
+    # Auto-sync check: if no articles exist yet for this date, fetch them now
+    from db import get_articles
+    existing_arts = get_articles(date=date)
+    if len(existing_arts) < 5:
+        try:
+            from scraper import sync_daily_news
+            from quiz_generator import ensure_daily_quizzes
+            sync_daily_news(target_date=date)
+            ensure_daily_quizzes(date=date)
+        except Exception as sync_err:
+            print(f"Auto-sync during PDF generation error: {sync_err}")
 
     pdf_filename = f"Lakshya_Telugu_EPaper_{date}.pdf"
     out_pdf_path = os.path.join(PDF_CACHE_DIR, pdf_filename)
@@ -537,7 +550,8 @@ def generate_epaper_pdf(date=None, force_refresh=False):
                 try:
                     os.makedirs(os.path.dirname(static_pdf_path), exist_ok=True)
                     shutil.copy2(out_pdf_path, static_pdf_path)
-                    shutil.copy2(out_pdf_path, fallback_today)
+                    if date == today_str:
+                        shutil.copy2(out_pdf_path, fallback_today)
                 except Exception as cp_err:
                     print(f"Error copying generated PDF to frontend: {cp_err}")
         except Exception as e:
@@ -552,8 +566,8 @@ def generate_epaper_pdf(date=None, force_refresh=False):
     if os.path.exists(out_pdf_path) and os.path.getsize(out_pdf_path) > 1000:
         return out_pdf_path
 
-    # 4. Fallback to today's static pre-compiled PDF
-    if os.path.exists(fallback_today) and os.path.getsize(fallback_today) > 1000:
+    # 4. Fallback to today's static pre-compiled PDF only when today or no specific date was requested
+    if date == today_str and os.path.exists(fallback_today) and os.path.getsize(fallback_today) > 1000:
         return fallback_today
 
     return None

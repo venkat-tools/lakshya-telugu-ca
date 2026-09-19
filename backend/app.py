@@ -76,7 +76,11 @@ def ensure_today_synced():
                 sync_daily_news(target_date=today_ist)
                 from quiz_generator import ensure_daily_quizzes
                 ensure_daily_quizzes(date=today_ist)
-                print(f"✅ [Startup Auto-Sync] నేటి ({today_ist}) వార్తలు మరియు క్విజ్ విజయవంతంగా సిద్ధమయ్యాయి.")
+                try:
+                    generate_epaper_pdf(today_ist, force_refresh=True)
+                except Exception as pdf_e:
+                    print(f"Startup PDF compilation error: {pdf_e}")
+                print(f"✅ [Startup Auto-Sync] నేటి ({today_ist}) వార్తలు, క్విజ్ మరియు ఈ-పేపర్ PDF విజయవంతంగా సిద్ధమయ్యాయి.")
         threading.Thread(target=_sync_worker, daemon=True).start()
     except Exception as e:
         print("Startup sync error:", e)
