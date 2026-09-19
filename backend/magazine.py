@@ -98,6 +98,12 @@ def fetch_period_data(period_type="monthly", year_month=None, start_date=None, e
 
     # Filter and deduplicate for high-yield exam quality
     try:
+        from political_filter import is_political_content
+    except Exception:
+        def is_political_content(t):
+            return False
+
+    try:
         from scraper import is_exam_worthy_content
     except Exception:
         def is_exam_worthy_content(t):
@@ -113,7 +119,7 @@ def fetch_period_data(period_type="monthly", year_month=None, start_date=None, e
     clean_articles = []
     for a in articles:
         norm = a.get("title", "").strip().lower()
-        if norm not in seen_titles and is_exam_worthy(a):
+        if norm not in seen_titles and not is_political_content(a.get("title", "") + " " + a.get("summary", "")) and is_exam_worthy(a):
             seen_titles.add(norm)
             clean_articles.append(a)
     
@@ -124,7 +130,7 @@ def fetch_period_data(period_type="monthly", year_month=None, start_date=None, e
         cursor.execute("SELECT * FROM articles ORDER BY date DESC, id DESC LIMIT 35")
         for a in [dict(row) for row in cursor.fetchall()]:
             norm = a.get("title", "").strip().lower()
-            if norm not in seen_titles and is_exam_worthy(a):
+            if norm not in seen_titles and not is_political_content(a.get("title", "") + " " + a.get("summary", "")) and is_exam_worthy(a):
                 seen_titles.add(norm)
                 clean_articles.append(a)
         conn.close()
@@ -138,6 +144,8 @@ def fetch_period_data(period_type="monthly", year_month=None, start_date=None, e
         cursor.execute("SELECT * FROM quiz_questions ORDER BY date DESC, id DESC LIMIT 20")
         quizzes = [dict(row) for row in cursor.fetchall()]
         conn.close()
+
+    quizzes = [q for q in quizzes if not is_political_content(f"{q.get('question', '')} {q.get('explanation', '')}")]
 
     seen_ol = set()
     clean_one_liners = []

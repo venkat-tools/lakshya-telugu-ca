@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from datetime import datetime
+from political_filter import is_political_content, filter_exam_articles, filter_exam_one_liners, filter_exam_quizzes
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "current_affairs.db")
 
@@ -90,8 +91,60 @@ def init_db():
         sanitize_legacy_uploaded_materials()
     except Exception:
         pass
+    try:
+        purge_political_records()
+    except Exception:
+        pass
+
+def purge_political_records():
+    """Permanently delete political party news, bickering, and election gossip from the database."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # 1. Purge political articles
+    cursor.execute("SELECT id, title, summary, category FROM articles")
+    purged_articles = []
+    for row in cursor.fetchall():
+        text = f"{row['title']} {row['category']} {row['summary']}"
+        if is_political_content(text):
+            purged_articles.append(row["id"])
+    
+    if purged_articles:
+        cursor.executemany("DELETE FROM articles WHERE id = ?", [(aid,) for aid in purged_articles])
+        print(f"Purged {len(purged_articles)} political articles from DB.")
+
+    # 2. Purge political one_liners
+    cursor.execute("SELECT id, point FROM one_liners")
+    purged_ol = []
+    for row in cursor.fetchall():
+        if is_political_content(row["point"]):
+            purged_ol.append(row["id"])
+    if purged_ol:
+        cursor.executemany("DELETE FROM one_liners WHERE id = ?", [(lid,) for lid in purged_ol])
+        print(f"Purged {len(purged_ol)} political one_liners from DB.")
+
+    # 3. Purge political quiz questions
+    cursor.execute("SELECT id, question, explanation FROM quiz_questions")
+    purged_q = []
+    for row in cursor.fetchall():
+        text = f"{row['question']} {row['explanation']}"
+        if is_political_content(text):
+            purged_q.append(row["id"])
+    if purged_q:
+        cursor.executemany("DELETE FROM quiz_questions WHERE id = ?", [(qid,) for qid in purged_q])
+        print(f"Purged {len(purged_q)} political quiz questions from DB.")
+
+    conn.commit()
+    conn.close()
+    return {
+        "articles": len(purged_articles),
+        "one_liners": len(purged_ol),
+        "quizzes": len(purged_q)
+    }
 
 def insert_article(date, category, title, summary, detailed_notes="", exam_relevance="", tags="", source=""):
+    if is_political_content(f"{title} {category} {summary}"):
+        return None
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -104,6 +157,8 @@ def insert_article(date, category, title, summary, detailed_notes="", exam_relev
     return article_id
 
 def insert_quiz(date, category, question, a, b, c, d, correct, explanation, exam_tag=""):
+    if is_political_content(f"{question} {explanation}"):
+        return None
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -116,6 +171,8 @@ def insert_quiz(date, category, question, a, b, c, d, correct, explanation, exam
     return qid
 
 def insert_one_liner(date, category, point):
+    if is_political_content(point):
+        return None
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -148,7 +205,7 @@ def get_articles(date=None, category=None, search_query=None):
     cursor.execute(query, params)
     rows = [dict(row) for row in cursor.fetchall()]
     conn.close()
-    return rows
+    return filter_exam_articles(rows)
 
 def get_quiz_by_date(date=None):
     conn = get_connection()
@@ -162,7 +219,7 @@ def get_quiz_by_date(date=None):
     cursor.execute(query, params)
     rows = [dict(row) for row in cursor.fetchall()]
     conn.close()
-    return rows
+    return filter_exam_quizzes(rows)
 
 def get_one_liners_by_date(date=None):
     conn = get_connection()
@@ -176,7 +233,7 @@ def get_one_liners_by_date(date=None):
     cursor.execute(query, params)
     rows = [dict(row) for row in cursor.fetchall()]
     conn.close()
-    return rows
+    return filter_exam_one_liners(rows)
 
 def get_available_dates():
     conn = get_connection()

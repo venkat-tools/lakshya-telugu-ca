@@ -124,6 +124,13 @@ CATEGORY_LABELS = {
 BANNED_EXAM_JUNK = ["రెసిపీ", "వంటకాలు", "సినిమా", "గాసిప్", "హత్య", "ఆత్మహత్య", "వివాదం", "బ్రేకింగ్"]
 
 def is_exam_worthy(art):
+    try:
+        from political_filter import is_political_content
+        text = (art.get("title", "") + " " + art.get("summary", "")).strip()
+        if is_political_content(text):
+            return False
+    except Exception:
+        pass
     from scraper import is_exam_worthy_content
     text = (art.get("title", "") + " " + art.get("summary", "")).strip()
     return is_exam_worthy_content(text)

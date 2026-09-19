@@ -433,9 +433,10 @@ def broadcast_daily_digest(date=None, token=None, chat_id=None):
         date = dates[0] if dates else datetime.now(IST).strftime("%Y-%m-%d")
 
     from quiz_generator import ensure_daily_quizzes
+    from political_filter import filter_exam_articles, filter_exam_one_liners
 
-    articles = get_articles(date=date)
-    one_liners = get_one_liners_by_date(date=date)
+    articles = filter_exam_articles(get_articles(date=date))
+    one_liners = filter_exam_one_liners(get_one_liners_by_date(date=date))
     quizzes = ensure_daily_quizzes(date)
 
     if not articles and not one_liners:

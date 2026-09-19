@@ -202,6 +202,7 @@ def serve_static(path):
 
 # ----------------- API Endpoints -----------------
 @app.route("/api/affairs", methods=["GET"])
+@app.route("/api/articles", methods=["GET"])
 def api_articles():
     date = request.args.get("date")
     category = request.args.get("category", "all")
@@ -1800,6 +1801,17 @@ def api_sanitize_uploaded_materials():
     from db import sanitize_legacy_uploaded_materials
     sanitize_legacy_uploaded_materials()
     return jsonify({"success": True, "message": "అప్‌లోడ్ చేసిన అన్ని మెటీరియల్స్ టైటిల్స్ మరియు సారాంశాలు తెలుగులోకి విజయవంతంగా సవరించబడ్డాయి."})
+
+@app.route("/api/admin/purge_political", methods=["GET", "POST"])
+def api_admin_purge_political():
+    from db import purge_political_records
+    res = purge_political_records()
+    return jsonify({
+        "success": True, 
+        "message": f"రాజకీయ వార్తలు విజయవంతంగా తొలగించబడ్డాయి (ఆర్టికల్స్: {res['articles']}, వన్-లైనర్స్: {res['one_liners']}, క్విజ్‌లు: {res['quizzes']}).",
+        "purged": res
+    })
+
 
 @app.route("/api/uploaded_materials/purge_all", methods=["DELETE", "POST"])
 def api_purge_all_materials():

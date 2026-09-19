@@ -28,6 +28,7 @@ if sys.platform == "win32":
         pass
 
 from db import get_connection, insert_article, insert_quiz, insert_one_liner
+from political_filter import is_political_content
 
 # ----------------- Strict Negative Filters (Banned Junk) -----------------
 BANNED_EXAM_PATTERNS = [
@@ -72,9 +73,9 @@ KEYWORD_CATEGORIES = {
     ],
     "national": [
         "రాజ్యాంగం", "సుప్రీంకోర్టు", "హైకోర్టు", "తీర్పు", "అధికరణ", "ఆర్టికల్", "సవరణ", 
-        "చట్టం", "బిల్లు", "కమిషన్", "జమిలి ఎన్నికలు", "కొవింద్ కమిటీ", "ఎన్నికల సంఘం", 
+        "చట్టం", "బిల్లు", "కమిషన్", "జమిలి ఎన్నికలు", "కొవింద్ కమిటీ", "ఎన్నికల సంస్కరణలు", 
         "పార్లమెంట్", "కేంద్ర మంత్రివర్గం", "బ్రిక్స్", "brics", "జీ20", "g20", "ఐక్యరాజ్యసమితి",
-        "కేంద్ర ప్రభుత్వం", "రాష్ట్రపతి", "ఉపరాష్ట్రపతి", "ప్రధానమంత్రి", "అనర్హత వేటు"
+        "కేంద్ర ప్రభుత్వం", "రాష్ట్రపతి", "ఉపరాష్ట్రపతి", "ప్రధానమంత్రి"
     ],
     "environment": [
         "పోలవరం ప్రాజెక్ట్", "డయాఫ్రమ్ వాల్", "జాతీయ పార్కు", "టైగర్ రిజర్వ్", "రామ్‌సర్ సైట్", 
@@ -92,17 +93,22 @@ KEYWORD_CATEGORIES = {
 }
 
 def is_exam_worthy_content(text):
-    """Strictly evaluates if content is genuine competitive exam material"""
+    """Strictly evaluates if content is genuine competitive exam material and rejects all political news"""
     if not text or len(text.strip()) < 12:
         return False
+    
+    # 1. Reject political party news, bickering, and election gossip
+    if is_political_content(text):
+        return False
+
     text_lower = text.lower()
 
-    # Reject banned junk
+    # 2. Reject banned junk (crime, cinema, accidents, recipes, viral)
     for pattern in BANNED_EXAM_PATTERNS:
         if re.search(pattern, text_lower):
             return False
 
-    # Positive match required
+    # 3. Positive match required
     for cat, keywords in KEYWORD_CATEGORIES.items():
         for kw in keywords:
             if kw.lower() in text_lower:
@@ -351,7 +357,7 @@ def sync_daily_news(target_date=None):
         ("regional", "ఆంధ్రప్రదేశ్ ప్రభుత్వం OR తెలంగాణ ప్రభుత్వం OR కేబినెట్ ఆమోదం OR పథకం OR రైతు భరోసా OR అమరావతి OR పోలవరం OR దీపం-2"),
         ("economy", "రిజర్వ్ బ్యాంక్ OR ఆర్బీఐ OR బ్యాంకింగ్ OR జీడీపీ OR ద్రవ్యోల్బణం OR ఆర్థిక OR ఈపీఎఫ్ఓ OR రెపో రేటు"),
         ("science_tech", "ఇస్రో OR నాసా OR డీఆర్‌డీవో OR అంతరిక్షం OR ఉపగ్రహం OR కృత్రిమ మేధ OR సైన్స్ OR శాస్త్రవేత్తలు"),
-        ("national", "సుప్రీంకోర్టు OR కేంద్ర ప్రభుత్వం OR పార్లమెంట్ OR తీర్పు OR రాజ్యాంగం OR బిల్లు OR ఎన్నికల సంఘం"),
+        ("national", "భారత రాజ్యాంగం OR సుప్రీంకోర్టు రాజ్యాంగ ధర్మాసనం OR కేంద్ర కేబినెట్ ఆమోదం OR పార్లమెంట్ బిల్లు OR ఎన్నికల సంస్కరణలు"),
         ("environment", "పర్యావరణం OR జాతీయ పార్కు OR పోలవరం OR వాతావరణం OR భారీ వర్షాలు OR అల్పపీడనం"),
         ("sports_awards", "క్రీడలు OR ఛాంపియన్‌షిప్ OR ఒలింపిక్స్ OR ఆసియా క్రీడలు OR పతకం OR స్వర్ణం OR గ్రాండ్‌మాస్టర్")
     ]

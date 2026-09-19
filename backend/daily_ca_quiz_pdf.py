@@ -67,6 +67,12 @@ def render_ca_quiz_html(date=None):
         cat = a.get("category", "")
         if src.startswith("PDF:") or "యూజర్ అప్‌లోడ్" in tags or cat == "study_material":
             continue
+        try:
+            from political_filter import is_political_content
+            if is_political_content(a.get("title", "") + " " + a.get("summary", "")):
+                continue
+        except Exception:
+            pass
         if a["title"] not in seen_titles:
             articles.append(a)
             seen_titles.add(a["title"])
