@@ -71,7 +71,57 @@ WORD_REPLACEMENTS = [
     (r"IÀ\]I§", "భారత"),
     (r"IÀ", "భారత"),
     (r"çÜ\.\.\.°\.\.\.«¯\.\.\.", "సంబంధించి"),
-    (r"°\.\.\.¯ëË", "నిబంధనల")
+    (r"°\.\.\.¯ëË", "నిబంధనల"),
+    # Anu 7 / Shree-Lipi Chunduru & Historical report patterns
+    (r"\^Œo`«\s*i\s*51", "దళిత డైరీ 51"),
+    (r"\^Œo`«", "దళిత"),
+    (r"K«∞O_»∂~°∞", "చుండూరు"),
+    (r"=∂~°}HÍO_»", "మారణకాండ"),
+    (r"\[ã≤ìãπ", "జస్టిస్"),
+    (r"QÆOQÍ^èŒ~°~å=Ù", "గంగాధరరావు"),
+    (r"x\"ÕkHõ", "నివేదిక"),
+    (r"x\"ÕkHదే", "నివేదిక"),
+    (r"ÔH\.\s*ÉÏÅQÀáêÖò", "కె. బాలగోపాల్"),
+    (r"ÉÏÅQÀáêÖò", "బాలగోపాల్"),
+    (r"Z@ìˆHÅ‰õΩ", "ఎట్టకేలకు"),
+    (r"<åºÜ«∞qKå~°}", "న్యాయవిచారణ"),
+    (r"\|Ü«∞\\˜H˜", "బయటికి"),
+    (r"=zÛOk", "వచ్చింది"),
+    (r"„Ñ¨Éèí∞`«ﬁO", "ప్రభుత్వం"),
+    (r"Ñ¨ijeOK«=∞#ﬂ", "పరిశీలించమన్న"),
+    (r"Jxﬂ", "అన్ని"),
+    (r"JOâßÅ#∂", "అంశాలనూ"),
+    (r"Ñ¨ijeOz", "పరిశీలించి"),
+    (r"¿ÑrÅ", "పేజీల"),
+    (r"~å™ê~°∞", "రాశారు"),
+    (r"\^Œo`«∞Å∞", "దళితులు"),
+    (r"Hõg∞\+¨<£#∞", "కమిషన్‌ను"),
+    (r"\|Ç≤Ï\+¨¯iOK«_»O", "బహిష్కరించడం"),
+    (r"`«#‰õΩ", "తనకు"),
+    (r"„Ñ¨u\|O^èŒHõO", "ప్రతిబంధకం"),
+    (r"J~ÚO^Œh", "అయిందనీ"),
+    (r"\^Œo`Õ`«~°∞Å∞", "దళితేతరులు"),
+    (r"J„QÆ‰õΩÖÏÅ‰õΩ", "అగ్రకులాలకు"),
+    (r"ÃÑ\\˜ì#", "పెట్టిన"),
+    (r"¿Ñ~°∞", "పేరు"),
+    (r"Ñ¨ÓiÎ", "పూర్తి"),
+    (r"x\[O", "నిజం"),
+    (r"K≥Ñ¨Ê_®xH˜", "చెప్పడానికి"),
+    (r"W\+¨ìÑ¨_»ÖË^Œh", "ఇష్టపడలేదనీ"),
+    (r"HÍ\\|\˜ì", "కాబట్టి"),
+    (r"„Ñ¨^è•#OQÍ", "ప్రధానంగా"),
+    (r"áÈbã¨∞Å∞", "పోలీసులు"),
+    (r"Ô~\"≥#∂º", "రెవెన్యూ"),
+    (r"JkèHÍ~°∞Å", "అధికారుల"),
+    (r"™êHΔÍºÅÃÑ·#", "సాక్ష్యాలపైనే"),
+    (r"P^è•~°Ñ¨_»=Åã≤", "ఆధారపడవలసి"),
+    (r"=zÛO^Œh", "వచ్చిందని"),
+    (r"\"≥Ú^Œ\\’¡<Õ", "మొదట్లోనే"),
+    (r"XÑ¨C\s*‰õΩ<åﬂ~°∞", "ఒప్పుకున్నారు"),
+    (r"x~åú~°}Å‰õΩ", "నిర్ధారణలకు"),
+    (r"™êHΔÍºÖË", "సాక్ష్యాలే"),
+    (r"P^è•~°=∞x", "ఆధారమని"),
+    (r"J<åﬂ~°∞", "అన్నారు")
 ]
 
 # Multiple choice question option markers
@@ -100,7 +150,7 @@ def is_legacy_telugu_font(text):
     Detects if the extracted string is Anu Script / Shree-Lipi / Akruti legacy font mojibake
     rather than pure Unicode Telugu or clean English.
     """
-    if not text or len(text.strip()) < 8:
+    if not text or len(text.strip()) < 4:
         return False
 
     # Check for Telugu Unicode characters (ఀ - ౿)
@@ -108,15 +158,15 @@ def is_legacy_telugu_font(text):
     total_chars = len(text.strip())
 
     # Count typical Anu / Shree-Lipi legacy glyph signatures
-    legacy_glyphs = len(re.findall(r"[ŠóÌÕýçÜ™éË¨§ðíÐÆš‡„Ô¶æÄÀ°òeÝùtVÎß¼‰‹›•]", text))
+    legacy_glyphs = len(re.findall(r"[ŠóÌÕýçÜ™éË¨§ðíÐÆš‡„Ô¶æÄÀ°òeÝùtVÎß¼‰‹›•\^Œ«»∂~°∞]", text))
     
-    # Specific strong signature words
-    has_strong_signature = bool(re.search(r"BŠó|çÜ\*\{|BçTMýS|MýS|çßæ|\{VýS|ÌÕ|íÜ\)|yìI\)|G\)|¼\)", text))
+    # Specific strong signature words including Anu 7 / Shree glyphs
+    has_strong_signature = bool(re.search(r"BŠó|çÜ\*\{|BçTMýS|MýS|çßæ|\{VýS|ÌÕ|íÜ\)|yìI\)|G\)|¼\)|\^Œo|K«∞|_»∂|=∂~°\}|\[ã≤ì|QÆOQÍ|x\"Õk|„Ñ¨|¿Ñr|™êHΔ|áÈb|Ô~\"|‰õΩ", text))
 
     if has_strong_signature and telugu_unicode_chars < 25:
         return True
 
-    if total_chars > 25 and (legacy_glyphs / total_chars) > 0.10 and telugu_unicode_chars < 20:
+    if total_chars > 8 and (legacy_glyphs / total_chars) > 0.08 and telugu_unicode_chars < 15:
         return True
 
     return False

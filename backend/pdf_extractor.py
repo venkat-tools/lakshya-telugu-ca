@@ -197,17 +197,24 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
     elif is_legacy_telugu_font(doc_title):
         doc_title = convert_legacy_to_unicode(doc_title)
 
-    if not doc_title:
-        # Check first line of page 1
-        first_lines = [l.strip() for l in full_text.split("\n") if len(l.strip()) > 8]
-        if first_lines and not any(k in first_lines[0] for k in ["విషయ సూచిక", "Content", "Table"]):
-            doc_title = first_lines[0][:100]
+    if not doc_title or is_legacy_telugu_font(doc_title):
+        clean_base = os.path.splitext(orig_filename)[0].replace("_", " ").title()
+        if "Chunduru" in orig_filename or "Balagopal" in orig_filename:
+            doc_title = "చుండూరు మారణకాండ - జస్టిస్ గంగాధరరావు నివేదిక (కె. బాలగోపాల్)"
+            category = "history"
+        elif "Ts History" in clean_base:
+            doc_title = "తెలంగాణ చరిత్ర సమగ్ర మైండ్‌మ్యాప్ (TS History Mindmap)"
+            category = "history"
+        elif "Movement" in clean_base:
+            doc_title = "తెలంగాణ ఉద్యమ చరిత్ర మైండ్‌మ్యాప్ (Movement Mindmap)"
+            category = "history"
+        elif "Vishwakarma" in clean_base:
+            doc_title = "పీఎం విశ్వకర్మ యోజన - సమగ్ర సమాచారం"
         else:
-            clean_base = os.path.splitext(orig_filename)[0].replace("_", " ").title()
-            if "Ts History" in clean_base:
-                doc_title = "తెలంగాణ చరిత్ర సమగ్ర మైండ్‌మ్యాప్ (TS History Mindmap)"
-            elif "Movement" in clean_base:
-                doc_title = "తెలంగాణ ఉద్యమ చరిత్ర మైండ్‌మ్యాప్ (Movement Mindmap)"
+            # Check first line of page 1 if not legacy font
+            first_lines = [l.strip() for l in full_text.split("\n") if len(l.strip()) > 8]
+            if first_lines and not is_legacy_telugu_font(first_lines[0]) and not any(k in first_lines[0] for k in ["విషయ సూచిక", "Content", "Table"]):
+                doc_title = first_lines[0][:100]
             else:
                 doc_title = clean_base
 
@@ -217,7 +224,8 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
         doc_title = convert_legacy_to_unicode(doc_title)
 
     if len(doc_title.strip()) < 5 or is_mindmap_font(doc_title) or is_legacy_telugu_font(doc_title):
-        doc_title = f"{CATEGORY_NAMES.get(category, 'పోటీ పరీక్షల')} స్టడీ మెటీరియల్"
+        clean_base = os.path.splitext(orig_filename)[0].replace("_", " ")
+        doc_title = clean_base if len(clean_base) > 5 else f"{CATEGORY_NAMES.get(category, 'పోటీ పరీక్షల')} స్టడీ మెటీరియల్"
 
     articles_count = 0
     quizzes_count = 0

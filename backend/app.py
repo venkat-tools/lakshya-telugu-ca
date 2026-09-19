@@ -62,6 +62,8 @@ def request_entity_too_large(error):
 # Ensure DB has tables and initial seed data
 init_db()
 populate_seed_data()
+from db import sanitize_legacy_uploaded_materials
+sanitize_legacy_uploaded_materials()
 
 # Startup check: ensure today's news (IST) is synced in DB
 def ensure_today_synced():
@@ -1761,6 +1763,22 @@ def api_delete_uploaded_material(mid):
     from db import delete_uploaded_material
     delete_uploaded_material(mid)
     return jsonify({"success": True, "message": "స్టడీ మెటీరియల్ విజయవంతంగా తొలగించబడింది."})
+
+@app.route("/api/uploaded_materials/<int:mid>/update", methods=["POST", "PUT"])
+def api_update_uploaded_material(mid):
+    data = request.get_json(silent=True) or request.form.to_dict()
+    title = data.get("title")
+    category = data.get("category")
+    summary = data.get("extracted_summary") or data.get("summary")
+    from db import update_uploaded_material
+    success = update_uploaded_material(mid, title=title, category=category, extracted_summary=summary)
+    return jsonify({"success": success})
+
+@app.route("/api/uploaded_materials/sanitize", methods=["GET", "POST"])
+def api_sanitize_uploaded_materials():
+    from db import sanitize_legacy_uploaded_materials
+    sanitize_legacy_uploaded_materials()
+    return jsonify({"success": True, "message": "అప్‌లోడ్ చేసిన అన్ని మెటీరియల్స్ టైటిల్స్ మరియు సారాంశాలు తెలుగులోకి విజయవంతంగా సవరించబడ్డాయి."})
 
 @app.route("/api/uploaded_materials/purge_all", methods=["DELETE", "POST"])
 def api_purge_all_materials():

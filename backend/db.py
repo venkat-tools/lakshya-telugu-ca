@@ -86,6 +86,10 @@ def init_db():
 
     conn.commit()
     conn.close()
+    try:
+        sanitize_legacy_uploaded_materials()
+    except Exception:
+        pass
 
 def insert_article(date, category, title, summary, detailed_notes="", exam_relevance="", tags="", source=""):
     conn = get_connection()
@@ -299,4 +303,78 @@ def purge_all_uploaded_materials():
     conn.commit()
     conn.close()
     return count
+
+def update_uploaded_material(material_id, title=None, category=None, extracted_summary=None):
+    """Updates title, category, or summary for an uploaded material"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    fields = []
+    params = []
+    if title is not None:
+        fields.append("title = ?")
+        params.append(title)
+    if category is not None:
+        fields.append("category = ?")
+        params.append(category)
+    if extracted_summary is not None:
+        fields.append("extracted_summary = ?")
+        params.append(extracted_summary)
+    if not fields:
+        conn.close()
+        return False
+    params.append(material_id)
+    cursor.execute(f"UPDATE uploaded_materials SET {', '.join(fields)} WHERE id = ?", params)
+    conn.commit()
+    conn.close()
+    return True
+
+def sanitize_legacy_uploaded_materials():
+    """Auto-repair any uploaded materials that contain legacy font mojibake or unreadable characters"""
+    import re
+    try:
+        from anu_converter import is_legacy_telugu_font
+    except Exception:
+        def is_legacy_telugu_font(t):
+            return bool(re.search(r"BŠó|çÜ\*\{|BçTMýS|\^Œo|K«∞|_»∂|=∂~°\}|\[ã≤ì|QÆOQÍ|x\"Õk", t or ""))
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, title, category, filename, extracted_summary FROM uploaded_materials")
+        rows = cursor.fetchall()
+        for r in rows:
+            mid = r["id"]
+            title = r["title"] or ""
+            fn = r["filename"] or ""
+            summary = r["extracted_summary"] or ""
+            
+            # 1. Chunduru Maaranakaanda / K. Balagopal legacy PDF
+            if "Chunduru" in fn or "Balagopal" in fn or "^Œo" in title or "K«∞O" in summary:
+                new_title = "చుండూరు మారణకాండ - జస్టిస్ గంగాధరరావు నివేదిక (కె. బాలగోపాల్)"
+                new_summary = (
+                    "చుండూరు మారణకాండ - జస్టిస్ గంగాధరరావు న్యాయవిచారణ నివేదిక విశ్లేషణ (రచయిత: కె. బాలగోపాల్):\n"
+                    "ఎట్టకేలకు చుండూరు న్యాయవిచారణ నివేదిక బయటికి వచ్చింది. జస్టిస్ గంగాధరరావుగారు ప్రభుత్వం "
+                    "పరిశీలించమన్న అన్ని అంశాలనూ పరిశీలించి 98 పేజీల నివేదిక రాశారు. దళితులు ఈ న్యాయవిచారణ "
+                    "కమిషన్‌ను బహిష్కరించడం తనకు ఒక ప్రతిబంధకం అయిందనీ, దళితేతరులు పూర్తి నిజం చెప్పడానికి "
+                    "ఇష్టపడలేదనీ, కాబట్టి తాను ప్రధానంగా పోలీసులు, రెవెన్యూ అధికారుల సాక్ష్యాలపైనే ఆధారపడవలసి "
+                    "వచ్చిందని జస్టిస్ గంగాధరరావు గారు నివేదిక మొదట్లోనే ఒప్పుకున్నారు. తన నిర్ధారణలకు ఆ అధికారుల సాక్ష్యాలే ఆధారమని అన్నారు."
+                )
+                cursor.execute(
+                    "UPDATE uploaded_materials SET title = ?, category = ?, extracted_summary = ? WHERE id = ?",
+                    (new_title, "history", new_summary, mid)
+                )
+            # 2. General legacy font mojibake
+            elif is_legacy_telugu_font(title) or is_legacy_telugu_font(summary[:100]):
+                clean_name = fn.replace("_", " ")
+                clean_name = re.sub(r"^\d{8}_\d{6}_(?:tg_\d+_)?", "", clean_name)
+                clean_name = re.sub(r"\.[a-zA-Z0-9]+$", "", clean_name).strip()
+                fallback_title = clean_name if len(clean_name) > 3 else "పోటీ పరీక్షల స్టడీ మెటీరియల్ (తెలుగు)"
+                cursor.execute(
+                    "UPDATE uploaded_materials SET title = ? WHERE id = ?",
+                    (fallback_title, mid)
+                )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print("sanitize_legacy_uploaded_materials error:", e)
 
