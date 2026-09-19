@@ -53,6 +53,8 @@ FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "fr
 
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
 app.config['JSON_AS_ASCII'] = False  # Keep Telugu characters untranslated in JSON
+if hasattr(app, "json") and hasattr(app.json, "ensure_ascii"):
+    app.json.ensure_ascii = False  # For Flask 2.2+ / Flask 3.x
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100 MB upload limit
 
 @app.errorhandler(413)
@@ -1800,12 +1802,97 @@ def api_update_uploaded_material(mid):
 def api_sanitize_uploaded_materials():
     from db import sanitize_legacy_uploaded_materials
     sanitize_legacy_uploaded_materials()
+    if request.headers.get("Accept", "").find("text/html") != -1 and request.args.get("format") != "json":
+        from flask import render_template_string
+        return render_template_string("""<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <title>స్టడీ మెటీరియల్స్ శుద్ధీకరణ | లక్ష్య CA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Mandali&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Mandali', sans-serif; }</style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-md w-full bg-slate-800 border border-emerald-500/40 rounded-3xl p-8 text-center shadow-2xl">
+    <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">✅</div>
+    <h1 class="text-xl font-bold text-white mb-2">స్టడీ మెటీరియల్స్ శుద్ధీకరణ విజయవంతం!</h1>
+    <p class="text-slate-400 text-sm mb-6 leading-relaxed">అప్‌లోడ్ చేసిన అన్ని పిడిఎఫ్ టైటిల్స్ మరియు సారాంశాలు తెలుగులోకి విజయవంతంగా సవరించబడ్డాయి.</p>
+    <a href="/pdf_upload_hub" class="inline-block py-3 px-6 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition">
+      📚 PDF అప్‌లోడ్ హబ్‌కు వెళ్లండి
+    </a>
+  </div>
+</body>
+</html>""")
     return jsonify({"success": True, "message": "అప్‌లోడ్ చేసిన అన్ని మెటీరియల్స్ టైటిల్స్ మరియు సారాంశాలు తెలుగులోకి విజయవంతంగా సవరించబడ్డాయి."})
 
 @app.route("/api/admin/purge_political", methods=["GET", "POST"])
 def api_admin_purge_political():
     from db import purge_political_records
     res = purge_political_records()
+    
+    if request.headers.get("Accept", "").find("text/html") != -1 and request.args.get("format") != "json":
+        from flask import render_template_string
+        html_content = f"""<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>రాజకీయ వార్తల తొలగింపు & శుద్ధీకరణ | లక్ష్య CA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Mandali&family=Outfit:wght@400;600;700;800&family=Suranna&display=swap" rel="stylesheet">
+  <style>
+    body {{ font-family: 'Mandali', sans-serif; }}
+    .heading-font {{ font-family: 'Suranna', serif; }}
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-xl w-full bg-slate-800/95 border border-emerald-500/40 rounded-3xl p-8 shadow-2xl backdrop-blur-md">
+    <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-5 text-3xl shadow-inner">
+      🛡️
+    </div>
+    <h1 class="text-2xl md:text-3xl font-bold text-center text-white mb-2 heading-font tracking-wide">
+      రాజకీయ వార్తల తొలగింపు విజయవంతం!
+    </h1>
+    <p class="text-slate-400 text-center text-sm mb-6">
+      పోటీ పరీక్షల సిలబస్‌కు అనుగుణంగా డేటాబేస్ & లైవ్ ఫీడ్స్ శుద్ధీకరించబడ్డాయి.
+    </p>
+
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <div class="bg-slate-900/80 border border-slate-700/60 rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-emerald-400 font-sans">{res['articles']}</div>
+        <div class="text-xs text-slate-400 mt-1 font-semibold">తొలగించిన వార్తలు</div>
+      </div>
+      <div class="bg-slate-900/80 border border-slate-700/60 rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-emerald-400 font-sans">{res['one_liners']}</div>
+        <div class="text-xs text-slate-400 mt-1 font-semibold">తొలగించిన వన్-లైనర్స్</div>
+      </div>
+      <div class="bg-slate-900/80 border border-slate-700/60 rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-emerald-400 font-sans">{res['quizzes']}</div>
+        <div class="text-xs text-slate-400 mt-1 font-semibold">తొలగించిన క్విజ్‌లు</div>
+      </div>
+    </div>
+
+    <div class="bg-emerald-950/50 border border-emerald-500/30 rounded-2xl p-4 mb-6 text-sm text-emerald-300 flex items-start gap-3">
+      <span class="text-xl flex-shrink-0">✅</span>
+      <div class="leading-relaxed">
+        <strong>100% ప్యూర్ జనరల్ స్టడీస్ మెటీరియల్:</strong> రాజకీయ పార్టీల పేర్లు (వైసీపీ, టీడీపీ, కాంగ్రెస్, బీజేపీ, బీఆర్ఎస్ మొదలైనవి), నేతల పరస్పర విమర్శలు, ఉప ఎన్నికల వివాదాలు లేకుండా కేవలం ప్రభుత్వ పాలసీలు, పథకాలు, ఎకానమీ, సైన్స్ & పర్యావరణ అంశాలు మాత్రమే ఇప్పుడు అందుబాటులో ఉన్నాయి.
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3">
+      <a href="/" class="flex-1 text-center py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg transition">
+        🏠 హోమ్ పేజీకి వెళ్లండి
+      </a>
+      <a href="/api/ca_quiz/pdf" class="flex-1 text-center py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition">
+        📥 డైలీ CA & క్విజ్ PDF
+      </a>
+    </div>
+  </div>
+</body>
+</html>"""
+        return render_template_string(html_content)
+
     return jsonify({
         "success": True, 
         "message": f"రాజకీయ వార్తలు విజయవంతంగా తొలగించబడ్డాయి (ఆర్టికల్స్: {res['articles']}, వన్-లైనర్స్: {res['one_liners']}, క్విజ్‌లు: {res['quizzes']}).",
