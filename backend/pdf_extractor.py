@@ -146,11 +146,84 @@ def extract_mcqs_from_text(text):
             break
     return quizzes
 
+def _sanitize_ocr_noise(text):
+    """Removes garbled Latin diacritics while keeping Telugu Unicode (\u0c00-\u0c7f) and standard ASCII."""
+    if not text:
+        return ""
+    # Fix common Telugu OCR digit-0 (\u0c66) used for anusvara (\u0c02) between Telugu letters
+    text = re.sub(r"(?<=[\u0c00-\u0c7f])\u0c66(?=[\u0c00-\u0c7f])", "\u0c02", text)
+    text = re.sub(r"(?<=[\u0c00-\u0c7f])\u0c66\b", "\u0c41", text)
+    # Strip non-ASCII, non-Telugu characters (e.g. Vietnamese/Latin accented noise from English-only OCR on Telugu glyphs)
+    text = re.sub(r"[^\x09\x0A\x0D\x20-\x7E\u0C00-\u0C7F•₹–—]+", " ", text)
+    lines = []
+    for raw_line in text.splitlines():
+        line = re.sub(r"[ \t]+", " ", raw_line).strip()
+        if not line:
+            continue
+        # Drop pure noise lines that have neither Telugu words nor meaningful English words (3+ letters)
+        has_tel = bool(re.search(r"[\u0c00-\u0c7f]{2,}", line))
+        has_eng = bool(re.search(r"[A-Za-z]{3,}", line))
+        has_num = bool(re.search(r"\b(?:19\d\d|20\d\d)\b", line))
+        if has_tel or has_eng or has_num:
+            lines.append(line)
+    return clean_extracted_text("\n".join(lines))
+
+
+def _extract_telugu_bhashini_ocr(img_bytes, filename="page.jpg"):
+    """
+    Calls Bhashini IIT-J IndicPhotoOCR Gradio API (identifier_lang='telugu')
+    to extract native Telugu Unicode script directly from Telugu infographic/study images.
+    """
+    try:
+        import json
+        import requests
+        base = "https://bhashini-iitj-indicphotoocr.hf.space"
+        up_r = requests.post(
+            f"{base}/gradio_api/upload",
+            files={"files": (filename, img_bytes, "image/jpeg")},
+            timeout=(4, 12)
+        )
+        if up_r.status_code != 200:
+            return ""
+        up_list = up_r.json()
+        if not up_list:
+            return ""
+        remote_path = up_list[0]
+        file_data = {
+            "path": remote_path,
+            "url": f"{base}/gradio_api/file={remote_path}",
+            "orig_name": filename,
+            "mime_type": "image/jpeg",
+            "meta": {"_type": "gradio.FileData"}
+        }
+        call_r = requests.post(
+            f"{base}/gradio_api/call/process_image",
+            json={"data": [file_data, "telugu"]},
+            timeout=(4, 10)
+        )
+        if call_r.status_code != 200:
+            return ""
+        ev_id = call_r.json().get("event_id")
+        if not ev_id:
+            return ""
+        sse_r = requests.get(f"{base}/gradio_api/call/process_image/{ev_id}", timeout=(4, 18))
+        for line in sse_r.text.splitlines():
+            if line.startswith("data: "):
+                payload = line[6:].strip()
+                if payload and payload != "null":
+                    arr = json.loads(payload)
+                    if isinstance(arr, list) and len(arr) >= 2 and isinstance(arr[1], str):
+                        return _sanitize_ocr_noise(arr[1])
+    except Exception:
+        pass
+    return ""
+
+
 def extract_text_from_image_ocr(img_path_or_bytes, filename="page.jpg"):
     """
-    Extracts text from an image (.jpg/.png) using:
-    1. pytesseract (if installed locally)
-    2. Free OCR.space Cloud API (Engine 2 & Engine 1 fallback)
+    Extracts both Telugu Unicode and English text from an image (.jpg/.png) using:
+    1. pytesseract (lang='tel+eng', if installed locally)
+    2. Bhashini IndicPhotoOCR (native Telugu script OCR) + OCR.space Cloud API (English/numbers)
     """
     try:
         import pytesseract
@@ -159,7 +232,7 @@ def extract_text_from_image_ocr(img_path_or_bytes, filename="page.jpg"):
         im = Image.open(img_path_or_bytes) if isinstance(img_path_or_bytes, str) else Image.open(io.BytesIO(img_path_or_bytes))
         txt = pytesseract.image_to_string(im, lang="tel+eng")
         if txt and len(txt.strip()) > 25:
-            return clean_extracted_text(txt)
+            return _sanitize_ocr_noise(txt)
     except Exception:
         pass
 
@@ -171,22 +244,37 @@ def extract_text_from_image_ocr(img_path_or_bytes, filename="page.jpg"):
         else:
             img_bytes = img_path_or_bytes
 
+        # 1. Native Telugu Script OCR via Bhashini IndicPhotoOCR
+        tel_ocr = _extract_telugu_bhashini_ocr(img_bytes, filename=filename)
+
+        # 2. English / Numeric OCR via OCR.space (Engine 2 & Engine 1)
+        eng_ocr = ""
         for engine in ("2", "1"):
             try:
                 resp = requests.post(
                     "https://api.ocr.space/parse/image",
                     data={"apikey": "helloworld", "OCREngine": engine, "scale": "true"},
                     files={"file": (filename, img_bytes, "image/jpeg")},
-                    timeout=25
+                    timeout=(4, 12)
                 ).json()
                 if not resp.get("IsErroredOnProcessing"):
                     parsed_list = resp.get("ParsedResults") or []
                     if parsed_list:
-                        txt = parsed_list[0].get("ParsedText") or ""
-                        if len(txt.strip()) > 15:
-                            return clean_extracted_text(txt)
+                        raw_txt = parsed_list[0].get("ParsedText") or ""
+                        eng_lines = []
+                        for ln in raw_txt.splitlines():
+                            clean_ln = re.sub(r"[^\x20-\x7E]+", " ", ln).strip()
+                            clean_ln = re.sub(r"\s+", " ", clean_ln)
+                            if re.search(r"[A-Za-z]{4,}", clean_ln):
+                                eng_lines.append(clean_ln)
+                        if eng_lines:
+                            eng_ocr = "\n".join(eng_lines)
+                            break
             except Exception:
                 continue
+
+        combined = "\n".join(part for part in (tel_ocr, eng_ocr) if part).strip()
+        return _sanitize_ocr_noise(combined)
     except Exception:
         pass
     return ""
@@ -196,21 +284,86 @@ def translate_english_to_telugu(text):
     """Translates English OCR/PDF text into Telugu using Google Translate free endpoint."""
     if not text or len(text.strip()) < 10:
         return ""
-    # Check if text already has substantial Telugu characters
     tel_chars = sum(1 for ch in text if "\u0c00" <= ch <= "\u0c7f")
-    if tel_chars > len(text) * 0.25:
+    if tel_chars > len(text) * 0.35:
         return text
     try:
         import requests
         url = "https://translate.googleapis.com/translate_a/single"
         params = {"client": "gtx", "sl": "en", "tl": "te", "dt": "t", "q": text[:1800]}
-        r = requests.get(url, params=params, timeout=12).json()
+        r = requests.get(url, params=params, timeout=(3, 8)).json()
         if r and isinstance(r, list) and r[0]:
             translated = "".join(seg[0] for seg in r[0] if seg and seg[0])
             return clean_extracted_text(translated)
     except Exception:
         pass
     return ""
+
+
+def synthesize_telugu_study_notes_ai(raw_text, doc_title, page_label="", default_cat="national"):
+    """
+    Transforms raw Telugu/English OCR or document text into clean, structured Telugu
+    study notes, summary, one-liner, and practice MCQ.
+    """
+    cleaned = _sanitize_ocr_noise(raw_text)
+    if not cleaned or len(cleaned.strip()) < 10:
+        return None
+
+    # Ensure English segments are also translated to Telugu if mostly English
+    tel_translated = translate_english_to_telugu(cleaned)
+    working_text = f"{tel_translated}\n{cleaned}".strip() if tel_translated and tel_translated != cleaned else cleaned
+
+    raw_lines = [
+        re.sub(r"^[•\-\*▪\s]+", "", ln).strip()
+        for ln in working_text.splitlines()
+        if len(ln.strip()) > 3
+    ]
+    # Deduplicate while preserving order
+    seen = set()
+    lines = []
+    for ln in raw_lines:
+        key = ln.lower()
+        if key not in seen:
+            seen.add(key)
+            lines.append(ln)
+
+    if not lines:
+        return None
+
+    heading = lines[0][:85]
+    if len(heading) < 6 and len(lines) > 1:
+        heading = f"{lines[0]} - {lines[1]}"[:85]
+    if page_label and page_label not in heading:
+        title = f"{heading} ({page_label})"[:95]
+    else:
+        title = heading[:95]
+
+    bullet_points = [f"• {ln}" for ln in lines[:18]]
+    summary = " | ".join(lines[:4])[:300]
+    one_liner = f"[TELEGRAM NOTES] {title}: {summary[:140]}"
+
+    quiz = None
+    if len(lines) >= 2:
+        fact_line = lines[1] if len(lines[1]) > 10 else lines[0]
+        other_line = lines[2] if len(lines) > 2 else "పైవేవీ కావు"
+        quiz = {
+            "question": f"'{title[:60]}' స్టడీ మెటీరియల్ ప్రకారం క్రింది వాటిలో సరైన ముఖ్యాంశం ఏది?",
+            "option_a": fact_line[:120],
+            "option_b": f"కేవలం {other_line[:95]} మాత్రమే కాదు",
+            "option_c": "ఈ అంశం సిలబస్ పరిధిలో లేదు",
+            "option_d": "పైవేవీ కావు",
+            "correct": "A",
+            "explanation": f"అప్‌లోడ్ చేసిన స్టడీ మెటీరియల్ ({title}) ప్రకారం: {' | '.join(lines[:3])[:220]}"
+        }
+
+    return {
+        "title": title,
+        "summary": summary,
+        "bullet_points": bullet_points,
+        "one_liner": one_liner,
+        "quiz": quiz
+    }
+
 
 
 def generate_smart_quizzes_from_text(full_text, doc_title, category="national"):
@@ -639,6 +792,16 @@ def process_uploaded_pdf(
     images_dir = os.path.join(UPLOAD_DIR, "images")
     os.makedirs(images_dir, exist_ok=True)
 
+    def _ocr_single_item(item_tuple):
+        p_num, web_url, img_data_or_path, im_fname = item_tuple
+        ocr_txt = extract_text_from_image_ocr(img_data_or_path, filename=im_fname)
+        if ocr_txt:
+            tel_txt = translate_english_to_telugu(ocr_txt)
+            combined_page_txt = f"{tel_txt}\n{ocr_txt}".strip() if tel_txt and tel_txt != ocr_txt else ocr_txt
+            return (p_num, web_url, combined_page_txt)
+        return (p_num, web_url, "")
+
+    ocr_tasks = []
     if source_images and isinstance(source_images, list):
         for idx, src_im in enumerate(source_images[:30], 1):
             if os.path.exists(src_im):
@@ -649,17 +812,11 @@ def process_uploaded_pdf(
                 web_im_url = f"/pdfs/uploads/images/{im_name}"
                 saved_web_images.append(web_im_url)
                 persisted_rel_paths.append(f"frontend/pdfs/uploads/images/{im_name}")
-                if not custom_articles and idx <= 10:
-                    ocr_txt = extract_text_from_image_ocr(im_dest, filename=im_name)
-                    if ocr_txt:
-                        tel_txt = translate_english_to_telugu(ocr_txt)
-                        combined_page_txt = f"{tel_txt}\n{ocr_txt}".strip() if tel_txt and tel_txt != ocr_txt else ocr_txt
-                        ocr_page_texts.append((idx, web_im_url, combined_page_txt))
-                    else:
-                        ocr_page_texts.append((idx, web_im_url, ""))
+                if not custom_articles:
+                    ocr_tasks.append((idx, web_im_url, im_dest, im_name))
     elif len(full_text) < 80 and not custom_articles:
         # Scanned PDF without embedded text: extract embedded images from PDF pages & run OCR
-        for p_idx in range(min(total_pages, 15)):
+        for p_idx in range(min(total_pages, 25)):
             try:
                 page_obj = reader.pages[p_idx]
                 if page_obj.images:
@@ -672,16 +829,14 @@ def process_uploaded_pdf(
                     web_im_url = f"/pdfs/uploads/images/{im_name}"
                     saved_web_images.append(web_im_url)
                     persisted_rel_paths.append(f"frontend/pdfs/uploads/images/{im_name}")
-                    if p_idx < 8:
-                        ocr_txt = extract_text_from_image_ocr(im_obj.data, filename=im_name)
-                        if ocr_txt:
-                            tel_txt = translate_english_to_telugu(ocr_txt)
-                            combined_page_txt = f"{tel_txt}\n{ocr_txt}".strip() if tel_txt and tel_txt != ocr_txt else ocr_txt
-                            ocr_page_texts.append((p_idx + 1, web_im_url, combined_page_txt))
-                        else:
-                            ocr_page_texts.append((p_idx + 1, web_im_url, ""))
+                    ocr_tasks.append((p_idx + 1, web_im_url, im_obj.data, im_name))
             except Exception:
                 pass
+
+    if ocr_tasks:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            ocr_page_texts = list(pool.map(_ocr_single_item, ocr_tasks))
 
     if not full_text and ocr_page_texts:
         full_text = clean_extracted_text("\n\n".join(t for _, _, t in ocr_page_texts if t))
@@ -746,9 +901,11 @@ def process_uploaded_pdf(
                         art.get("one_liner", f"[{t_cat.upper()}] {t_title}")
                     )
         elif ocr_page_texts:
-            # Create rich articles combining OCR extracted text AND inline infographic images!
+            # Create rich articles combining OCR + AI Telugu Study Notes AND inline infographic images!
             cat_key = category if category in ["regional", "economy", "national", "science_tech", "sports_awards"] else "national"
             batch_size = 3 if len(ocr_page_texts) > 4 else 1
+            if custom_quizzes is None:
+                custom_quizzes = []
             for b_start in range(0, len(ocr_page_texts), batch_size):
                 batch = ocr_page_texts[b_start:b_start + batch_size]
                 p_nums = [str(p[0]) for p in batch]
@@ -756,18 +913,47 @@ def process_uploaded_pdf(
                 combined_txt = "\n\n".join(p[2] for p in batch if p[2]).strip()
                 img_tags = "\n".join(f"[IMAGE:{p[1]}]" for p in batch if p[1])
 
-                first_lines = [l.strip() for l in combined_txt.split("\n") if len(l.strip()) > 6]
-                art_heading = first_lines[0][:85] if first_lines else f"{doc_title} ({p_label})"
-                art_summary = (
-                    " | ".join(first_lines[:3])[:300]
-                    if first_lines
-                    else f"టెలిగ్రామ్ ద్వారా అప్‌లోడ్ చేసిన '{doc_title}' ({p_label}) విజువల్ ఇన్ఫోగ్రాఫిక్ చార్ట్ & స్టడీ నోట్స్."
-                )
+                ai_data = synthesize_telugu_study_notes_ai(combined_txt, doc_title, p_label, cat_key) if combined_txt else None
+                if ai_data:
+                    art_heading = str(ai_data.get("title") or f"{doc_title} ({p_label})")[:95]
+                    art_summary = str(ai_data.get("summary") or "")[:320]
+                    bp_list = ai_data.get("bullet_points") or []
+                    if isinstance(bp_list, list):
+                        formatted_body = "\n".join(
+                            f"• {str(pt).lstrip('•-* ')}" for pt in bp_list if str(pt).strip()
+                        )
+                    else:
+                        formatted_body = str(bp_list)
+                    one_liner_txt = str(ai_data.get("one_liner") or f"[TELEGRAM NOTES] {art_heading}: {art_summary[:130]}")
+                    ai_q = ai_data.get("quiz")
+                    if isinstance(ai_q, dict) and ai_q.get("question") and ai_q.get("option_a"):
+                        custom_quizzes.append({
+                            "category": cat_key,
+                            "question": str(ai_q["question"])[:300],
+                            "option_a": str(ai_q.get("option_a", ""))[:130],
+                            "option_b": str(ai_q.get("option_b", "పైవేవీ కావు"))[:130],
+                            "option_c": str(ai_q.get("option_c", "పాత నిబంధన"))[:130],
+                            "option_d": str(ai_q.get("option_d", "వర్తించదు"))[:130],
+                            "correct": str(ai_q.get("correct", "A")).upper()[:1] if str(ai_q.get("correct", "A")).upper()[:1] in ("A", "B", "C", "D") else "A",
+                            "explanation": str(ai_q.get("explanation", f"{art_heading} స్టడీ నోట్స్ ఆధారంగా.")),
+                            "exam_tag": f"Telegram: {doc_title[:25]}"
+                        })
+                else:
+                    first_lines = [l.strip() for l in combined_txt.split("\n") if len(l.strip()) > 6]
+                    art_heading = first_lines[0][:85] if first_lines else f"{doc_title} ({p_label})"
+                    art_summary = (
+                        " | ".join(first_lines[:3])[:300]
+                        if first_lines
+                        else f"టెలిగ్రామ్ ద్వారా అప్‌లోడ్ చేసిన '{doc_title}' ({p_label}) విజువల్ ఇన్ఫోగ్రాఫిక్ చార్ట్ & స్టడీ నోట్స్."
+                    )
+                    formatted_body = combined_txt if combined_txt else "క్రింది హై-రిజల్యూషన్ ఇన్ఫోగ్రాఫిక్ చార్ట్‌లో పూర్తి పట్టిక మరియు పాయింట్లను చూడండి:"
+                    one_liner_txt = f"[TELEGRAM NOTES] {art_heading}: {art_summary[:140]}"
+
                 detailed = (
                     f"📄 <b>టెలిగ్రామ్ స్టడీ మెటీరియల్:</b> {doc_title} ({p_label})\n"
                     f"📂 <b>విభాగం:</b> {cat_label}\n"
                     f"─────────────────────────────\n"
-                    f"{combined_txt if combined_txt else 'క్రింది హై-రిజల్యూషన్ ఇన్ఫోగ్రాఫిక్ చార్ట్‌లో పూర్తి పట్టిక మరియు పాయింట్లను చూడండి:'}\n\n"
+                    f"{formatted_body}\n\n"
                     f"{img_tags}\n\n"
                     f"📥 <b>పూర్తి PDF డౌన్‌లోడ్:</b> https://lakshya-telugu-ca.onrender.com/pdfs/uploads/{dest_filename}"
                 ).strip()
@@ -775,7 +961,7 @@ def process_uploaded_pdf(
                 aid = insert_article(
                     date=target_date,
                     category=cat_key,
-                    title=f"📌 {art_heading}",
+                    title=f"📌 {art_heading}" if not art_heading.startswith("📌") else art_heading,
                     summary=art_summary,
                     detailed_notes=detailed,
                     exam_relevance=f"టెలిగ్రామ్ అప్‌లోడ్ స్టడీ మెటీరియల్ ({cat_label})",
@@ -784,7 +970,7 @@ def process_uploaded_pdf(
                 )
                 if aid:
                     articles_count += 1
-                    insert_one_liner(target_date, cat_key, f"[TELEGRAM NOTES] {art_heading}: {art_summary[:140]}")
+                    insert_one_liner(target_date, cat_key, one_liner_txt)
         elif full_text and len(full_text) > 60:
             topics = extract_topics_from_text(full_text)
 
@@ -1045,22 +1231,48 @@ def process_uploaded_text_file(file_path, custom_title="", category="education",
     cat_label = CATEGORY_NAMES.get(category, "పోటీ పరీక్షల స్టడీ మెటీరియల్")
 
     chunks = split_into_semantic_chunks(full_text, max_chunks=10)
+    if not chunks and full_text:
+        chunks = [full_text[:2500]]
     articles_count = 0
+    ai_quizzes = []
     for idx, chunk in enumerate(chunks, 1):
-        lines = [l.strip() for l in chunk.split("\n") if len(l.strip()) > 4]
-        art_title = lines[0][:100] if lines else f"{doc_title} (భాగం {idx})"
-        summary_text = lines[1][:300] if len(lines) > 1 else chunk[:300]
+        ai_data = synthesize_telugu_study_notes_ai(chunk, doc_title, f"భాగం {idx}", cat_key)
+        if ai_data:
+            art_title = str(ai_data.get("title") or f"{doc_title} (భాగం {idx})")[:100]
+            summary_text = str(ai_data.get("summary") or chunk[:300])[:300]
+            bp_list = ai_data.get("bullet_points") or []
+            body_text = "\n".join(f"• {str(pt).lstrip('•-* ')}" for pt in bp_list if str(pt).strip()) if isinstance(bp_list, list) else chunk
+            one_liner_txt = str(ai_data.get("one_liner") or f"[TELEGRAM FILE] {art_title}: {summary_text[:130]}")
+            ai_q = ai_data.get("quiz")
+            if isinstance(ai_q, dict) and ai_q.get("question") and ai_q.get("option_a"):
+                ai_quizzes.append({
+                    "question": str(ai_q["question"])[:300],
+                    "option_a": str(ai_q.get("option_a", ""))[:130],
+                    "option_b": str(ai_q.get("option_b", "పైవేవీ కావు"))[:130],
+                    "option_c": str(ai_q.get("option_c", "పాత నిబంధన"))[:130],
+                    "option_d": str(ai_q.get("option_d", "వర్తించదు"))[:130],
+                    "correct": str(ai_q.get("correct", "A")).upper()[:1] if str(ai_q.get("correct", "A")).upper()[:1] in ("A", "B", "C", "D") else "A",
+                    "explanation": str(ai_q.get("explanation", f"{art_title} ఆధారంగా.")),
+                    "exam_tag": f"Telegram: {doc_title[:25]}"
+                })
+        else:
+            lines = [l.strip() for l in chunk.split("\n") if len(l.strip()) > 4]
+            art_title = lines[0][:100] if lines else f"{doc_title} (భాగం {idx})"
+            summary_text = lines[1][:300] if len(lines) > 1 else chunk[:300]
+            body_text = chunk
+            one_liner_txt = f"[TELEGRAM FILE] {art_title}: {summary_text[:130]}"
+
         detailed = (
             f"📄 <b>టెలిగ్రామ్ స్టడీ ఫైల్:</b> {doc_title}\n"
             f"📂 <b>విభాగం:</b> {cat_label}\n"
             f"─────────────────────────────\n"
-            f"{chunk}\n\n"
+            f"{body_text}\n\n"
             f"📥 <b>ఫైల్ డౌన్‌లోడ్:</b> https://lakshya-telugu-ca.onrender.com/pdfs/uploads/{dest_filename}"
         )
         aid = insert_article(
             date=target_date,
             category=cat_key,
-            title=art_title,
+            title=f"📌 {art_title}" if not art_title.startswith("📌") else art_title,
             summary=summary_text,
             detailed_notes=detailed,
             exam_relevance=f"టెలిగ్రామ్ అప్‌లోడ్ మెటీరియల్ ({cat_label})",
@@ -1069,10 +1281,10 @@ def process_uploaded_text_file(file_path, custom_title="", category="education",
         )
         if aid:
             articles_count += 1
-            insert_one_liner(target_date, cat_key, f"[TELEGRAM FILE] {art_title}: {summary_text[:130]}")
+            insert_one_liner(target_date, cat_key, one_liner_txt)
 
     quizzes_count = 0
-    mcqs = extract_mcqs_from_text(full_text) or generate_smart_quizzes_from_text(full_text, doc_title, cat_key)
+    mcqs = extract_mcqs_from_text(full_text) or ai_quizzes or generate_smart_quizzes_from_text(full_text, doc_title, cat_key)
     for q in mcqs:
         qid = insert_quiz(
             date=target_date,

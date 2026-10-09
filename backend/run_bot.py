@@ -96,7 +96,7 @@ def start_bot_polling():
                 return fn.endswith((".jpg", ".jpeg", ".png", ".webp")) or mt.startswith("image/")
 
             if any(_is_photo_or_img_update(u) for u in updates):
-                for _ in range(6):
+                for _ in range(10):
                     temp_last_id = updates[-1]["update_id"]
                     time.sleep(2.0)
                     try:
@@ -1318,6 +1318,40 @@ def start_bot_polling():
                         "👉 https://lakshya-telugu-ca.onrender.com/tribal_heritage_hub"
                     )
                     send_telegram_message(tr_msg, token=token, chat_id=chat_id)
+
+                elif not text.startswith("/") and len(text.strip()) >= 40:
+                    try:
+                        import tempfile
+                        from pdf_extractor import process_uploaded_text_file, extract_date_from_text
+                        first_line = text.strip().splitlines()[0][:65].strip()
+                        temp_txt = os.path.join(tempfile.gettempdir(), f"tg_notes_{int(time.time())}.txt")
+                        with open(temp_txt, "w", encoding="utf-8") as tf:
+                            tf.write(text.strip())
+                        detected_dt = extract_date_from_text(text[:500])
+                        res = process_uploaded_text_file(
+                            file_path=temp_txt,
+                            custom_title=first_line or "టెలిగ్రామ్ స్టడీ నోట్స్",
+                            category="national",
+                            target_date=detected_dt,
+                            auto_github_sync=True
+                        )
+                        try:
+                            os.remove(temp_txt)
+                        except Exception:
+                            pass
+                        send_telegram_message(
+                            f"🎉 <b>మీరు పంపిన టెక్స్ట్ నోట్స్ లక్ష్య వెబ్‌సైట్‌లో అప్‌డేట్ చేయబడ్డాయి!</b>\n"
+                            f"───────────────────────\n"
+                            f"📖 <b>శీర్షిక:</b> {res.get('title')}\n"
+                            f"📅 <b>తేదీ:</b> {res.get('target_date')}\n"
+                            f"📰 <b>చేర్చబడిన ఆర్టికల్స్:</b> {res.get('articles_created', 0)} (టాప్‌లో పిన్ చేయబడ్డాయి)\n"
+                            f"📝 <b>క్విజ్ MCQs:</b> {res.get('quizzes_created', 0)}\n\n"
+                            f"🌐 https://lakshya-telugu-ca.onrender.com",
+                            token=token,
+                            chat_id=chat_id
+                        )
+                    except Exception as te:
+                        print("Text note sync error:", te)
         except KeyboardInterrupt:
             print("\nబోట్ ఆపివేయబడింది.")
             break
