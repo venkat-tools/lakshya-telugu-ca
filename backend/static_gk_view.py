@@ -298,7 +298,7 @@ def render_static_gk_html():
             </div>
         </a>
         <div class="nav-actions">
-            <a href="/frontend/pdfs/static_gk_master_pocketbook.pdf" target="_blank" class="nav-btn pdf-btn">
+            <a href="/pdfs/static_gk_master_pocketbook.pdf" target="_blank" class="nav-btn pdf-btn">
                 📄 మాస్టర్ పాకెట్‌బుక్ PDF
             </a>
             <a href="/" class="nav-btn">🏠 హోమ్ డ్యాష్‌బోర్డ్</a>

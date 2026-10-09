@@ -474,7 +474,7 @@ def render_mains_descriptive_html():
             </div>
         </a>
         <div class="nav-actions">
-            <a href="/frontend/pdfs/appsc_mains_answer_writing_handbook.pdf" target="_blank" class="nav-btn pdf-btn">
+            <a href="/pdfs/appsc_mains_answer_writing_handbook.pdf" target="_blank" class="nav-btn pdf-btn">
                 📄 మాస్టర్ హ్యాండ్‌బుక్ PDF
             </a>
             <a href="/" class="nav-btn">🏠 హోమ్ డ్యాష్‌బోర్డ్</a>

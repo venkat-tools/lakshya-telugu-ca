@@ -349,7 +349,7 @@ def render_agri_irrigation_html():
             <button class="nav-btn" onclick="toggleFullScreenMode()" title="ట్యాబ్స్ దాచు / చూపించు">
                 <i class="fa-solid fa-expand"></i> <span id="toggleText">పూర్తి స్క్రీన్</span>
             </button>
-            <a href="/frontend/pdfs/ap_ts_agriculture_irrigation_master.pdf" target="_blank" class="nav-btn nav-btn-primary">
+            <a href="/pdfs/ap_ts_agriculture_irrigation_master.pdf" target="_blank" class="nav-btn nav-btn-primary">
                 <i class="fa-solid fa-file-pdf"></i> డౌన్‌లోడ్ PDF
             </a>
             <a href="/" class="nav-btn">

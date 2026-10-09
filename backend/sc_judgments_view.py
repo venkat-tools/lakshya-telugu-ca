@@ -446,7 +446,7 @@ def render_sc_judgments_html():
             <button class="nav-btn" onclick="toggleFullScreenMode()" title="ట్యాబ్స్ దాచు / చూపించు">
                 <i class="fa-solid fa-expand"></i> <span id="toggleText">పూర్తి స్క్రీన్</span>
             </button>
-            <a href="/frontend/pdfs/supreme_court_landmark_cases_handbook.pdf" target="_blank" class="nav-btn nav-btn-primary">
+            <a href="/pdfs/supreme_court_landmark_cases_handbook.pdf" target="_blank" class="nav-btn nav-btn-primary">
                 <i class="fa-solid fa-file-pdf"></i> డౌన్‌లోడ్ PDF
             </a>
             <a href="/" class="nav-btn">

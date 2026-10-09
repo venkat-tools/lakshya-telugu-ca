@@ -202,6 +202,7 @@ def ca_quiz_view():
         date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
     return render_ca_quiz_html(date=date)
 
+@app.route("/frontend/<path:path>")
 @app.route("/<path:path>")
 def serve_static(path):
     return send_from_directory(FRONTEND_DIR, path)
