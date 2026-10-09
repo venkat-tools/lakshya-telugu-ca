@@ -99,7 +99,9 @@ start_scheduler_thread()
 # Start background Telegram bot polling thread when hosted on cloud
 def start_embedded_bot():
     def _run_bot_worker():
+        import time
         # Prevent multiple gunicorn workers from concurrent getUpdates polling (avoids Telegram 409 Conflict)
+        lock_file = None
         try:
             import tempfile, fcntl
             lock_path = os.path.join(tempfile.gettempdir(), "lakshya_bot_polling.lock")
@@ -112,12 +114,14 @@ def start_embedded_bot():
         except ImportError:
             pass  # Windows or environment without fcntl
 
-        try:
-            from run_bot import start_bot_polling
-            print("🤖 [Embedded Bot] టెలిగ్రామ్ బోట్ బ్యాక్‌గ్రౌండ్ థ్రెడ్ ప్రారంభమైంది.")
-            start_bot_polling()
-        except Exception as e:
-            print("⚠️ Embedded bot error:", e)
+        while True:
+            try:
+                from run_bot import start_bot_polling
+                print("🤖 [Embedded Bot] టెలిగ్రామ్ బోట్ బ్యాక్‌గ్రౌండ్ థ్రెడ్ ప్రారంభమైంది.")
+                start_bot_polling()
+            except Exception as e:
+                print("⚠️ Embedded bot error:", e)
+            time.sleep(5)
 
     import threading
     threading.Thread(target=_run_bot_worker, daemon=True).start()
@@ -1793,29 +1797,57 @@ def tribal_heritage_hub_view():
 # ----------------- Educational PDF Uploader & Auto-Sync Endpoints -----------------
 @app.route("/api/upload_pdf", methods=["POST"])
 def api_upload_pdf():
-    if "file" not in request.files:
-        return jsonify({"success": False, "error": "దయచేసి PDF ఫైల్‌ను అప్‌లోడ్ చేయండి."}), 400
-    file = request.files["file"]
-    if not file or not file.filename or not file.filename.lower().endswith(".pdf"):
-        return jsonify({"success": False, "error": "కేవలం .pdf ఫార్మాట్ ఫైల్స్ మాత్రమే అనుమతించబడతాయి."}), 400
+    files = request.files.getlist("file")
+    if not files or not files[0] or not files[0].filename:
+        return jsonify({"success": False, "error": "దయచేసి PDF లేదా ఇమేజ్ ఫైల్‌ను అప్‌లోడ్ చేయండి."}), 400
 
-    # Students and teachers can upload study PDFs freely without admin pin
     title = request.form.get("title", "").strip()
     category = request.form.get("category", "education").strip()
-    # Default to 1 so uploaded PDFs automatically update the website!
     sync_articles = request.form.get("sync_articles", "1") == "1"
     sync_quizzes = request.form.get("sync_quizzes", "1") == "1"
 
+    first_fn = files[0].filename.lower()
+    allowed_img_exts = (".jpg", ".jpeg", ".png", ".webp")
+
     try:
-        from pdf_extractor import process_uploaded_pdf
-        res = process_uploaded_pdf(
-            file_input=file,
-            custom_title=title,
-            category=category,
-            sync_to_website=sync_articles,
-            extract_quizzes=sync_quizzes
-        )
-        return jsonify({"success": True, "message": "PDF విజయవంతంగా డిజిటల్ లైబ్రరీ & వెబ్‌సైట్‌లో అప్‌డేట్ చేయబడింది!", "data": res})
+        from pdf_extractor import process_uploaded_pdf, compile_images_to_pdf
+        if len(files) == 1 and first_fn.endswith(".pdf"):
+            res = process_uploaded_pdf(
+                file_input=files[0],
+                custom_title=title,
+                category=category,
+                sync_to_website=sync_articles,
+                extract_quizzes=sync_quizzes
+            )
+            return jsonify({"success": True, "message": "PDF విజయవంతంగా డిజిటల్ లైబ్రరీ & వెబ్‌సైట్‌లో అప్‌డేట్ చేయబడింది!", "data": res})
+        elif all((f.filename or "").lower().endswith(allowed_img_exts) for f in files):
+            import tempfile, time
+            temp_dir = tempfile.gettempdir()
+            ts = int(time.time())
+            img_paths = []
+            for idx, f_obj in enumerate(files, 1):
+                ext = os.path.splitext(f_obj.filename)[1].lower()
+                p = os.path.join(temp_dir, f"web_img_{ts}_{idx:03d}{ext}")
+                f_obj.save(p)
+                img_paths.append(p)
+            compiled_pdf = os.path.join(temp_dir, f"web_compiled_{ts}_{len(img_paths)}_pages.pdf")
+            compile_images_to_pdf(img_paths, compiled_pdf)
+            res = process_uploaded_pdf(
+                file_input=compiled_pdf,
+                custom_title=title or f"విజువల్ స్టడీ మెటీరియల్ ({len(img_paths)} పేజీలు)",
+                category=category,
+                sync_to_website=sync_articles,
+                extract_quizzes=sync_quizzes
+            )
+            for p in img_paths + [compiled_pdf]:
+                try:
+                    if os.path.exists(p):
+                        os.remove(p)
+                except Exception:
+                    pass
+            return jsonify({"success": True, "message": f"{len(img_paths)} ఇమేజ్‌లు PDF గా మార్చబడి వెబ్‌సైట్‌లో అప్‌డేట్ చేయబడ్డాయి!", "data": res})
+        else:
+            return jsonify({"success": False, "error": "కేవలం .pdf లేదా ఇమేజ్ (.jpg, .png, .webp) ఫైల్స్ మాత్రమే అనుమతించబడతాయి."}), 400
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 

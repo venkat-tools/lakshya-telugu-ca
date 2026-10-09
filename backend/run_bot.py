@@ -81,12 +81,166 @@ def start_bot_polling():
                 time.sleep(5)
                 continue
 
-            for update in data.get("result", []):
-                last_update_id = update["update_id"]
+            updates = list(data.get("result", []))
+            if not updates:
+                continue
+
+            # If any update contains a photo or image document, wait briefly in a loop to gather all pages of a multi-photo album
+            def _is_photo_or_img_update(u_item):
+                m = u_item.get("message") or u_item.get("channel_post") or u_item.get("edited_message") or {}
+                if m.get("photo"):
+                    return True
+                d = m.get("document") or {}
+                fn = (d.get("file_name") or "").lower()
+                mt = (d.get("mime_type") or "").lower()
+                return fn.endswith((".jpg", ".jpeg", ".png", ".webp")) or mt.startswith("image/")
+
+            if any(_is_photo_or_img_update(u) for u in updates):
+                for _ in range(6):
+                    temp_last_id = updates[-1]["update_id"]
+                    time.sleep(2.0)
+                    try:
+                        more_url = f"https://api.telegram.org/bot{token}/getUpdates?offset={temp_last_id + 1}&timeout=2"
+                        more_res = requests.get(more_url, timeout=6).json()
+                        more_list = more_res.get("result", []) if more_res.get("ok") else []
+                        if more_list:
+                            updates.extend(more_list)
+                        else:
+                            break
+                    except Exception:
+                        break
+
+            # First, group any photo / image document updates by chat_id so multi-photo albums become a single PDF
+            photo_batches = {}
+            non_photo_updates = []
+
+            for update in updates:
+                last_update_id = max(last_update_id, update["update_id"])
                 msg = update.get("message") or update.get("channel_post") or update.get("edited_message")
                 if not msg:
                     continue
+                if _is_photo_or_img_update(update):
+                    cid = msg["chat"]["id"]
+                    photo_batches.setdefault(cid, []).append(msg)
+                else:
+                    non_photo_updates.append((update, msg))
 
+            # Process grouped photo/image albums per chat_id
+            for chat_id, msg_list in photo_batches.items():
+                add_subscriber(chat_id)
+                first_msg = msg_list[0]
+                captions = [(m.get("caption") or "").strip() for m in msg_list if (m.get("caption") or "").strip()]
+                caption = " ".join(captions).strip()
+                num_pages = len(msg_list)
+
+                send_telegram_message(
+                    f"⏳ <b>మీరు పంపిన {num_pages} స్టడీ ఫోటోలు / ఇమేజ్ పేజీలు అందాయి!</b>\n\n"
+                    f"<i>వాటిని హై-రిజల్యూషన్ PDF మెటీరియల్‌గా కంపైల్ చేసి, లక్ష్య వెబ్‌సైట్ & డిజిటల్ లైబ్రరీలో అప్‌డేట్ చేస్తున్నాం... దయచేసి కొన్ని సెకన్లు వేచి ఉండండి.</i>",
+                    token=token,
+                    chat_id=chat_id
+                )
+
+                try:
+                    import tempfile
+                    temp_dir = tempfile.gettempdir()
+                    batch_ts = int(time.time())
+                    img_paths = []
+
+                    for idx, m_item in enumerate(msg_list, 1):
+                        if m_item.get("photo"):
+                            file_id = m_item["photo"][-1]["file_id"]
+                            ext = ".jpg"
+                        else:
+                            doc_item = m_item["document"]
+                            file_id = doc_item["file_id"]
+                            orig_ext = os.path.splitext(doc_item.get("file_name") or ".jpg")[1].lower()
+                            ext = orig_ext if orig_ext in [".jpg", ".jpeg", ".png", ".webp"] else ".jpg"
+
+                        finfo = requests.get(f"https://api.telegram.org/bot{token}/getFile?file_id={file_id}", timeout=30).json()
+                        if not finfo.get("ok"):
+                            continue
+                        tg_fpath = finfo["result"]["file_path"]
+                        img_bytes = requests.get(f"https://api.telegram.org/file/bot{token}/{tg_fpath}", timeout=60).content
+                        local_img_path = os.path.join(temp_dir, f"tg_img_{batch_ts}_{idx:03d}{ext}")
+                        with open(local_img_path, "wb") as imf:
+                            imf.write(img_bytes)
+                        img_paths.append(local_img_path)
+
+                    if not img_paths:
+                        raise RuntimeError("టెలిగ్రామ్ నుండి ఫోటోలను డౌన్‌లోడ్ చేయలేకపోయాము.")
+
+                    from pdf_extractor import compile_images_to_pdf, process_uploaded_pdf, extract_date_from_text
+                    compiled_pdf_name = f"Lakshya_Visual_Study_Material_{num_pages}_Pages.pdf"
+                    compiled_pdf_path = os.path.join(temp_dir, f"tg_{batch_ts}_{compiled_pdf_name}")
+                    compile_images_to_pdf(img_paths, compiled_pdf_path)
+
+                    cat = "education"
+                    check_str = caption.lower()
+                    if any(k in check_str for k in ["polity", "రాజ్యాంగం", "పాలిటీ", "constitution"]):
+                        cat = "national"
+                    elif any(k in check_str for k in ["history", "చరిత్ర", "రాజవంశ", "సుల్తా", "మొఘల్", "రాతియుగ"]):
+                        cat = "history"
+                    elif any(k in check_str for k in ["geography", "భూగోళ", "నదులు", "ప్రాజెక్టు", "డ్యామ్", "river", "dam"]):
+                        cat = "national"
+                    elif any(k in check_str for k in ["economy", "ఆర్థిక", "బడ్జెట్", "budget"]):
+                        cat = "economy"
+                    elif any(k in check_str for k in ["science", "సైన్స్", "isro", "tech"]):
+                        cat = "science_tech"
+                    elif any(k in check_str for k in ["scheme", "పథకాలు", "సంక్షేమం", "ap", "telangana", "తెలంగాణ", "ఆంధ్ర"]):
+                        cat = "regional"
+
+                    if caption and caption.lower() != "lakshya2026" and not caption.startswith("/"):
+                        custom_title = caption
+                    else:
+                        today_str_ist = datetime.now().strftime("%Y-%m-%d")
+                        custom_title = f"పోటీ పరీక్షల స్పెషల్ విజువల్ స్టడీ మెటీరియల్ & ఇన్ఫోగ్రాఫిక్స్ అట్లాస్ ({num_pages} పేజీలు - {today_str_ist})"
+
+                    detected_date = extract_date_from_text(caption)
+                    result = process_uploaded_pdf(
+                        file_input=compiled_pdf_path,
+                        custom_title=custom_title,
+                        category=cat,
+                        sync_to_website=True,
+                        extract_quizzes=True,
+                        target_date=detected_date
+                    )
+
+                    title = result["title"]
+                    total_pages = result["total_pages"]
+                    size_fmt = result["file_size_formatted"]
+                    cat_name = result["category_name"]
+                    target_date = result.get("target_date", "")
+                    arts_count = result.get("articles_created", 0)
+                    quiz_count = result.get("quizzes_created", 0)
+
+                    success_msg = (
+                        f"🎉 <b>మీరు పంపిన {num_pages} ఫోటోలు PDF గా మార్చబడి వెబ్‌సైట్ & లైబ్రరీలో అప్‌డేట్ చేయబడ్డాయి!</b>\n"
+                        f"───────────────────────\n"
+                        f"📖 <b>మెటీరియల్:</b> {title}\n"
+                        f"📅 <b>తేదీ:</b> {target_date}\n"
+                        f"📄 <b>పేజీలు:</b> {total_pages} | <b>సైజ్:</b> {size_fmt}\n"
+                        f"🏷️ <b>విభాగం:</b> {cat_name}\n"
+                        f"📰 <b>వెబ్‌సైట్‌లో చేర్చబడిన ఆర్టికల్స్:</b> {arts_count} వార్తలు\n"
+                        f"📝 <b>రూపొందించిన క్విజ్ ప్రశ్నలు:</b> {quiz_count} MCQs\n\n"
+                        f"📥 <b>కంపైల్ చేసిన PDF డైరెక్ట్ లింక్:</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com{result['pdf_url']}\n\n"
+                        f"🌐 <b>వెబ్‌సైట్ స్టడీ PDF ల విభాగం:</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/#materials\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/pdf_upload_hub"
+                    )
+                    send_telegram_message(success_msg, token=token, chat_id=chat_id)
+
+                    for p in img_paths + [compiled_pdf_path]:
+                        try:
+                            if os.path.exists(p):
+                                os.remove(p)
+                        except Exception:
+                            pass
+                except Exception as pe:
+                    err_msg = f"❌ <b>ఫోటోల ప్రాసెసింగ్‌లో లోపం ఎదురైంది:</b>\n<code>{str(pe)[:300]}</code>"
+                    send_telegram_message(err_msg, token=token, chat_id=chat_id)
+
+            for update, msg in non_photo_updates:
                 chat_id = msg["chat"]["id"]
                 add_subscriber(chat_id)
                 doc = msg.get("document")
@@ -1159,6 +1313,7 @@ def start_bot_polling():
                         "👉 https://lakshya-telugu-ca.onrender.com/tribal_heritage_hub"
                     )
                     send_telegram_message(tr_msg, token=token, chat_id=chat_id)
+        except KeyboardInterrupt:
             print("\nబోట్ ఆపివేయబడింది.")
             break
         except Exception as e:

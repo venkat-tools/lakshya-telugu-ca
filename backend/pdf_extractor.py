@@ -241,9 +241,143 @@ def clean_document_title(raw_title, orig_filename, target_date):
         return f"{clean_base.strip()} ({target_date})", "education"
     return raw_title.strip(), "education"
 
-def process_uploaded_pdf(file_input, custom_title="", category="education", sync_to_website=True, extract_quizzes=True, target_date=None):
+def _get_jpeg_dimensions(jpeg_bytes):
+    """Parse width and height from JPEG SOF marker in pure Python."""
+    i = 2
+    n = len(jpeg_bytes)
+    while i < n - 8:
+        if jpeg_bytes[i] != 0xFF:
+            i += 1
+            continue
+        marker = jpeg_bytes[i + 1]
+        if marker == 0xFF:
+            i += 1
+            continue
+        if marker in (0xD8, 0xD9) or (0xD0 <= marker <= 0xD7):
+            i += 2
+            continue
+        seg_len = (jpeg_bytes[i + 2] << 8) + jpeg_bytes[i + 3]
+        if marker in (0xC0, 0xC1, 0xC2):
+            h = (jpeg_bytes[i + 5] << 8) + jpeg_bytes[i + 6]
+            w = (jpeg_bytes[i + 7] << 8) + jpeg_bytes[i + 8]
+            return max(w, 1), max(h, 1)
+        i += 2 + seg_len
+    return 1000, 1280
+
+
+def compile_images_to_pdf(image_paths, output_pdf_path):
     """
-    Main processing pipeline for user-uploaded educational PDFs.
+    Compiles one or more image files (.jpg, .png, .webp) into a single multi-page PDF.
+    Uses Pillow if available, with a pure-Python JPEG-to-PDF fallback.
+    """
+    if not image_paths:
+        raise ValueError("కనీసం ఒక ఇమేజ్ ఫైల్ అయినా ఉండాలి.")
+
+    try:
+        from PIL import Image
+        pil_images = []
+        for p in image_paths:
+            img = Image.open(p)
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            pil_images.append(img)
+        first = pil_images[0]
+        rest = pil_images[1:]
+        first.save(output_pdf_path, "PDF", resolution=150.0, save_all=True, append_images=rest)
+        for im in pil_images:
+            try:
+                im.close()
+            except Exception:
+                pass
+        return output_pdf_path
+    except ImportError:
+        pass
+
+    # Pure-Python JPEG-to-PDF compiler (zero external dependencies)
+    objects = []
+    # Object 1: Catalog, Object 2: Pages
+    page_obj_ids = []
+    next_id = 3
+    page_entries = []
+
+    for img_path in image_paths:
+        with open(img_path, "rb") as f:
+            img_bytes = f.read()
+        w, h = _get_jpeg_dimensions(img_bytes)
+        # Scale to A4 width (595 pt) preserving aspect ratio
+        pdf_w = 595.0
+        pdf_h = round(595.0 * (h / float(w)), 2)
+
+        img_obj_id = next_id
+        content_obj_id = next_id + 1
+        page_obj_id = next_id + 2
+        next_id += 3
+        page_obj_ids.append(page_obj_id)
+
+        img_header = (
+            f"<< /Type /XObject /Subtype /Image /Width {w} /Height {h} "
+            f"/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length {len(img_bytes)} >>\nstream\n"
+        ).encode("ascii")
+        img_footer = b"\nendstream"
+        objects.append((img_obj_id, img_header + img_bytes + img_footer))
+
+        content_stream = f"q {pdf_w} 0 0 {pdf_h} 0 0 cm /Im0 Do Q".encode("ascii")
+        content_obj = (
+            f"<< /Length {len(content_stream)} >>\nstream\n".encode("ascii")
+            + content_stream
+            + b"\nendstream"
+        )
+        objects.append((content_obj_id, content_obj))
+
+        page_obj = (
+            f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {pdf_w} {pdf_h}] "
+            f"/Resources << /XObject << /Im0 {img_obj_id} 0 R >> >> "
+            f"/Contents {content_obj_id} 0 R >>"
+        ).encode("ascii")
+        objects.append((page_obj_id, page_obj))
+
+    kids_str = " ".join(f"{pid} 0 R" for pid in page_obj_ids)
+    catalog_obj = b"<< /Type /Catalog /Pages 2 0 R >>"
+    pages_obj = f"<< /Type /Pages /Kids [{kids_str}] /Count {len(page_obj_ids)} >>".encode("ascii")
+
+    all_objs = [(1, catalog_obj), (2, pages_obj)] + objects
+    all_objs.sort(key=lambda x: x[0])
+
+    out = bytearray(b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n")
+    offsets = {}
+    for oid, body in all_objs:
+        offsets[oid] = len(out)
+        out.extend(f"{oid} 0 obj\n".encode("ascii"))
+        out.extend(body)
+        out.extend(b"\nendobj\n")
+
+    xref_pos = len(out)
+    total_objs = len(all_objs) + 1
+    out.extend(f"xref\n0 {total_objs}\n0000000000 65535 f \n".encode("ascii"))
+    for oid in range(1, total_objs):
+        out.extend(f"{offsets[oid]:010d} 00000 n \n".encode("ascii"))
+    out.extend(
+        f"trailer\n<< /Size {total_objs} /Root 1 0 R >>\nstartxref\n{xref_pos}\n%%EOF\n".encode("ascii")
+    )
+
+    with open(output_pdf_path, "wb") as pf:
+        pf.write(out)
+    return output_pdf_path
+
+
+def process_uploaded_pdf(
+    file_input,
+    custom_title="",
+    category="education",
+    sync_to_website=True,
+    extract_quizzes=True,
+    target_date=None,
+    custom_summary="",
+    custom_articles=None,
+    custom_quizzes=None
+):
+    """
+    Main processing pipeline for user-uploaded educational PDFs or compiled image albums.
     `file_input`: file path (str) OR Werkzeug FileStorage object.
     Defaults sync_to_website=True and extract_quizzes=True.
     """
@@ -295,8 +429,6 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
     except Exception:
         pass
 
-    snippet = full_text[:400] if full_text else "స్టడీ మెటీరియల్ PDF."
-
     # Detect target date
     if not target_date:
         target_date = extract_date_from_text(f"{custom_title} {orig_filename} {full_text[:2000]}")
@@ -309,199 +441,190 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
     if category == "education" and detected_cat != "education":
         category = detected_cat
 
+    if custom_summary:
+        snippet = custom_summary[:500]
+    elif full_text and len(full_text) > 20:
+        snippet = full_text[:400]
+    else:
+        cat_label_default = CATEGORY_NAMES.get(category, "పోటీ పరీక్షల స్టడీ మెటీరియల్")
+        snippet = (
+            f"{doc_title} — మొత్తం {total_pages} పేజీల హై-రిజల్యూషన్ విజువల్ స్టడీ మెటీరియల్ & ఇన్ఫోగ్రాఫిక్స్ PDF "
+            f"({cat_label_default}). APPSC, TSPSC, UPSC, SSC, RRB పరీక్షల రివిజన్ కోసం ప్రత్యేకంగా రూపొందించబడింది."
+        )
+
     articles_count = 0
     quizzes_count = 0
+    cat_label = CATEGORY_NAMES.get(category, "పోటీ పరీక్షల స్టడీ మెటీరియల్")
 
     # 3. Synchronize to Website Articles & Database
-    if sync_to_website and full_text and len(full_text) > 80:
-        topics = extract_topics_from_text(full_text)
-        cat_label = CATEGORY_NAMES.get(category, "పోటీ పరీక్షల స్టడీ మెటీరియల్")
-
-        if topics:
-            for idx, t in enumerate(topics, 1):
-                raw_title = t['title']
-                t_title = re.sub(r'^\d+\.\s*', '', raw_title).strip()
-                if len(t_title) < 5:
-                    t_title = f"{doc_title} - విభాగం {idx}"
-
-                body = t['body'].strip()
-                summary = body[:300]
-                detailed = (
-                    f"📄 <b>అప్‌లోడ్ చేసిన స్టడీ మెటీరియల్:</b> {doc_title}\n"
-                    f"📂 <b>టాపిక్:</b> {t_title}\n"
-                    f"─────────────────────────────\n"
-                    f"{body}\n\n"
-                    f"📥 <b>ఒరిజినల్ PDF డౌన్‌లోడ్:</b> /pdfs/uploads/{dest_filename}"
-                )
-
-                t_cat = category
-                low = (t_title + " " + body[:200]).lower()
-                if any(k in low for k in ['andhra', 'ap', 'kuppam', 'veligonda', 'sanjeevani', 'dugarajapatnam', 'gurajada', 'janman']):
-                    t_cat = "regional"
-                elif any(k in low for k in ['gift city', 'economy', 'fssai', 'gfci', 'budget', 'financial']):
-                    t_cat = "economy"
-                elif any(k in low for k in ['elias', 'exoplanet', 'science', 'isro', 'carbon', 'soil', 'monal']):
-                    t_cat = "science_tech"
-                elif any(k in low for k in ['asian games', 'sports', 'gondhal', 'award']):
-                    t_cat = "sports_awards"
-                elif any(k in low for k in ['sco', 'falkland', 'national', 'swachhata']):
+    if sync_to_website:
+        if custom_articles and isinstance(custom_articles, list):
+            for art in custom_articles:
+                t_cat = art.get("category") or category
+                if t_cat not in ["national", "regional", "economy", "science_tech", "sports_awards", "appointments", "education", "history"]:
                     t_cat = "national"
-
+                t_title = art.get("title", doc_title)[:120]
+                t_summary = art.get("summary", snippet[:300])
+                t_notes = art.get("detailed_notes", "")
+                if f"/pdfs/uploads/{dest_filename}" not in t_notes:
+                    t_notes = (
+                        f"{t_notes}\n\n"
+                        f"📥 <b>పూర్తి {total_pages}-పేజీల విజువల్ PDF డౌన్‌లోడ్:</b> https://lakshya-telugu-ca.onrender.com/pdfs/uploads/{dest_filename}"
+                    ).strip()
                 aid = insert_article(
                     date=target_date,
-                    category=t_cat,
-                    title=t_title[:100],
-                    summary=summary,
-                    detailed_notes=detailed,
-                    exam_relevance=f"అభ్యర్థుల స్టడీ మెటీరియల్ ({cat_label})",
-                    tags=f"{t_cat}, కరెంట్ అఫైర్స్, PDF నోట్స్",
-                    source=f"PDF: {doc_title[:35]}"
+                    category=t_cat if t_cat in ["national", "regional", "economy", "science_tech", "sports_awards", "appointments"] else "national",
+                    title=t_title,
+                    summary=t_summary,
+                    detailed_notes=t_notes,
+                    exam_relevance=art.get("exam_relevance", f"అభ్యర్థుల స్టడీ మెటీరియల్ ({cat_label})"),
+                    tags=art.get("tags", f"{t_cat}, విజువల్ అట్లాస్, PDF నోట్స్"),
+                    source=art.get("source", f"PDF: {doc_title[:35]}")
                 )
                 if aid:
                     articles_count += 1
-                    insert_one_liner(target_date, t_cat, f"[{t_cat.upper()}] {t_title}")
+                    insert_one_liner(
+                        target_date,
+                        t_cat if t_cat in ["national", "regional", "economy", "science_tech", "sports_awards", "appointments"] else "national",
+                        art.get("one_liner", f"[{t_cat.upper()}] {t_title}")
+                    )
+        elif full_text and len(full_text) > 80:
+            topics = extract_topics_from_text(full_text)
+
+            if topics:
+                for idx, t in enumerate(topics, 1):
+                    raw_title = t['title']
+                    t_title = re.sub(r'^\d+\.\s*', '', raw_title).strip()
+                    if len(t_title) < 5:
+                        t_title = f"{doc_title} - విభాగం {idx}"
+
+                    body = t['body'].strip()
+                    summary = body[:300]
+                    detailed = (
+                        f"📄 <b>అప్‌లోడ్ చేసిన స్టడీ మెటీరియల్:</b> {doc_title}\n"
+                        f"📂 <b>టాపిక్:</b> {t_title}\n"
+                        f"─────────────────────────────\n"
+                        f"{body}\n\n"
+                        f"📥 <b>ఒరిజినల్ PDF డౌన్‌లోడ్:</b> /pdfs/uploads/{dest_filename}"
+                    )
+
+                    t_cat = category
+                    low = (t_title + " " + body[:200]).lower()
+                    if any(k in low for k in ['andhra', 'ap', 'kuppam', 'veligonda', 'sanjeevani', 'dugarajapatnam', 'gurajada', 'janman']):
+                        t_cat = "regional"
+                    elif any(k in low for k in ['gift city', 'economy', 'fssai', 'gfci', 'budget', 'financial']):
+                        t_cat = "economy"
+                    elif any(k in low for k in ['elias', 'exoplanet', 'science', 'isro', 'carbon', 'soil', 'monal']):
+                        t_cat = "science_tech"
+                    elif any(k in low for k in ['asian games', 'sports', 'gondhal', 'award']):
+                        t_cat = "sports_awards"
+                    elif any(k in low for k in ['sco', 'falkland', 'national', 'swachhata']):
+                        t_cat = "national"
+
+                    aid = insert_article(
+                        date=target_date,
+                        category=t_cat if t_cat in ["national", "regional", "economy", "science_tech", "sports_awards", "appointments"] else "national",
+                        title=t_title[:100],
+                        summary=summary,
+                        detailed_notes=detailed,
+                        exam_relevance=f"అభ్యర్థుల స్టడీ మెటీరియల్ ({cat_label})",
+                        tags=f"{t_cat}, కరెంట్ అఫైర్స్, PDF నోట్స్",
+                        source=f"PDF: {doc_title[:35]}"
+                    )
+                    if aid:
+                        articles_count += 1
+                        insert_one_liner(target_date, t_cat, f"[{t_cat.upper()}] {t_title}")
+            else:
+                chunks = split_into_semantic_chunks(full_text, max_chunks=4)
+                cat_key = category if category in ["education", "regional", "economy", "national", "science_tech"] else "national"
+
+                for idx, chunk in enumerate(chunks, 1):
+                    lines = [l.strip() for l in chunk.split("\n") if len(l.strip()) > 5]
+                    art_title = lines[0][:90] if lines else f"{doc_title} (భాగం {idx})"
+                    if len(art_title) < 10:
+                        art_title = f"{doc_title} - ముఖ్య సమాచారం (విభాగం {idx})"
+
+                    summary_text = lines[1][:300] if len(lines) > 1 else chunk[:300]
+                    detailed = (
+                        f"📄 <b>అప్‌లోడ్ చేసిన మెటీరియల్:</b> {doc_title}\n"
+                        f"📂 <b>విభాగం:</b> {cat_label}\n"
+                        f"─────────────────────────────\n"
+                        f"{chunk}\n\n"
+                        f"📥 <b>ఒరిజినల్ PDF డౌన్‌లోడ్:</b> /pdfs/uploads/{dest_filename}"
+                    )
+
+                    aid = insert_article(
+                        date=target_date,
+                        category=cat_key if cat_key in ["national", "regional", "economy", "science_tech", "sports_awards", "appointments"] else "national",
+                        title=art_title,
+                        summary=summary_text,
+                        detailed_notes=detailed,
+                        exam_relevance=f"అభ్యర్థులు అప్‌లోడ్ చేసిన ప్రామాణిక మెటీరియల్ ({cat_label})",
+                        tags=f"యూజర్ అప్‌లోడ్, {cat_key}, స్టడీ మెటీరియల్",
+                        source=f"PDF: {doc_title[:40]}"
+                    )
+                    if aid:
+                        articles_count += 1
+                        insert_one_liner(target_date, cat_key, f"[{cat_key.upper()}] {art_title}")
         else:
-            chunks = split_into_semantic_chunks(full_text, max_chunks=4)
-            cat_key = category if category in ["education", "regional", "economy", "national", "science_tech"] else "education"
-
-            for idx, chunk in enumerate(chunks, 1):
-                lines = [l.strip() for l in chunk.split("\n") if len(l.strip()) > 5]
-                art_title = lines[0][:90] if lines else f"{doc_title} (భాగం {idx})"
-                if len(art_title) < 10:
-                    art_title = f"{doc_title} - ముఖ్య సమాచారం (విభాగం {idx})"
-
-                summary_text = lines[1][:300] if len(lines) > 1 else chunk[:300]
-                detailed = (
-                    f"📄 <b>అప్‌లోడ్ చేసిన మెటీరియల్:</b> {doc_title}\n"
-                    f"📂 <b>విభాగం:</b> {cat_label}\n"
-                    f"─────────────────────────────\n"
-                    f"{chunk}\n\n"
-                    f"📥 <b>ఒరిజినల్ PDF డౌన్‌లోడ్:</b> /pdfs/uploads/{dest_filename}"
-                )
-
-                aid = insert_article(
-                    date=target_date,
-                    category=cat_key,
-                    title=art_title,
-                    summary=summary_text,
-                    detailed_notes=detailed,
-                    exam_relevance=f"అభ్యర్థులు అప్‌లోడ్ చేసిన ప్రామాణిక మెటీరియల్ ({cat_label})",
-                    tags=f"యూజర్ అప్‌లోడ్, {cat_key}, స్టడీ మెటీరియల్",
-                    source=f"PDF: {doc_title[:40]}"
-                )
-                if aid:
-                    articles_count += 1
-                    insert_one_liner(target_date, cat_key, f"[{cat_key.upper()}] {art_title}")
+            # Image-based PDF / Visual Infographics Album without embedded text layer
+            cat_key = category if category in ["regional", "economy", "national", "science_tech", "sports_awards"] else "national"
+            detailed = (
+                f"📄 <b>నూతన విజువల్ స్టడీ మెటీరియల్ / ఇన్ఫోగ్రాఫిక్స్ PDF:</b> {doc_title}\n"
+                f"📂 <b>విభాగం:</b> {cat_label} | <b>మొత్తం పేజీలు:</b> {total_pages}\n"
+                f"─────────────────────────────\n"
+                f"{snippet}\n\n"
+                f"📥 <b>పూర్తి PDF ఆన్‌లైన్‌లో చదవండి / డౌన్‌లోడ్ చేసుకోండి:</b>\n"
+                f"https://lakshya-telugu-ca.onrender.com/pdfs/uploads/{dest_filename}"
+            )
+            aid = insert_article(
+                date=target_date,
+                category=cat_key,
+                title=f"📚 {doc_title} ({total_pages} పేజీల స్టడీ మెటీరియల్ PDF)",
+                summary=snippet[:300],
+                detailed_notes=detailed,
+                exam_relevance=f"అభ్యర్థుల విజువల్ స్టడీ మెటీరియల్ ({cat_label})",
+                tags=f"స్టడీ మెటీరియల్, ఇన్ఫోగ్రాఫిక్స్, {cat_key}, PDF",
+                source=f"PDF: {doc_title[:35]}"
+            )
+            if aid:
+                articles_count += 1
+                insert_one_liner(target_date, cat_key, f"[STUDY PDF] {doc_title} ({total_pages} పేజీల మెటీరియల్ డిజిటల్ లైబ్రరీలో అందుబాటులో ఉంది)")
 
     # 4. Extract or Generate Practice Quizzes
-    if extract_quizzes and full_text:
-        detected_mcqs = extract_mcqs_from_text(full_text)
+    if extract_quizzes:
         cat_key = category if category in ["education", "regional", "economy", "national", "science_tech"] else "national"
-
-        if detected_mcqs:
-            for q in detected_mcqs:
+        if custom_quizzes and isinstance(custom_quizzes, list):
+            for q in custom_quizzes:
                 qid = insert_quiz(
                     date=target_date,
-                    category=cat_key,
+                    category=q.get("category", cat_key),
                     question=q["question"],
                     a=q["option_a"],
                     b=q["option_b"],
                     c=q["option_c"],
                     d=q["option_d"],
-                    correct=q["correct"],
-                    explanation=q["explanation"],
-                    exam_tag=f"PDF మెటీరియల్: {doc_title[:30]}"
+                    correct=q.get("correct", "A"),
+                    explanation=q.get("explanation", ""),
+                    exam_tag=q.get("exam_tag", f"PDF మెటీరియల్: {doc_title[:30]}")
                 )
                 if qid:
                     quizzes_count += 1
         else:
-            if "CivicCentreIAS" in orig_filename or "19_September" in orig_filename:
-                q_list = [
-                    {
-                        "q": "స్వచ్ఛతా హీ సేవా (SHS) 2026 ప్రచారం యొక్క ప్రధాన ఇతివృత్తం (Theme) ఏమిటి?",
-                        "a": "Swachhata Mein Sahbhag; Swachh Bharat, Viksit Bharat",
-                        "b": "Clean India, Green India 2026",
-                        "c": "Jan Bhagidari Se Swachhata",
-                        "d": "Ek Kadam Swachhata Ki Ore",
-                        "correct": "A",
-                        "exp": "స్వచ్ఛతా హీ సేవా 2026 ప్రచారాన్ని 17 సెప్టెంబర్ 2026న ప్రారంభించారు. దీని థీమ్ 'Swachhata Mein Sahbhag; Swachh Bharat, Viksit Bharat'."
-                    },
-                    {
-                        "q": "గ్లోబల్ ఫైనాన్షియల్ సెంటర్స్ ఇండెక్స్ (GFCI 36) ప్రకారం గుజరాత్ ఇంటర్నేషనల్ ఫైనాన్స్ టెక్-సిటీ (GIFT City) ఎన్నో స్థానంలో నిలిచింది?",
-                        "a": "37వ స్థానం",
-                        "b": "12వ స్థానం",
-                        "c": "50వ స్థానం",
-                        "d": "25వ స్థానం",
-                        "correct": "A",
-                        "exp": "GIFT City గ్లోబల్ ఫైనాన్షియల్ సెంటర్స్ ఇండెక్స్‌లో 37వ ర్యాంకును కైవసం చేసుకుంది. ఇది భారతదేశపు మొట్టమొదటి ఆపరేషనల్ స్మార్ట్ సిటీ మరియు IFSC."
-                    },
-                    {
-                        "q": "ఆంధ్రప్రదేశ్ ప్రభుత్వం కుప్పంలో పైలట్ ప్రాజెక్ట్‌గా ప్రారంభించి రాష్ట్రవ్యాప్తంగా విస్తరిస్తున్న డిజిటల్ హెల్త్ ప్లాట్‌ఫారమ్ పేరు ఏమిటి?",
-                        "a": "ప్రాజెక్ట్ సంజీవని (Project SANJEEVANI)",
-                        "b": "ఆరోగ్య రక్ష",
-                        "c": "వైఎస్సార్ డిజిటల్ హెల్త్",
-                        "d": "ఈ-స్వస్థ్య ఆంధ్ర",
-                        "correct": "A",
-                        "exp": "ప్రాజెక్ట్ సంజీవని (Project SANJEEVANI) అనేది ABHA-ఆధారిత సమగ్ర డిజిటల్ హెల్త్ ఎకోసిస్టమ్, ఇది 24x7 కేర్ కోఆర్డినేషన్ సెంటర్‌తో పనిచేస్తుంది."
-                    },
-                    {
-                        "q": "ఆంధ్రప్రదేశ్ రాష్ట్రంలో ప్రకాశం, నెల్లూరు, కడప జిల్లాలకు సాగునీరు మరియు తాగునీరు అందించే ముఖ్యమైన ప్రాజెక్ట్ ఏది?",
-                        "a": "వెలిగొండ ప్రాజెక్ట్ (Veligonda Project)",
-                        "b": "పోలవరం ప్రాజెక్ట్",
-                        "c": "గాలేరు నగరి సుజల స్రవంతి",
-                        "d": "తెలుగు గంగ ప్రాజెక్ట్",
-                        "correct": "A",
-                        "exp": "వెలిగొండ ప్రాజెక్ట్ మార్కాపురం, ప్రకాశం, నెల్లూరు, కడప జిల్లాల్లో 3.36 లక్షల ఎకరాలకు సాగునీటిని, లక్షలాది మందికి తాగునీటిని అందిస్తుంది."
-                    }
-                ]
-                for item in q_list:
+            detected_mcqs = extract_mcqs_from_text(full_text) if full_text else []
+            if detected_mcqs:
+                for q in detected_mcqs:
                     qid = insert_quiz(
                         date=target_date,
-                        category="national",
-                        question=item["q"],
-                        a=item["a"],
-                        b=item["b"],
-                        c=item["c"],
-                        d=item["d"],
-                        correct=item["correct"],
-                        explanation=item["exp"],
-                        exam_tag="APPSC ప్రత్యేకం 2026"
-                    )
-                    if qid:
-                        quizzes_count += 1
-            elif "SEPTEMBER_18" in orig_filename.upper() or "Daily_C.A._DISCRIPTIVE" in orig_filename:
-                q_list = [
-                    {
-                        "q": "భారతదేశంలో మొట్టమొదటి సాయిల్ కార్బన్ పేమెంట్ (Soil Carbon Payment) ప్రాజెక్ట్‌ను ఏ ప్రాంతంలో ప్రారంభించారు?",
-                        "a": "లడఖ్ (Ladakh)",
-                        "b": "సిక్కిం",
-                        "c": "అరుణాచల్ ప్రదేశ్",
-                        "d": "హిమాచల్ ప్రదేశ్",
-                        "correct": "A",
-                        "exp": "ICAR మరియు Grow Indigo సంయుక్తంగా లడఖ్ ప్రాంతంలో (నుబ్రా, షామ్, జాన్స్కర్) రైతుల కోసం మొట్టమొదటి సాయిల్ కార్బన్ పేమెంట్ ప్రాజెక్ట్‌ను చేపట్టాయి."
-                    },
-                    {
-                        "q": "భారత నావికాదళం కోసం స్వదేశీ భారీ టార్పెడోలు మరియు డిఫెన్స్ సిస్టమ్స్‌ను అభివృద్ధి చేస్తున్న విశాఖపట్నంలోని DRDO ప్రయోగశాల ఏది?",
-                        "a": "NSTL (నావల్ సైన్స్ అండ్ టెక్నాలజికల్ లేబొరేటరీ)",
-                        "b": "DRDL",
-                        "c": "RCI",
-                        "d": "DMRL",
-                        "correct": "A",
-                        "exp": "విశాఖపట్నంలోని నేవల్ సైన్స్ & టెక్నాలజికల్ లేబొరేటరీ (NSTL) మేక్ ఇన్ ఇండియాలో భాగంగా అధునాతన నావల్ టార్పెడోలను అభివృద్ధి చేస్తుంది."
-                    }
-                ]
-                for item in q_list:
-                    qid = insert_quiz(
-                        date=target_date,
-                        category="science_tech",
-                        question=item["q"],
-                        a=item["a"],
-                        b=item["b"],
-                        c=item["c"],
-                        d=item["d"],
-                        correct=item["correct"],
-                        explanation=item["exp"],
-                        exam_tag="డిఫెన్స్ & సైన్స్ ప్రత్యేకం"
+                        category=cat_key,
+                        question=q["question"],
+                        a=q["option_a"],
+                        b=q["option_b"],
+                        c=q["option_c"],
+                        d=q["option_d"],
+                        correct=q["correct"],
+                        explanation=q["explanation"],
+                        exam_tag=f"PDF మెటీరియల్: {doc_title[:30]}"
                     )
                     if qid:
                         quizzes_count += 1
@@ -516,7 +639,7 @@ def process_uploaded_pdf(file_input, custom_title="", category="education", sync
                     c="సినిమా వినోద రంగం",
                     d="స్థానిక రాజకీయ వివాదాలు",
                     correct="A",
-                    explanation=f"ఈ మెటీరియల్ {CATEGORY_NAMES.get(category, 'పోటీ పరీక్షలు')} సిలబస్‌కు అనుగుణంగా వెబ్‌సైట్‌లో జోడించబడింది.",
+                    explanation=f"ఈ మెటీరియల్ ({total_pages} పేజీలు) {CATEGORY_NAMES.get(category, 'పోటీ పరీక్షలు')} సిలబస్‌కు అనుగుణంగా వెబ్‌సైట్‌లో జోడించబడింది.",
                     exam_tag=f"{doc_title[:30]}"
                 )
                 if qid:
