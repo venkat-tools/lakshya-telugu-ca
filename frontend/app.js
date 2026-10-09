@@ -326,11 +326,22 @@ function extractArticleUrl(art) {
   return null;
 }
 
-// Helper to format detailed notes with clickable, high-contrast links
+// Helper to format detailed notes with clickable, high-contrast links and inline infographic images
 function formatDetailedNotes(notes) {
   if (!notes) return "";
   const lines = notes.split("\n");
   const formatted = lines.map(line => {
+    const imgMatch = line.match(/\[IMAGE:(\/pdfs\/uploads\/[^\]]+)\]/);
+    if (imgMatch) {
+      const imgUrl = imgMatch[1];
+      return `<div class="my-2.5"><a href="${imgUrl}" target="_blank" rel="noopener noreferrer" title="పూర్తి సైజులో ఇన్ఫోగ్రాఫిక్ చార్ట్ చూడటానికి క్లిక్ చేయండి"><img src="${imgUrl}" alt="Study Infographic Chart" class="w-full max-h-[420px] object-contain rounded-xl border-2 border-indigo-400/60 shadow-md bg-white p-1.5 hover:scale-[1.01] transition cursor-pointer" loading="lazy" /></a></div>`;
+    }
+    const relPdfMatch = line.match(/(\/pdfs\/uploads\/[^\s<"'>]+\.pdf)/);
+    if (relPdfMatch && !line.includes("http")) {
+      const pdfUrl = relPdfMatch[1];
+      const prefix = line.substring(0, line.indexOf(pdfUrl));
+      return `${prefix}<a href="${pdfUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 mt-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black rounded-lg shadow-sm transition cursor-pointer"><span>📥 ఒరిజినల్ PDF మెటీరియల్ తెరవండి / డౌన్‌లోడ్ (Open PDF ↗)</span></a>`;
+    }
     const urlMatch = line.match(/(https?:\/\/[^\s<"'>]+)/);
     if (urlMatch) {
       const url = urlMatch[1];
@@ -340,7 +351,7 @@ function formatDetailedNotes(notes) {
         <svg class="w-3.5 h-3.5 inline shrink-0 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
       </a>\n<div class="my-2"><a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black rounded-lg shadow-sm transition hover:scale-[1.02] cursor-pointer">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-        <span>🌐 సంబంధిత వెబ్‌సైట్‌లో పూర్తి కథనం ఓపెన్ చేయండి (Open Link ↗)</span>
+        <span>🌐 సంబంధిత వెబ్‌సైట్‌లో పూర్తి కథనం / PDF ఓపెన్ చేయండి (Open Link ↗)</span>
       </a></div>`;
     }
     return line;
@@ -352,9 +363,10 @@ function formatDetailedNotes(notes) {
     const catInfo = CATEGORY_MAP[art.category] || { label: "🏛️ జాతీయం", class: "badge-national" };
     const borderCls = `border-cat-${art.category}` || "border-cat-national";
     const artLink = extractArticleUrl(art);
+    const isUploadedMaterial = Boolean(art.source && (art.source.startsWith("PDF:") || art.source.startsWith("Telegram:")));
     
     const card = document.createElement("div");
-    card.className = `article-card bg-white rounded-2xl border ${borderCls} p-5 card-shadow flex flex-col justify-between`;
+    card.className = `article-card bg-white rounded-2xl border ${borderCls} ${isUploadedMaterial ? 'ring-2 ring-indigo-500/40' : ''} p-5 card-shadow flex flex-col justify-between`;
     card.innerHTML = `
       <div>
         <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
@@ -362,9 +374,15 @@ function formatDetailedNotes(notes) {
             <span class="text-xs font-black px-2.5 py-1 rounded-md ${catInfo.class}">
               ${catInfo.label}
             </span>
-            <span class="text-xs font-bold px-2 py-0.5 rounded-md source-tag-badge">
-              📰 ${art.source ? art.source.split('(')[0].trim() : 'దినపత్రిక'}
-            </span>
+            ${isUploadedMaterial ? `
+              <span class="text-xs font-black px-2.5 py-0.5 rounded-md bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-2xs">
+                📲 టెలిగ్రామ్ / PDF అప్‌లోడ్ డేటా
+              </span>
+            ` : `
+              <span class="text-xs font-bold px-2 py-0.5 rounded-md source-tag-badge">
+                📰 ${art.source ? art.source.split('(')[0].trim() : 'దినపత్రిక'}
+              </span>
+            `}
           </div>
           <span class="text-xs font-bold px-2.5 py-0.5 rounded-md exam-tag-badge">
             🎯 ${art.exam_relevance || "పోటీ పరీక్షల ప్రత్యేకం"}

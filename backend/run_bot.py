@@ -202,7 +202,9 @@ def start_bot_polling():
                         category=cat,
                         sync_to_website=True,
                         extract_quizzes=True,
-                        target_date=detected_date
+                        target_date=detected_date,
+                        source_images=img_paths,
+                        auto_github_sync=True
                     )
 
                     title = result["title"]
@@ -214,19 +216,19 @@ def start_bot_polling():
                     quiz_count = result.get("quizzes_created", 0)
 
                     success_msg = (
-                        f"🎉 <b>మీరు పంపిన {num_pages} ఫోటోలు PDF గా మార్చబడి వెబ్‌సైట్ & లైబ్రరీలో అప్‌డేట్ చేయబడ్డాయి!</b>\n"
+                        f"🎉 <b>మీరు పంపిన {num_pages} ఫోటోలలోని డేటా & PDF వెబ్‌సైట్‌లో అప్‌డేట్ చేయబడ్డాయి!</b>\n"
                         f"───────────────────────\n"
                         f"📖 <b>మెటీరియల్:</b> {title}\n"
                         f"📅 <b>తేదీ:</b> {target_date}\n"
                         f"📄 <b>పేజీలు:</b> {total_pages} | <b>సైజ్:</b> {size_fmt}\n"
                         f"🏷️ <b>విభాగం:</b> {cat_name}\n"
-                        f"📰 <b>వెబ్‌సైట్‌లో చేర్చబడిన ఆర్టికల్స్:</b> {arts_count} వార్తలు\n"
+                        f"📰 <b>వెబ్‌సైట్‌లో చేర్చబడిన ఆర్టికల్స్:</b> {arts_count} వార్తలు (టాప్‌లో పిన్ చేయబడ్డాయి)\n"
                         f"📝 <b>రూపొందించిన క్విజ్ ప్రశ్నలు:</b> {quiz_count} MCQs\n\n"
                         f"📥 <b>కంపైల్ చేసిన PDF డైరెక్ట్ లింక్:</b>\n"
                         f"👉 https://lakshya-telugu-ca.onrender.com{result['pdf_url']}\n\n"
-                        f"🌐 <b>వెబ్‌సైట్ స్టడీ PDF ల విభాగం:</b>\n"
-                        f"👉 https://lakshya-telugu-ca.onrender.com/#materials\n"
-                        f"👉 https://lakshya-telugu-ca.onrender.com/pdf_upload_hub"
+                        f"🌐 <b>వెబ్‌సైట్ హోమ్‌పేజీ & స్టడీ PDF ల విభాగం:</b>\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com\n"
+                        f"👉 https://lakshya-telugu-ca.onrender.com/#materials"
                     )
                     send_telegram_message(success_msg, token=token, chat_id=chat_id)
 
@@ -251,14 +253,16 @@ def start_bot_polling():
                 if not text and not doc:
                     continue
 
-                # Handle PDF Document Uploads
+                # Handle PDF & Study Document Uploads (.pdf, .txt, .csv, .md, .json, .docx)
                 if doc:
                     file_name = doc.get("file_name", "document.pdf")
                     file_size = doc.get("file_size", 0)
                     mime_type = doc.get("mime_type", "")
-                    is_pdf = file_name.lower().endswith(".pdf") or mime_type == "application/pdf"
+                    low_fn = file_name.lower()
+                    is_pdf = low_fn.endswith(".pdf") or mime_type == "application/pdf"
+                    is_text_doc = low_fn.endswith((".txt", ".csv", ".md", ".json", ".docx"))
 
-                    if is_pdf:
+                    if is_pdf or is_text_doc:
                         admin_chat_id = config.get("chat_id") or "5405953028"
                         chat_type = msg.get("chat", {}).get("type", "")
                         is_admin = (
@@ -270,29 +274,24 @@ def start_bot_polling():
                         if not is_admin:
                             no_perm_msg = (
                                 "⚠️ <b>అనుమతి నిరాకరించబడింది!</b>\n\n"
-                                "వెబ్‌సైట్‌లోకి PDF అప్‌లోడ్ చేసే అధికారం అడ్మిన్‌కు ఉంది. మీరు క్యాప్షన్‌లో అడ్మిన్ పిన్ (<code>lakshya2026</code>) ఇచ్చి కూడా నేరుగా అప్‌లోడ్ చేయవచ్చు.\n"
-                                "స్టడీ మెటీరియల్స్ డౌన్‌లోడ్ కోసం <b>/material</b> లేదా <b>/syllabus</b> ఉపయోగించండి."
+                                "వెబ్‌సైట్‌లోకి ఫైల్ అప్‌లోడ్ చేసే అధికారం అడ్మిన్‌కు ఉంది. మీరు క్యాప్షన్‌లో అడ్మిన్ పిన్ (<code>lakshya2026</code>) ఇచ్చి కూడా నేరుగా అప్‌లోడ్ చేయవచ్చు."
                             )
                             send_telegram_message(no_perm_msg, token=token, chat_id=chat_id)
                             continue
 
-                        # Telegram Bot API getFile has a hard 20MB limit
                         if file_size > 20 * 1024 * 1024:
                             size_mb = round(file_size / (1024 * 1024), 1)
                             large_file_msg = (
                                 f"⚠️ <b>ఫైల్ పరిమాణం చాలా పెద్దది ({size_mb} MB):</b>\n\n"
-                                f"టెలిగ్రామ్ బోట్ API ద్వారా గరిష్టంగా <b>20 MB</b> పరిమాణం గల ఫైల్స్‌ను మాత్రమే డౌన్‌లోడ్ చేయగలదు.\n\n"
-                                f"🌐 <b>వెబ్‌సైట్ ద్వారా నేరుగా అప్‌లోడ్ చేయండి:</b>\n"
-                                f"మా వెబ్‌సైట్‌లో <b>100 MB</b> వరకు గల పెద్ద PDF లను నేరుగా అప్‌లోడ్ చేసుకోవచ్చు (ఆటో-సింక్ అవుతుంది):\n"
-                                f"👉 https://lakshya-telugu-ca.onrender.com/pdf_upload_hub\n\n"
-                                f"<i>(చిట్కా: 20MB లోపు ఉన్న PDF లను టెలిగ్రామ్‌లో నేరుగా పంపవచ్చు)</i>"
+                                f"టెలిగ్రామ్ బోట్ API ద్వారా గరిష్టంగా <b>20 MB</b> పరిమాణం గల ఫైల్స్‌ను మాత్రమే డౌన్‌లోడ్ చేయగలదు.\n"
+                                f"👉 https://lakshya-telugu-ca.onrender.com/pdf_upload_hub"
                             )
                             send_telegram_message(large_file_msg, token=token, chat_id=chat_id)
                             continue
 
                         send_telegram_message(
-                            f"⏳ <b>మీరు పంపిన PDF అందింది:</b> <code>{file_name}</code>\n\n"
-                            f"<i>PDF నుండి సిలబస్ ముఖ్యాంశాలు, ఆర్టికల్స్ మరియు క్విజ్ MCQs సంగ్రహించి వెబ్‌సైట్‌లో అప్‌డేట్ చేస్తున్నాం... దయచేసి కొన్ని సెకన్లు వేచి ఉండండి.</i>",
+                            f"⏳ <b>మీరు పంపిన ఫైల్ అందింది:</b> <code>{file_name}</code>\n\n"
+                            f"<i>ఫైల్ నుండి సిలబస్ ముఖ్యాంశాలు, ఆర్టికల్స్, వన్-లైనర్స్ మరియు క్విజ్ MCQs సంగ్రహించి వెబ్‌సైట్‌లో అప్‌డేట్ చేస్తున్నాం... దయచేసి కొన్ని సెకన్లు వేచి ఉండండి.</i>",
                             token=token,
                             chat_id=chat_id
                         )
@@ -308,22 +307,22 @@ def start_bot_polling():
 
                             tg_file_path = file_info_res["result"]["file_path"]
                             download_url = f"https://api.telegram.org/file/bot{token}/{tg_file_path}"
-                            pdf_bytes = requests.get(download_url, timeout=120).content
+                            file_bytes = requests.get(download_url, timeout=120).content
 
                             import tempfile
                             temp_dir = tempfile.gettempdir()
-                            temp_pdf_path = os.path.join(temp_dir, f"tg_{int(time.time())}_{file_name}")
-                            with open(temp_pdf_path, "wb") as pf:
-                                pf.write(pdf_bytes)
+                            temp_file_path = os.path.join(temp_dir, f"tg_{int(time.time())}_{file_name}")
+                            with open(temp_file_path, "wb") as pf:
+                                pf.write(file_bytes)
 
                             cat = "education"
                             check_str = (caption + " " + file_name).lower()
                             if any(k in check_str for k in ["polity", "రాజ్యాంగం", "పాలిటీ", "constitution"]):
-                                cat = "polity"
+                                cat = "national"
                             elif any(k in check_str for k in ["history", "చరిత్ర", "mindmap", "mind map"]):
                                 cat = "history"
-                            elif any(k in check_str for k in ["geography", "భూగోళ"]):
-                                cat = "geography"
+                            elif any(k in check_str for k in ["geography", "భూగోళ", "river", "dam", "నదులు"]):
+                                cat = "national"
                             elif any(k in check_str for k in ["economy", "ఆర్థిక", "బడ్జెట్", "budget"]):
                                 cat = "economy"
                             elif any(k in check_str for k in ["science", "సైన్స్", "isro", "tech"]):
@@ -331,22 +330,31 @@ def start_bot_polling():
                             elif any(k in check_str for k in ["scheme", "పథకాలు", "సంక్షేమం", "welfare"]):
                                 cat = "regional"
 
-                            # Clean custom_title
                             if caption and caption.lower() != "lakshya2026" and not caption.startswith("/"):
                                 custom_title = caption
                             else:
                                 custom_title = ""
 
-                            from pdf_extractor import process_uploaded_pdf, extract_date_from_text
+                            from pdf_extractor import process_uploaded_pdf, process_uploaded_text_file, extract_date_from_text
                             detected_date = extract_date_from_text(f"{custom_title} {file_name}")
-                            result = process_uploaded_pdf(
-                                file_input=temp_pdf_path,
-                                custom_title=custom_title,
-                                category=cat,
-                                sync_to_website=True,
-                                extract_quizzes=True,
-                                target_date=detected_date
-                            )
+                            if is_pdf:
+                                result = process_uploaded_pdf(
+                                    file_input=temp_file_path,
+                                    custom_title=custom_title,
+                                    category=cat,
+                                    sync_to_website=True,
+                                    extract_quizzes=True,
+                                    target_date=detected_date,
+                                    auto_github_sync=True
+                                )
+                            else:
+                                result = process_uploaded_text_file(
+                                    file_path=temp_file_path,
+                                    custom_title=custom_title,
+                                    category=cat,
+                                    target_date=detected_date,
+                                    auto_github_sync=True
+                                )
 
                             title = result["title"]
                             total_pages = result["total_pages"]
@@ -358,32 +366,29 @@ def start_bot_polling():
                             quiz_count = result.get("quizzes_created", 0)
 
                             success_msg = (
-                                f"🎉 <b>PDF విజయవంతంగా వెబ్‌సైట్ & లైబ్రరీలో అప్‌డేట్ చేయబడింది!</b>\n"
+                                f"🎉 <b>ఫైల్‌లోని డేటా విజయవంతంగా వెబ్‌సైట్ & లైబ్రరీలో అప్‌డేట్ చేయబడింది!</b>\n"
                                 f"───────────────────────\n"
                                 f"📖 <b>మెటీరియల్:</b> {title}\n"
                                 f"📅 <b>తేదీ:</b> {target_date}\n"
-                                f"📄 <b>పేజీలు:</b> {total_pages} | <b>సైజ్:</b> {size_fmt}\n"
+                                f"📄 <b>పేజీలు/భాగాలు:</b> {total_pages} | <b>సైజ్:</b> {size_fmt}\n"
                                 f"🏷️ <b>విభాగం:</b> {cat_name}\n"
-                                f"📰 <b>వెబ్‌సైట్‌లో చేర్చబడిన ఆర్టికల్స్:</b> {arts_count} వార్తలు\n"
+                                f"📰 <b>వెబ్‌సైట్‌లో చేర్చబడిన ఆర్టికల్స్:</b> {arts_count} వార్తలు (టాప్‌లో పిన్ చేయబడ్డాయి)\n"
                                 f"📝 <b>రూపొందించిన క్విజ్ ప్రశ్నలు:</b> {quiz_count} MCQs\n\n"
                                 f"📰 <b>లక్ష్య డైలీ ఈ-పేపర్ PDF (అప్‌డేటెడ్):</b>\n"
                                 f"👉 https://lakshya-telugu-ca.onrender.com/api/epaper/pdf?date={target_date}\n\n"
-                                f"📑 <b>లక్ష్య డైలీ CA & క్విజ్ క్యాప్సూల్ PDF:</b>\n"
-                                f"👉 https://lakshya-telugu-ca.onrender.com/api/ca_quiz/pdf?date={target_date}\n\n"
-                                f"🌐 <b>వెబ్‌సైట్ స్టడీ PDF ల విభాగం:</b>\n"
-                                f"👉 https://lakshya-telugu-ca.onrender.com/#materials\n\n"
-                                f"🚀 <i>మీరు అప్‌లోడ్ చేసిన మెటీరియల్ సారాంశం & క్విజ్‌లు నేరుగా మన లక్ష్య డైలీ కరెంట్ అఫైర్స్ & లక్ష్య PDF లలో కలిసిపోయాయి!</i>"
+                                f"🌐 <b>వెబ్‌సైట్ హోమ్‌పేజీలో చూడండి:</b>\n"
+                                f"👉 https://lakshya-telugu-ca.onrender.com"
                             )
                             send_telegram_message(success_msg, token=token, chat_id=chat_id)
 
                             try:
-                                if os.path.exists(temp_pdf_path):
-                                    os.remove(temp_pdf_path)
+                                if os.path.exists(temp_file_path):
+                                    os.remove(temp_file_path)
                             except Exception:
                                 pass
 
                         except Exception as pe:
-                            err_msg = f"❌ <b>PDF ప్రాసెసింగ్‌లో లోపం ఎదురైంది:</b>\n<code>{str(pe)[:300]}</code>"
+                            err_msg = f"❌ <b>ఫైల్ ప్రాసెసింగ్‌లో లోపం ఎదురైంది:</b>\n<code>{str(pe)[:300]}</code>"
                             send_telegram_message(err_msg, token=token, chat_id=chat_id)
 
                         continue

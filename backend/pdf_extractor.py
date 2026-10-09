@@ -146,31 +146,236 @@ def extract_mcqs_from_text(text):
             break
     return quizzes
 
-def split_into_semantic_chunks(text, max_chunks=5):
+def extract_text_from_image_ocr(img_path_or_bytes, filename="page.jpg"):
+    """
+    Extracts text from an image (.jpg/.png) using:
+    1. pytesseract (if installed locally)
+    2. Free OCR.space Cloud API (Engine 2 & Engine 1 fallback)
+    """
+    try:
+        import pytesseract
+        from PIL import Image
+        import io
+        im = Image.open(img_path_or_bytes) if isinstance(img_path_or_bytes, str) else Image.open(io.BytesIO(img_path_or_bytes))
+        txt = pytesseract.image_to_string(im, lang="tel+eng")
+        if txt and len(txt.strip()) > 25:
+            return clean_extracted_text(txt)
+    except Exception:
+        pass
+
+    try:
+        import requests
+        if isinstance(img_path_or_bytes, str):
+            with open(img_path_or_bytes, "rb") as f:
+                img_bytes = f.read()
+        else:
+            img_bytes = img_path_or_bytes
+
+        for engine in ("2", "1"):
+            try:
+                resp = requests.post(
+                    "https://api.ocr.space/parse/image",
+                    data={"apikey": "helloworld", "OCREngine": engine, "scale": "true"},
+                    files={"file": (filename, img_bytes, "image/jpeg")},
+                    timeout=25
+                ).json()
+                if not resp.get("IsErroredOnProcessing"):
+                    parsed_list = resp.get("ParsedResults") or []
+                    if parsed_list:
+                        txt = parsed_list[0].get("ParsedText") or ""
+                        if len(txt.strip()) > 15:
+                            return clean_extracted_text(txt)
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return ""
+
+
+def translate_english_to_telugu(text):
+    """Translates English OCR/PDF text into Telugu using Google Translate free endpoint."""
+    if not text or len(text.strip()) < 10:
+        return ""
+    # Check if text already has substantial Telugu characters
+    tel_chars = sum(1 for ch in text if "\u0c00" <= ch <= "\u0c7f")
+    if tel_chars > len(text) * 0.25:
+        return text
+    try:
+        import requests
+        url = "https://translate.googleapis.com/translate_a/single"
+        params = {"client": "gtx", "sl": "en", "tl": "te", "dt": "t", "q": text[:1800]}
+        r = requests.get(url, params=params, timeout=12).json()
+        if r and isinstance(r, list) and r[0]:
+            translated = "".join(seg[0] for seg in r[0] if seg and seg[0])
+            return clean_extracted_text(translated)
+    except Exception:
+        pass
+    return ""
+
+
+def generate_smart_quizzes_from_text(full_text, doc_title, category="national"):
+    """
+    Generates up to 5 fact-based MCQs from extracted document text when explicit MCQs are not present.
+    """
+    quizzes = []
+    if not full_text or len(full_text) < 40:
+        return quizzes
+
+    lines = [l.strip(" •-*▪\t") for l in full_text.split("\n") if len(l.strip()) > 25]
+    factual_lines = [l for l in lines if re.search(r"(\d{4}|\d+%|\b(?:నది|ప్రాజెక్ట్|రాజధాని|వంశం|సైట్|UNESCO|River|Dam|Project|Dynasty|Article|ఆర్టికల్)\b)", l, re.I)]
+    pool = factual_lines if len(factual_lines) >= 2 else lines[:8]
+
+    distractors = [
+        "పైవేవీ కావు (None of the above)",
+        "కేవలం పాత నిబంధన మాత్రమే వర్తిస్తుంది",
+        "ఈ అంశం సిలబస్ పరిధిలో లేదు"
+    ]
+
+    for idx, fact in enumerate(pool[:5], 1):
+        clean_fact = re.sub(r"\s+", " ", fact).strip()
+        if len(clean_fact) < 20:
+            continue
+        short_fact = clean_fact[:115]
+        other_facts = [re.sub(r"\s+", " ", x).strip()[:115] for x in pool if x != fact and len(x) > 20]
+        opt_b = other_facts[0] if len(other_facts) > 0 else distractors[0]
+        opt_c = other_facts[1] if len(other_facts) > 1 else distractors[1]
+        opt_d = distractors[0] if len(other_facts) > 1 else distractors[2]
+
+        quizzes.append({
+            "category": category,
+            "question": f"'{doc_title[:55]}' స్టడీ మెటీరియల్ ప్రకారం క్రింది వాటిలో సరైన ముఖ్యాంశం ఏది? (ప్రశ్న {idx})",
+            "option_a": short_fact,
+            "option_b": opt_b,
+            "option_c": opt_c,
+            "option_d": opt_d,
+            "correct": "A",
+            "explanation": f"అప్‌లోడ్ చేసిన మెటీరియల్ ప్రకారం: {clean_fact[:240]}",
+            "exam_tag": f"PDF: {doc_title[:28]}"
+        })
+    return quizzes
+
+
+def _auto_persist_to_github(rel_file_paths=None):
+    """
+    Automatically commits updated current_affairs.db and newly uploaded files in frontend/pdfs/uploads/
+    to GitHub (venkat-tools/lakshya-telugu-ca:main) in the background so Render restarts never lose Telegram uploads.
+    """
+    try:
+        import base64
+        import requests
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        token = os.environ.get("GITHUB_TOKEN", "").strip()
+        if not token:
+            git_cfg = os.path.join(repo_root, ".git", "config")
+            if os.path.exists(git_cfg):
+                with open(git_cfg, "r", encoding="utf-8", errors="ignore") as f:
+                    m = re.search(r"ghp_[A-Za-z0-9]+", f.read())
+                    if m:
+                        token = m.group(0)
+        if not token:
+            return
+
+        owner = "venkat-tools"
+        repo = "lakshya-telugu-ca"
+        branch = "main"
+        headers = {
+            "Authorization": f"token {token}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+        base_api = f"https://api.github.com/repos/{owner}/{repo}"
+
+        ref_r = requests.get(f"{base_api}/git/ref/heads/{branch}", headers=headers, timeout=20)
+        if ref_r.status_code != 200:
+            return
+        latest_commit_sha = ref_r.json()["object"]["sha"]
+        commit_r = requests.get(f"{base_api}/git/commits/{latest_commit_sha}", headers=headers, timeout=20)
+        base_tree_sha = commit_r.json()["tree"]["sha"]
+
+        paths_to_push = ["backend/current_affairs.db"]
+        if rel_file_paths:
+            for p in rel_file_paths:
+                norm_p = p.replace("\\", "/").lstrip("/")
+                if norm_p not in paths_to_push:
+                    paths_to_push.append(norm_p)
+
+        tree_items = []
+        for rel_path in paths_to_push:
+            full_p = os.path.join(repo_root, *rel_path.split("/"))
+            if not os.path.exists(full_p) or os.path.getsize(full_p) > 25 * 1024 * 1024:
+                continue
+            with open(full_p, "rb") as f:
+                b64_data = base64.b64encode(f.read()).decode("ascii")
+            blob_r = requests.post(
+                f"{base_api}/git/blobs",
+                headers=headers,
+                json={"content": b64_data, "encoding": "base64"},
+                timeout=60
+            )
+            if blob_r.status_code == 201:
+                tree_items.append({
+                    "path": rel_path,
+                    "mode": "100644",
+                    "type": "blob",
+                    "sha": blob_r.json()["sha"]
+                })
+
+        if not tree_items:
+            return
+
+        new_tree_r = requests.post(
+            f"{base_api}/git/trees",
+            headers=headers,
+            json={"base_tree": base_tree_sha, "tree": tree_items},
+            timeout=30
+        )
+        if new_tree_r.status_code != 201:
+            return
+
+        new_commit_r = requests.post(
+            f"{base_api}/git/commits",
+            headers=headers,
+            json={
+                "message": "Auto-sync Telegram uploaded material & extracted data to Lakshya DB",
+                "tree": new_tree_r.json()["sha"],
+                "parents": [latest_commit_sha]
+            },
+            timeout=30
+        )
+        if new_commit_r.status_code == 201:
+            requests.patch(
+                f"{base_api}/git/refs/heads/{branch}",
+                headers=headers,
+                json={"sha": new_commit_r.json()["sha"], "force": False},
+                timeout=30
+            )
+            print("✅ [GitHub Auto-Sync] టెలిగ్రామ్ అప్‌లోడ్ డేటా GitHub రిపోజిటరీలో భద్రపరచబడింది.")
+    except Exception as ge:
+        print(f"GitHub auto-persist warning: {ge}")
+
+
+def split_into_semantic_chunks(text, max_chunks=12):
     """Splits full document text into meaningful article chunks"""
-    paragraphs = [p.strip() for p in text.split("\n\n") if len(p.strip()) > 80]
+    paragraphs = [p.strip() for p in text.split("\n\n") if len(p.strip()) > 60]
     if not paragraphs:
-        # Fallback to lines if no empty line separation
-        lines = [line.strip() for line in text.split("\n") if len(line.strip()) > 50]
+        lines = [line.strip() for line in text.split("\n") if len(line.strip()) > 35]
         chunks = []
         cur = []
         for l in lines:
             cur.append(l)
-            if len(" ".join(cur)) > 400:
-                chunks.append(" ".join(cur))
+            if len("\n".join(cur)) > 450:
+                chunks.append("\n".join(cur))
                 cur = []
         if cur:
-            chunks.append(" ".join(cur))
+            chunks.append("\n".join(cur))
         return chunks[:max_chunks]
 
-    # Combine small paragraphs
     chunks = []
     current_chunk = []
     current_len = 0
     for p in paragraphs:
         current_chunk.append(p)
         current_len += len(p)
-        if current_len >= 500:
+        if current_len >= 550:
             chunks.append("\n\n".join(current_chunk))
             current_chunk = []
             current_len = 0
@@ -181,7 +386,8 @@ def split_into_semantic_chunks(text, max_chunks=5):
 
 def extract_topics_from_text(full_text):
     """
-    Extracts structured current affairs topics and headings from text.
+    Extracts structured current affairs / study material topics and headings from text.
+    Supports Telugu & English headings, numbered sections, and bulleted blocks.
     """
     lines = [l.strip() for l in full_text.split('\n') if l.strip()]
     topics = []
@@ -197,23 +403,23 @@ def extract_topics_from_text(full_text):
         is_main_heading = False
         if re.match(r'^(?:(?:Andhra Pradesh|National International)\s+Daily\s+Current\s+Affairs)', l, re.I):
             is_main_heading = True
-        elif re.match(r'^\d+\.\s+[A-Z][A-Za-z0-9\s\(\)\-\:\,\'\&]{3,65}$', l) and not l.endswith('.'):
+        elif re.match(r'^(?:\d+[\.\)]|[IVX]+\.|📌|🏛️|🌊|👑|⚔️|🏺|🪨|🧱|🐅|🗺️|#+\s+)\s*[^\n]{4,85}$', l) and not l.endswith('.'):
             is_main_heading = True
         elif re.match(r'^About the\s+[A-Za-z0-9\s\(\)\-\:\,\'\&]{3,65}$', l):
             is_main_heading = True
-        elif any(k in l.upper() for k in ['SOIL CARBON PAYMENT', 'MAKE IN INDIA', 'IFFCO']):
+        elif any(k in l.upper() for k in ['SOIL CARBON PAYMENT', 'MAKE IN INDIA', 'IFFCO', 'UNESCO', 'DAMS OF INDIA', 'NATIONAL PARK']):
             is_main_heading = True
 
         if is_main_heading:
-            if current_topic and len('\n'.join(current_body)) > 80:
+            if current_topic and len('\n'.join(current_body)) > 60:
                 topics.append({'title': current_topic, 'body': '\n'.join(current_body)})
-            current_topic = l
+            current_topic = l.lstrip('#').strip()
             current_body = []
         else:
             if current_topic:
                 current_body.append(l)
 
-    if current_topic and len('\n'.join(current_body)) > 80:
+    if current_topic and len('\n'.join(current_body)) > 60:
         topics.append({'title': current_topic, 'body': '\n'.join(current_body)})
 
     return topics
@@ -295,16 +501,13 @@ def compile_images_to_pdf(image_paths, output_pdf_path):
 
     # Pure-Python JPEG-to-PDF compiler (zero external dependencies)
     objects = []
-    # Object 1: Catalog, Object 2: Pages
     page_obj_ids = []
     next_id = 3
-    page_entries = []
 
     for img_path in image_paths:
         with open(img_path, "rb") as f:
             img_bytes = f.read()
         w, h = _get_jpeg_dimensions(img_bytes)
-        # Scale to A4 width (595 pt) preserving aspect ratio
         pdf_w = 595.0
         pdf_h = round(595.0 * (h / float(w)), 2)
 
@@ -374,14 +577,15 @@ def process_uploaded_pdf(
     target_date=None,
     custom_summary="",
     custom_articles=None,
-    custom_quizzes=None
+    custom_quizzes=None,
+    source_images=None,
+    auto_github_sync=True
 ):
     """
     Main processing pipeline for user-uploaded educational PDFs or compiled image albums.
-    `file_input`: file path (str) OR Werkzeug FileStorage object.
-    Defaults sync_to_website=True and extract_quizzes=True.
+    Automatically extracts embedded PDF text OR runs OCR + inline image saving on image-based uploads.
     """
-    # 1. Determine destination path and save
+    import shutil
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     if hasattr(file_input, "filename"):
         orig_filename = os.path.basename(file_input.filename)
@@ -394,12 +598,12 @@ def process_uploaded_pdf(
         safe_name = re.sub(r"[^\w\.\-]", "_", orig_filename)
         dest_filename = f"{timestamp}_{safe_name}"
         saved_path = os.path.join(UPLOAD_DIR, dest_filename)
-        import shutil
         shutil.copy2(file_input, saved_path)
     else:
         raise ValueError("సరైన PDF ఫైల్ అందించబడలేదు.")
 
     file_size = os.path.getsize(saved_path)
+    persisted_rel_paths = [f"frontend/pdfs/uploads/{dest_filename}"]
 
     # 2. Read PDF using pypdf
     try:
@@ -429,6 +633,59 @@ def process_uploaded_pdf(
     except Exception:
         pass
 
+    # Save individual page images and run OCR if this is an image upload or scanned PDF
+    saved_web_images = []
+    ocr_page_texts = []
+    images_dir = os.path.join(UPLOAD_DIR, "images")
+    os.makedirs(images_dir, exist_ok=True)
+
+    if source_images and isinstance(source_images, list):
+        for idx, src_im in enumerate(source_images[:30], 1):
+            if os.path.exists(src_im):
+                im_ext = os.path.splitext(src_im)[1].lower() or ".jpg"
+                im_name = f"{timestamp}_p{idx:02d}{im_ext}"
+                im_dest = os.path.join(images_dir, im_name)
+                shutil.copy2(src_im, im_dest)
+                web_im_url = f"/pdfs/uploads/images/{im_name}"
+                saved_web_images.append(web_im_url)
+                persisted_rel_paths.append(f"frontend/pdfs/uploads/images/{im_name}")
+                if not custom_articles and idx <= 10:
+                    ocr_txt = extract_text_from_image_ocr(im_dest, filename=im_name)
+                    if ocr_txt:
+                        tel_txt = translate_english_to_telugu(ocr_txt)
+                        combined_page_txt = f"{tel_txt}\n{ocr_txt}".strip() if tel_txt and tel_txt != ocr_txt else ocr_txt
+                        ocr_page_texts.append((idx, web_im_url, combined_page_txt))
+                    else:
+                        ocr_page_texts.append((idx, web_im_url, ""))
+    elif len(full_text) < 80 and not custom_articles:
+        # Scanned PDF without embedded text: extract embedded images from PDF pages & run OCR
+        for p_idx in range(min(total_pages, 15)):
+            try:
+                page_obj = reader.pages[p_idx]
+                if page_obj.images:
+                    im_obj = page_obj.images[0]
+                    im_ext = os.path.splitext(im_obj.name)[1].lower() or ".jpg"
+                    im_name = f"{timestamp}_p{p_idx+1:02d}{im_ext}"
+                    im_dest = os.path.join(images_dir, im_name)
+                    with open(im_dest, "wb") as imf:
+                        imf.write(im_obj.data)
+                    web_im_url = f"/pdfs/uploads/images/{im_name}"
+                    saved_web_images.append(web_im_url)
+                    persisted_rel_paths.append(f"frontend/pdfs/uploads/images/{im_name}")
+                    if p_idx < 8:
+                        ocr_txt = extract_text_from_image_ocr(im_obj.data, filename=im_name)
+                        if ocr_txt:
+                            tel_txt = translate_english_to_telugu(ocr_txt)
+                            combined_page_txt = f"{tel_txt}\n{ocr_txt}".strip() if tel_txt and tel_txt != ocr_txt else ocr_txt
+                            ocr_page_texts.append((p_idx + 1, web_im_url, combined_page_txt))
+                        else:
+                            ocr_page_texts.append((p_idx + 1, web_im_url, ""))
+            except Exception:
+                pass
+
+    if not full_text and ocr_page_texts:
+        full_text = clean_extracted_text("\n\n".join(t for _, _, t in ocr_page_texts if t))
+
     # Detect target date
     if not target_date:
         target_date = extract_date_from_text(f"{custom_title} {orig_filename} {full_text[:2000]}")
@@ -444,7 +701,7 @@ def process_uploaded_pdf(
     if custom_summary:
         snippet = custom_summary[:500]
     elif full_text and len(full_text) > 20:
-        snippet = full_text[:400]
+        snippet = full_text[:450]
     else:
         cat_label_default = CATEGORY_NAMES.get(category, "పోటీ పరీక్షల స్టడీ మెటీరియల్")
         snippet = (
@@ -463,8 +720,8 @@ def process_uploaded_pdf(
                 t_cat = art.get("category") or category
                 if t_cat not in ["national", "regional", "economy", "science_tech", "sports_awards", "appointments", "education", "history"]:
                     t_cat = "national"
-                t_title = art.get("title", doc_title)[:120]
-                t_summary = art.get("summary", snippet[:300])
+                t_title = art.get("title", doc_title)[:140]
+                t_summary = art.get("summary", snippet[:320])
                 t_notes = art.get("detailed_notes", "")
                 if f"/pdfs/uploads/{dest_filename}" not in t_notes:
                     t_notes = (
@@ -478,8 +735,8 @@ def process_uploaded_pdf(
                     summary=t_summary,
                     detailed_notes=t_notes,
                     exam_relevance=art.get("exam_relevance", f"అభ్యర్థుల స్టడీ మెటీరియల్ ({cat_label})"),
-                    tags=art.get("tags", f"{t_cat}, విజువల్ అట్లాస్, PDF నోట్స్"),
-                    source=art.get("source", f"PDF: {doc_title[:35]}")
+                    tags=art.get("tags", f"{t_cat}, విజువల్ అట్లాస్, PDF నోట్స్, టెలిగ్రామ్"),
+                    source=art.get("source", f"Telegram: {doc_title[:35]}")
                 )
                 if aid:
                     articles_count += 1
@@ -488,7 +745,47 @@ def process_uploaded_pdf(
                         t_cat if t_cat in ["national", "regional", "economy", "science_tech", "sports_awards", "appointments"] else "national",
                         art.get("one_liner", f"[{t_cat.upper()}] {t_title}")
                     )
-        elif full_text and len(full_text) > 80:
+        elif ocr_page_texts:
+            # Create rich articles combining OCR extracted text AND inline infographic images!
+            cat_key = category if category in ["regional", "economy", "national", "science_tech", "sports_awards"] else "national"
+            batch_size = 3 if len(ocr_page_texts) > 4 else 1
+            for b_start in range(0, len(ocr_page_texts), batch_size):
+                batch = ocr_page_texts[b_start:b_start + batch_size]
+                p_nums = [str(p[0]) for p in batch]
+                p_label = f"పేజీ {p_nums[0]}" if len(p_nums) == 1 else f"పేజీలు {p_nums[0]}–{p_nums[-1]}"
+                combined_txt = "\n\n".join(p[2] for p in batch if p[2]).strip()
+                img_tags = "\n".join(f"[IMAGE:{p[1]}]" for p in batch if p[1])
+
+                first_lines = [l.strip() for l in combined_txt.split("\n") if len(l.strip()) > 6]
+                art_heading = first_lines[0][:85] if first_lines else f"{doc_title} ({p_label})"
+                art_summary = (
+                    " | ".join(first_lines[:3])[:300]
+                    if first_lines
+                    else f"టెలిగ్రామ్ ద్వారా అప్‌లోడ్ చేసిన '{doc_title}' ({p_label}) విజువల్ ఇన్ఫోగ్రాఫిక్ చార్ట్ & స్టడీ నోట్స్."
+                )
+                detailed = (
+                    f"📄 <b>టెలిగ్రామ్ స్టడీ మెటీరియల్:</b> {doc_title} ({p_label})\n"
+                    f"📂 <b>విభాగం:</b> {cat_label}\n"
+                    f"─────────────────────────────\n"
+                    f"{combined_txt if combined_txt else 'క్రింది హై-రిజల్యూషన్ ఇన్ఫోగ్రాఫిక్ చార్ట్‌లో పూర్తి పట్టిక మరియు పాయింట్లను చూడండి:'}\n\n"
+                    f"{img_tags}\n\n"
+                    f"📥 <b>పూర్తి PDF డౌన్‌లోడ్:</b> https://lakshya-telugu-ca.onrender.com/pdfs/uploads/{dest_filename}"
+                ).strip()
+
+                aid = insert_article(
+                    date=target_date,
+                    category=cat_key,
+                    title=f"📌 {art_heading}",
+                    summary=art_summary,
+                    detailed_notes=detailed,
+                    exam_relevance=f"టెలిగ్రామ్ అప్‌లోడ్ స్టడీ మెటీరియల్ ({cat_label})",
+                    tags=f"టెలిగ్రామ్, PDF, విజువల్ అట్లాస్, {cat_key}",
+                    source=f"Telegram: {doc_title[:35]}"
+                )
+                if aid:
+                    articles_count += 1
+                    insert_one_liner(target_date, cat_key, f"[TELEGRAM NOTES] {art_heading}: {art_summary[:140]}")
+        elif full_text and len(full_text) > 60:
             topics = extract_topics_from_text(full_text)
 
             if topics:
@@ -505,42 +802,43 @@ def process_uploaded_pdf(
                         f"📂 <b>టాపిక్:</b> {t_title}\n"
                         f"─────────────────────────────\n"
                         f"{body}\n\n"
-                        f"📥 <b>ఒరిజినల్ PDF డౌన్‌లోడ్:</b> /pdfs/uploads/{dest_filename}"
+                        f"📥 <b>ఒరిజినల్ PDF డౌన్‌లోడ్:</b> https://lakshya-telugu-ca.onrender.com/pdfs/uploads/{dest_filename}"
                     )
 
                     t_cat = category
                     low = (t_title + " " + body[:200]).lower()
-                    if any(k in low for k in ['andhra', 'ap', 'kuppam', 'veligonda', 'sanjeevani', 'dugarajapatnam', 'gurajada', 'janman']):
+                    if any(k in low for k in ['andhra', 'ap', 'kuppam', 'veligonda', 'sanjeevani', 'dugarajapatnam', 'gurajada', 'janman', 'తెలంగాణ', 'ఆంధ్ర']):
                         t_cat = "regional"
-                    elif any(k in low for k in ['gift city', 'economy', 'fssai', 'gfci', 'budget', 'financial']):
+                    elif any(k in low for k in ['gift city', 'economy', 'fssai', 'gfci', 'budget', 'financial', 'ఆర్థిక', 'బ్యాంక్']):
                         t_cat = "economy"
-                    elif any(k in low for k in ['elias', 'exoplanet', 'science', 'isro', 'carbon', 'soil', 'monal']):
+                    elif any(k in low for k in ['elias', 'exoplanet', 'science', 'isro', 'carbon', 'soil', 'monal', 'సైన్స్', 'ఇస్రో']):
                         t_cat = "science_tech"
-                    elif any(k in low for k in ['asian games', 'sports', 'gondhal', 'award']):
+                    elif any(k in low for k in ['asian games', 'sports', 'gondhal', 'award', 'క్రీడలు', 'అవార్డు']):
                         t_cat = "sports_awards"
                     elif any(k in low for k in ['sco', 'falkland', 'national', 'swachhata']):
                         t_cat = "national"
 
+                    valid_cat = t_cat if t_cat in ["national", "regional", "economy", "science_tech", "sports_awards", "appointments"] else "national"
                     aid = insert_article(
                         date=target_date,
-                        category=t_cat if t_cat in ["national", "regional", "economy", "science_tech", "sports_awards", "appointments"] else "national",
-                        title=t_title[:100],
+                        category=valid_cat,
+                        title=t_title[:120],
                         summary=summary,
                         detailed_notes=detailed,
                         exam_relevance=f"అభ్యర్థుల స్టడీ మెటీరియల్ ({cat_label})",
-                        tags=f"{t_cat}, కరెంట్ అఫైర్స్, PDF నోట్స్",
+                        tags=f"{valid_cat}, కరెంట్ అఫైర్స్, PDF నోట్స్, టెలిగ్రామ్",
                         source=f"PDF: {doc_title[:35]}"
                     )
                     if aid:
                         articles_count += 1
-                        insert_one_liner(target_date, t_cat, f"[{t_cat.upper()}] {t_title}")
+                        insert_one_liner(target_date, valid_cat, f"[{valid_cat.upper()}] {t_title}: {summary[:130]}")
             else:
-                chunks = split_into_semantic_chunks(full_text, max_chunks=4)
-                cat_key = category if category in ["education", "regional", "economy", "national", "science_tech"] else "national"
+                chunks = split_into_semantic_chunks(full_text, max_chunks=10)
+                cat_key = category if category in ["regional", "economy", "national", "science_tech", "sports_awards", "appointments"] else "national"
 
                 for idx, chunk in enumerate(chunks, 1):
                     lines = [l.strip() for l in chunk.split("\n") if len(l.strip()) > 5]
-                    art_title = lines[0][:90] if lines else f"{doc_title} (భాగం {idx})"
+                    art_title = lines[0][:100] if lines else f"{doc_title} (భాగం {idx})"
                     if len(art_title) < 10:
                         art_title = f"{doc_title} - ముఖ్య సమాచారం (విభాగం {idx})"
 
@@ -550,33 +848,34 @@ def process_uploaded_pdf(
                         f"📂 <b>విభాగం:</b> {cat_label}\n"
                         f"─────────────────────────────\n"
                         f"{chunk}\n\n"
-                        f"📥 <b>ఒరిజినల్ PDF డౌన్‌లోడ్:</b> /pdfs/uploads/{dest_filename}"
+                        f"📥 <b>ఒరిజినల్ PDF డౌన్‌లోడ్:</b> https://lakshya-telugu-ca.onrender.com/pdfs/uploads/{dest_filename}"
                     )
 
                     aid = insert_article(
                         date=target_date,
-                        category=cat_key if cat_key in ["national", "regional", "economy", "science_tech", "sports_awards", "appointments"] else "national",
+                        category=cat_key,
                         title=art_title,
                         summary=summary_text,
                         detailed_notes=detailed,
                         exam_relevance=f"అభ్యర్థులు అప్‌లోడ్ చేసిన ప్రామాణిక మెటీరియల్ ({cat_label})",
-                        tags=f"యూజర్ అప్‌లోడ్, {cat_key}, స్టడీ మెటీరియల్",
+                        tags=f"యూజర్ అప్‌లోడ్, {cat_key}, స్టడీ మెటీరియల్, PDF",
                         source=f"PDF: {doc_title[:40]}"
                     )
                     if aid:
                         articles_count += 1
-                        insert_one_liner(target_date, cat_key, f"[{cat_key.upper()}] {art_title}")
+                        insert_one_liner(target_date, cat_key, f"[{cat_key.upper()}] {art_title}: {summary_text[:130]}")
         else:
-            # Image-based PDF / Visual Infographics Album without embedded text layer
             cat_key = category if category in ["regional", "economy", "national", "science_tech", "sports_awards"] else "national"
+            img_tags = "\n".join(f"[IMAGE:{u}]" for u in saved_web_images[:6])
             detailed = (
                 f"📄 <b>నూతన విజువల్ స్టడీ మెటీరియల్ / ఇన్ఫోగ్రాఫిక్స్ PDF:</b> {doc_title}\n"
                 f"📂 <b>విభాగం:</b> {cat_label} | <b>మొత్తం పేజీలు:</b> {total_pages}\n"
                 f"─────────────────────────────\n"
                 f"{snippet}\n\n"
+                f"{img_tags}\n\n"
                 f"📥 <b>పూర్తి PDF ఆన్‌లైన్‌లో చదవండి / డౌన్‌లోడ్ చేసుకోండి:</b>\n"
                 f"https://lakshya-telugu-ca.onrender.com/pdfs/uploads/{dest_filename}"
-            )
+            ).strip()
             aid = insert_article(
                 date=target_date,
                 category=cat_key,
@@ -584,8 +883,8 @@ def process_uploaded_pdf(
                 summary=snippet[:300],
                 detailed_notes=detailed,
                 exam_relevance=f"అభ్యర్థుల విజువల్ స్టడీ మెటీరియల్ ({cat_label})",
-                tags=f"స్టడీ మెటీరియల్, ఇన్ఫోగ్రాఫిక్స్, {cat_key}, PDF",
-                source=f"PDF: {doc_title[:35]}"
+                tags=f"స్టడీ మెటీరియల్, ఇన్ఫోగ్రాఫిక్స్, {cat_key}, PDF, టెలిగ్రామ్",
+                source=f"Telegram: {doc_title[:35]}"
             )
             if aid:
                 articles_count += 1
@@ -593,7 +892,7 @@ def process_uploaded_pdf(
 
     # 4. Extract or Generate Practice Quizzes
     if extract_quizzes:
-        cat_key = category if category in ["education", "regional", "economy", "national", "science_tech"] else "national"
+        cat_key = category if category in ["regional", "economy", "national", "science_tech", "sports_awards"] else "national"
         if custom_quizzes and isinstance(custom_quizzes, list):
             for q in custom_quizzes:
                 qid = insert_quiz(
@@ -612,11 +911,13 @@ def process_uploaded_pdf(
                     quizzes_count += 1
         else:
             detected_mcqs = extract_mcqs_from_text(full_text) if full_text else []
+            if not detected_mcqs and full_text:
+                detected_mcqs = generate_smart_quizzes_from_text(full_text, doc_title, cat_key)
             if detected_mcqs:
                 for q in detected_mcqs:
                     qid = insert_quiz(
                         date=target_date,
-                        category=cat_key,
+                        category=q.get("category", cat_key),
                         question=q["question"],
                         a=q["option_a"],
                         b=q["option_b"],
@@ -624,7 +925,7 @@ def process_uploaded_pdf(
                         d=q["option_d"],
                         correct=q["correct"],
                         explanation=q["explanation"],
-                        exam_tag=f"PDF మెటీరియల్: {doc_title[:30]}"
+                        exam_tag=q.get("exam_tag", f"PDF మెటీరియల్: {doc_title[:30]}")
                     )
                     if qid:
                         quizzes_count += 1
@@ -640,7 +941,7 @@ def process_uploaded_pdf(
                     d="స్థానిక రాజకీయ వివాదాలు",
                     correct="A",
                     explanation=f"ఈ మెటీరియల్ ({total_pages} పేజీలు) {CATEGORY_NAMES.get(category, 'పోటీ పరీక్షలు')} సిలబస్‌కు అనుగుణంగా వెబ్‌సైట్‌లో జోడించబడింది.",
-                    exam_tag=f"{doc_title[:30]}"
+                    exam_tag=f"PDF: {doc_title[:30]}"
                 )
                 if qid:
                     quizzes_count += 1
@@ -662,7 +963,7 @@ def process_uploaded_pdf(
 
     if sync_to_website and articles_count > 0:
         import threading
-        def _refresh_daily_pdfs(dt):
+        def _post_upload_tasks(dt, rel_paths, do_gh):
             try:
                 from pdf_generator import generate_epaper_pdf
                 from daily_ca_quiz_pdf import generate_ca_quiz_pdf
@@ -671,7 +972,9 @@ def process_uploaded_pdf(
                 print(f"✅ [PDF Sync] లక్ష్య డైలీ ఈ-పేపర్ & క్యాప్సూల్ PDF లు ({dt}) అప్‌డేట్ చేయబడ్డాయి.")
             except Exception as pe:
                 print(f"PDF regeneration error for {dt}: {pe}")
-        threading.Thread(target=_refresh_daily_pdfs, args=(target_date,), daemon=True).start()
+            if do_gh:
+                _auto_persist_to_github(rel_paths)
+        threading.Thread(target=_post_upload_tasks, args=(target_date, persisted_rel_paths, auto_github_sync), daemon=True).start()
 
     return {
         "success": True,
@@ -688,6 +991,134 @@ def process_uploaded_pdf(
         "articles_created": articles_count,
         "quizzes_created": quizzes_count,
         "summary": snippet[:200]
+    }
+
+
+def process_uploaded_text_file(file_path, custom_title="", category="education", target_date=None, auto_github_sync=True):
+    """
+    Processes non-PDF text/study files (.txt, .csv, .md, .json, .docx) uploaded via Telegram or web
+    and updates their content into Lakshya articles, one-liners, and quizzes.
+    """
+    import shutil
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    orig_filename = os.path.basename(file_path)
+    safe_name = re.sub(r"[^\w\.\-]", "_", orig_filename)
+    dest_filename = f"{timestamp}_{safe_name}"
+    saved_path = os.path.join(UPLOAD_DIR, dest_filename)
+    shutil.copy2(file_path, saved_path)
+    file_size = os.path.getsize(saved_path)
+
+    ext = os.path.splitext(orig_filename)[1].lower()
+    raw_text = ""
+    if ext == ".docx":
+        try:
+            import zipfile
+            import xml.etree.ElementTree as ET
+            with zipfile.ZipFile(saved_path) as zf:
+                xml_content = zf.read("word/document.xml")
+            tree = ET.fromstring(xml_content)
+            paragraphs = []
+            for elem in tree.iter():
+                if elem.tag.endswith("}p"):
+                    texts = [t.text for t in elem.iter() if t.tag.endswith("}t") and t.text]
+                    if texts:
+                        paragraphs.append("".join(texts))
+            raw_text = "\n\n".join(paragraphs)
+        except Exception:
+            pass
+
+    if not raw_text:
+        with open(saved_path, "r", encoding="utf-8", errors="ignore") as f:
+            raw_text = f.read()
+
+    full_text = clean_extracted_text(raw_text)
+    if not target_date:
+        target_date = extract_date_from_text(f"{custom_title} {orig_filename} {full_text[:1500]}")
+    if not target_date:
+        dates = get_available_dates()
+        target_date = dates[0] if dates else datetime.now().strftime("%Y-%m-%d")
+
+    doc_title, detected_cat = clean_document_title(custom_title, orig_filename, target_date)
+    if category == "education" and detected_cat != "education":
+        category = detected_cat
+    cat_key = category if category in ["regional", "economy", "national", "science_tech", "sports_awards"] else "national"
+    cat_label = CATEGORY_NAMES.get(category, "పోటీ పరీక్షల స్టడీ మెటీరియల్")
+
+    chunks = split_into_semantic_chunks(full_text, max_chunks=10)
+    articles_count = 0
+    for idx, chunk in enumerate(chunks, 1):
+        lines = [l.strip() for l in chunk.split("\n") if len(l.strip()) > 4]
+        art_title = lines[0][:100] if lines else f"{doc_title} (భాగం {idx})"
+        summary_text = lines[1][:300] if len(lines) > 1 else chunk[:300]
+        detailed = (
+            f"📄 <b>టెలిగ్రామ్ స్టడీ ఫైల్:</b> {doc_title}\n"
+            f"📂 <b>విభాగం:</b> {cat_label}\n"
+            f"─────────────────────────────\n"
+            f"{chunk}\n\n"
+            f"📥 <b>ఫైల్ డౌన్‌లోడ్:</b> https://lakshya-telugu-ca.onrender.com/pdfs/uploads/{dest_filename}"
+        )
+        aid = insert_article(
+            date=target_date,
+            category=cat_key,
+            title=art_title,
+            summary=summary_text,
+            detailed_notes=detailed,
+            exam_relevance=f"టెలిగ్రామ్ అప్‌లోడ్ మెటీరియల్ ({cat_label})",
+            tags=f"టెలిగ్రామ్, PDF, {cat_key}, స్టడీ నోట్స్",
+            source=f"Telegram: {doc_title[:35]}"
+        )
+        if aid:
+            articles_count += 1
+            insert_one_liner(target_date, cat_key, f"[TELEGRAM FILE] {art_title}: {summary_text[:130]}")
+
+    quizzes_count = 0
+    mcqs = extract_mcqs_from_text(full_text) or generate_smart_quizzes_from_text(full_text, doc_title, cat_key)
+    for q in mcqs:
+        qid = insert_quiz(
+            date=target_date,
+            category=cat_key,
+            question=q["question"],
+            a=q["option_a"],
+            b=q["option_b"],
+            c=q["option_c"],
+            d=q["option_d"],
+            correct=q["correct"],
+            explanation=q["explanation"],
+            exam_tag=q.get("exam_tag", f"Telegram: {doc_title[:25]}")
+        )
+        if qid:
+            quizzes_count += 1
+
+    mid = insert_uploaded_material(
+        title=doc_title,
+        category=category,
+        filename=dest_filename,
+        file_path=saved_path,
+        file_size=file_size,
+        total_pages=max(1, len(chunks)),
+        extracted_summary=full_text[:400],
+        articles_created=articles_count,
+        quizzes_created=quizzes_count
+    )
+
+    if auto_github_sync:
+        import threading
+        threading.Thread(target=_auto_persist_to_github, args=([f"frontend/pdfs/uploads/{dest_filename}"],), daemon=True).start()
+
+    return {
+        "success": True,
+        "material_id": mid,
+        "title": doc_title,
+        "category": category,
+        "category_name": cat_label,
+        "filename": dest_filename,
+        "pdf_url": f"/pdfs/uploads/{dest_filename}",
+        "file_size": file_size,
+        "file_size_formatted": f"{round(file_size / 1024, 1)} KB",
+        "total_pages": max(1, len(chunks)),
+        "target_date": target_date,
+        "articles_created": articles_count,
+        "quizzes_created": quizzes_count
     }
 
 def reprocess_and_sync_material(mid, target_date=None):

@@ -201,7 +201,12 @@ def get_articles(date=None, category=None, search_query=None):
         wildcard = f"%{search_query}%"
         params.extend([wildcard, wildcard, wildcard, wildcard])
 
-    query += " ORDER BY id DESC"
+    query += """ ORDER BY 
+        CASE 
+            WHEN (source LIKE 'PDF:%' OR source LIKE 'Telegram:%' OR tags LIKE '%PDF%' OR tags LIKE '%విజువల్%' OR tags LIKE '%టెలిగ్రామ్%') THEN 0 
+            ELSE 1 
+        END ASC, 
+        id DESC"""
     cursor.execute(query, params)
     rows = [dict(row) for row in cursor.fetchall()]
     conn.close()
@@ -215,7 +220,12 @@ def get_quiz_by_date(date=None):
     if date:
         query += " AND date = ?"
         params.append(date)
-    query += " ORDER BY id ASC"
+    query += """ ORDER BY 
+        CASE 
+            WHEN (exam_tag LIKE '%PDF%' OR exam_tag LIKE '%UNESCO%' OR exam_tag LIKE '%టెలిగ్రామ్%' OR exam_tag LIKE '%అట్లాస్%' OR exam_tag LIKE '%ఇండియన్ జాగ్రఫీ%' OR exam_tag LIKE '%చరిత్ర%') THEN 0 
+            ELSE 1 
+        END ASC, 
+        id DESC"""
     cursor.execute(query, params)
     rows = [dict(row) for row in cursor.fetchall()]
     conn.close()
@@ -229,7 +239,12 @@ def get_one_liners_by_date(date=None):
     if date:
         query += " AND date = ?"
         params.append(date)
-    query += " ORDER BY id ASC"
+    query += """ ORDER BY 
+        CASE 
+            WHEN (point LIKE '[%' OR point LIKE '📌%' OR point LIKE '🏛️%') THEN 0 
+            ELSE 1 
+        END ASC, 
+        id DESC"""
     cursor.execute(query, params)
     rows = [dict(row) for row in cursor.fetchall()]
     conn.close()
